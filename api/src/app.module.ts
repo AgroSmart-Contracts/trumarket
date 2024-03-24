@@ -8,6 +8,8 @@ import pino from 'pino';
 import { connectDB } from './database';
 import { Connection } from 'mongoose';
 import { providers } from './constants';
+import { AuthModule } from './auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -44,6 +46,12 @@ import { providers } from './constants';
           : loggerOptions,
       forRoutes: ['*'],
     }),
+    JwtModule.register({
+      secret: config.jwtSecret,
+      signOptions: { expiresIn: '1h' },
+      global: true,
+    }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

@@ -7,4 +7,5 @@ export const config = {
   s3Bucket: process.env.S3_BUCKET || 'api-bucket',
   awsEndpoint: process.env.AWS_ENDPOINT,
   awsRegion: process.env.AWS_REGION || 'us-east-1',
+  jwtSecret: process.env.JWT_SECRET || 'yourjsonwebtokensecret',
 };

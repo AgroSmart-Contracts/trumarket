@@ -9,12 +9,15 @@ import {
   Param,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiResponse,
   ApiOperation,
   ApiConsumes,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CreateDealDto } from './dto/createDeal.dto';
 import { InternalServerError, NotFoundError } from '../errors';
@@ -28,7 +31,8 @@ import DealModel from './deals.model';
 import fileInterceptor from '../file.interceptor';
 import { filePipeValidator } from '../multer.options';
 import * as fs from 'fs';
-import { s3Service } from 'src/aws/s3.service';
+import { s3Service } from '../aws/s3.service';
+import { AuthGuard } from '../auth.guard';
 
 @ApiTags('deals')
 @Controller('deals')
@@ -59,6 +63,8 @@ export class DealsController {
   }
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Create a deal' })
   @ApiResponse({
     status: 201,
@@ -71,6 +77,8 @@ export class DealsController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get a deal' })
   @ApiResponse({
     status: 200,
@@ -86,6 +94,8 @@ export class DealsController {
   }
 
   @Put(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Update a deal' })
   @ApiResponse({
     status: 200,
@@ -108,6 +118,8 @@ export class DealsController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a deal' })
   @ApiResponse({
     status: 200,
@@ -118,6 +130,8 @@ export class DealsController {
   }
 
   @Post(':id/docs')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
   @ApiResponse({
     status: 200,
@@ -147,6 +161,8 @@ export class DealsController {
   }
 
   @Delete(':id/docs/:docId')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete deal document' })
   @ApiResponse({
     status: 200,
@@ -162,6 +178,8 @@ export class DealsController {
   }
 
   @Post(':id/whitelist')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Whitelist wallet' })
   @ApiResponse({
     status: 200,
@@ -191,6 +209,8 @@ export class DealsController {
   }
 
   @Delete(':id/whitelist/:walletId')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Remove wallet from whitelist' })
   @ApiResponse({
     status: 200,
@@ -206,6 +226,8 @@ export class DealsController {
   }
 
   @Post(':id/milestones/:milestoneId/docs')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
   @ApiResponse({
@@ -245,6 +267,8 @@ export class DealsController {
   }
 
   @Delete(':id/milestones/:milestoneId/docs/:docId')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a milestone document' })
   @ApiResponse({
     status: 200,

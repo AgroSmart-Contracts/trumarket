@@ -14,6 +14,7 @@ async function bootstrap() {
     .setDescription('The Opsin API description')
     .setVersion('1.0')
     .addTag('Opsin')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document);
