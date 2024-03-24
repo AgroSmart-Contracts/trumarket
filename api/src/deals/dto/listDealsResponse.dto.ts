@@ -1,67 +1,54 @@
+import { IsDate, IsNumber, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class MilestoneDTO {
-  @Expose()
-  description: string;
-
-  @Expose()
-  location: string;
-
-  @Expose()
-  date: Date;
-}
-
-export class DealDtoResponse {
-  constructor(res: DealDtoResponse) {
+export class ListDealDtoResponse {
+  constructor(res: ListDealDtoResponse) {
     Object.assign(this, res);
   }
 
   @ApiProperty()
+  @IsString()
   @Expose()
   id: string;
 
   @ApiProperty()
+  @IsString()
   @Expose()
   description: string;
 
-  @ApiProperty({
-    type: [String],
-  })
-  @Expose()
-  docs: string[];
-
   @ApiProperty()
+  @IsDate()
   @Expose()
   deliveryStartDate: Date;
 
   @ApiProperty()
+  @IsDate()
   @Expose()
   deliveryEndDate: Date;
 
-  @ApiProperty({
-    type: [MilestoneDTO],
-  })
-  @Expose()
-  milestones: MilestoneDTO[];
-
   @ApiProperty()
+  @IsNumber()
   @Expose()
   investmentAmount: number;
 
   @ApiProperty()
+  @IsNumber()
   @Expose()
   revenue: number;
 
   @ApiProperty()
+  @IsNumber()
   @Expose()
   netBalance: number;
 
   @ApiProperty()
+  @IsNumber()
   @Expose()
   roi: number;
 
   @ApiProperty()
+  @IsString()
   @Expose()
   carbonFootprint: string;
 }

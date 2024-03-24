@@ -1,9 +1,9 @@
-import pino, { type LoggerOptions, type Logger } from 'pino'
-import { config } from '../config'
+import pino, { type LoggerOptions, type Logger } from 'pino';
+import { config } from '../config';
 
-const pinoOptions: LoggerOptions = { level: config.logLevel }
-let pinoTransport: any
-let pinoLogger: Logger
+const pinoOptions: LoggerOptions = { level: config.logLevel };
+let pinoTransport: any;
+let pinoLogger: Logger;
 
 if (config.env === 'development') {
   pinoTransport = pino.transport({
@@ -22,11 +22,11 @@ if (config.env === 'development') {
         options: { destination: 1, colorize: true },
       },
     ],
-  })
+  });
 }
 
 // eslint-disable-next-line
 pinoLogger = pino(pinoOptions, pinoTransport)
 
-export const loggerOptions = pinoOptions
-export const logger = pinoLogger
+export const loggerOptions = pinoOptions;
+export const logger = pinoLogger;
