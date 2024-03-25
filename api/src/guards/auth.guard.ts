@@ -1,4 +1,4 @@
-import { config } from './config';
+import { config } from '../config';
 import {
   type CanActivate,
   type ExecutionContext,
@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { type Request } from 'express';
+import { UnauthorizedError } from '../errors';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -17,7 +18,7 @@ export class AuthGuard implements CanActivate {
     // eslint-disable-next-line
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedError();
     }
 
     try {
@@ -28,7 +29,7 @@ export class AuthGuard implements CanActivate {
       // so that we can access it in our route handlers
       request.user = payload;
     } catch (err) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedError();
     }
     return true;
   }

@@ -9,18 +9,15 @@ import {
   Param,
   UseInterceptors,
   UploadedFile,
-  UseGuards,
-  Request,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiResponse,
   ApiOperation,
   ApiConsumes,
-  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CreateDealDto } from './dto/createDeal.dto';
-import { InternalServerError, NotFoundError } from '../errors';
+import { ConflictError, InternalServerError, NotFoundError } from '../errors';
 import { DealDtoResponse } from './dto/dealResponse.dto';
 import { ListDealDtoResponse } from './dto/listDealsResponse.dto';
 import { UploadDocumentDTO } from './dto/uploadDocument.dto';
@@ -32,7 +29,8 @@ import fileInterceptor from '../file.interceptor';
 import { filePipeValidator } from '../multer.options';
 import * as fs from 'fs';
 import { s3Service } from '../aws/s3.service';
-import { AuthGuard } from '../auth.guard';
+import { AdminAccessRestricted } from '../decorators/adminRestricted';
+import { WhitelistAccessRestricted } from '../decorators/whitelistRestricted';
 
 @ApiTags('deals')
 @Controller('deals')
@@ -63,8 +61,7 @@ export class DealsController {
   }
 
   @Post()
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @AdminAccessRestricted()
   @ApiOperation({ summary: 'Create a deal' })
   @ApiResponse({
     status: 201,
@@ -76,16 +73,15 @@ export class DealsController {
     return new DealDtoResponse(deal.toJSON());
   }
 
-  @Get(':id')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @Get(':dealId')
+  @WhitelistAccessRestricted()
   @ApiOperation({ summary: 'Get a deal' })
   @ApiResponse({
     status: 200,
     type: DealDtoResponse,
     description: 'Returns deal with id',
   })
-  async findOne(@Param('id') id: string): Promise<DealDtoResponse> {
+  async findOne(@Param('dealId') id: string): Promise<DealDtoResponse> {
     const deal = await DealModel.findById(id);
     if (!deal) {
       throw new NotFoundError();
@@ -93,9 +89,8 @@ export class DealsController {
     return new DealDtoResponse(deal.toJSON());
   }
 
-  @Put(':id')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @Put(':dealId')
+  @AdminAccessRestricted()
   @ApiOperation({ summary: 'Update a deal' })
   @ApiResponse({
     status: 200,
@@ -103,7 +98,7 @@ export class DealsController {
     description: 'The deal has been successfully updated',
   })
   async update(
-    @Param('id') id: string,
+    @Param('dealId') id: string,
     @Body() dealDto: UpdateDealDto,
   ): Promise<DealDtoResponse> {
     const deal = await DealModel.findByIdAndUpdate(
@@ -117,21 +112,19 @@ export class DealsController {
     return new DealDtoResponse(deal.toJSON());
   }
 
-  @Delete(':id')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @Delete(':dealId')
+  @AdminAccessRestricted()
   @ApiOperation({ summary: 'Delete a deal' })
   @ApiResponse({
     status: 200,
     description: 'The deal has been successfully deleted',
   })
-  async delete(@Param('id') id: string): Promise<void> {
+  async delete(@Param('dealId') id: string): Promise<void> {
     await DealModel.findByIdAndDelete(id);
   }
 
-  @Post(':id/docs')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @Post(':dealId/docs')
+  @AdminAccessRestricted()
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
   @ApiResponse({
     status: 200,
@@ -141,7 +134,7 @@ export class DealsController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(fileInterceptor)
   async uploadDealDocument(
-    @Param('id') id: string,
+    @Param('dealId') id: string,
     @Body() payload: UploadDocumentDTO,
     @UploadedFile(filePipeValidator) file: Express.Multer.File,
   ): Promise<UploadDocumentResponseDTO> {
@@ -160,16 +153,15 @@ export class DealsController {
     return new UploadDocumentResponseDTO(docs.toJSON());
   }
 
-  @Delete(':id/docs/:docId')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @Delete(':dealId/docs/:docId')
+  @AdminAccessRestricted()
   @ApiOperation({ summary: 'Delete deal document' })
   @ApiResponse({
     status: 200,
     description: 'The deal document was successfully deleted',
   })
   async deleteDealDocument(
-    @Param('id') id: string,
+    @Param('dealId') id: string,
     @Param('docId') docId: string,
   ): Promise<void> {
     await DealModel.findByIdAndUpdate(id, {
@@ -177,9 +169,8 @@ export class DealsController {
     });
   }
 
-  @Post(':id/whitelist')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @Post(':dealId/whitelist')
+  @AdminAccessRestricted()
   @ApiOperation({ summary: 'Whitelist wallet' })
   @ApiResponse({
     status: 200,
@@ -187,16 +178,20 @@ export class DealsController {
     description: 'The wallet was successfully whitelisted',
   })
   async whitelistAddress(
-    @Param('id') id: string,
+    @Param('dealId') id: string,
     @Body() payload: WhitelistWalletDto,
   ): Promise<WalletResponseDTO> {
-    const deal = await DealModel.findByIdAndUpdate(
-      id,
+    const deal = await DealModel.findOneAndUpdate(
+      { _id: id, 'whitelist.address': { $ne: payload.address.toLowerCase() } },
       {
         $push: { whitelist: payload },
       },
       { new: true },
     );
+
+    if (!deal) {
+      throw new ConflictError();
+    }
 
     const whitelist = deal.whitelist;
 
@@ -208,16 +203,15 @@ export class DealsController {
     return new WalletResponseDTO(wallet.toJSON());
   }
 
-  @Delete(':id/whitelist/:walletId')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @Delete(':dealId/whitelist/:walletId')
+  @AdminAccessRestricted()
   @ApiOperation({ summary: 'Remove wallet from whitelist' })
   @ApiResponse({
     status: 200,
     description: 'The wallet was successfully deleted from whitelist',
   })
   async blacklistAddress(
-    @Param('id') id: string,
+    @Param('dealId') id: string,
     @Param('walletId') walletId: string,
   ): Promise<void> {
     await DealModel.findByIdAndUpdate(id, {
@@ -225,9 +219,8 @@ export class DealsController {
     });
   }
 
-  @Post(':id/milestones/:milestoneId/docs')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @Post(':dealId/milestones/:milestoneId/docs')
+  @AdminAccessRestricted()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
   @ApiResponse({
@@ -238,7 +231,7 @@ export class DealsController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(fileInterceptor)
   async uploadMilestoneDocument(
-    @Param('id') id: string,
+    @Param('dealId') id: string,
     @Param('milestoneId') milestoneId: string,
     @Body() payload: UploadDocumentDTO,
     @UploadedFile(filePipeValidator) file: Express.Multer.File,
@@ -266,16 +259,15 @@ export class DealsController {
     return new UploadDocumentResponseDTO(docs.toJSON());
   }
 
-  @Delete(':id/milestones/:milestoneId/docs/:docId')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @Delete(':dealId/milestones/:milestoneId/docs/:docId')
+  @AdminAccessRestricted()
   @ApiOperation({ summary: 'Delete a milestone document' })
   @ApiResponse({
     status: 200,
     description: 'The deal milestone document was successfully deleted',
   })
   async deleteMilestoneDocument(
-    @Param('id') id: string,
+    @Param('dealId') id: string,
     @Param('milestoneId') milestoneId: string,
     @Param('docId') docId: string,
   ): Promise<void> {

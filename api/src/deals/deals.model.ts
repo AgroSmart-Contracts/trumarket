@@ -19,6 +19,7 @@ documentSchema.set('toJSON', {
 const walletSchema = new Schema({
   address: {
     type: String,
+    lowercase: true,
     required: true,
   },
 });

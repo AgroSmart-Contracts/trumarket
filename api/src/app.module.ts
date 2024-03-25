@@ -10,6 +10,7 @@ import { Connection } from 'mongoose';
 import { providers } from './constants';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { JwtModule } from '@nestjs/jwt';
       global: true,
     }),
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [

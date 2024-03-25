@@ -21,7 +21,9 @@ export class AuthController {
       throw new Error('Invalid signature');
     }
 
-    const token = await this.authService.generateJwtToken(address);
+    const token = await this.authService.generateJwtToken(
+      address.toLowerCase(),
+    );
     return new LoginResponseDto({ token });
   }
 }
