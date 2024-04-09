@@ -15,17 +15,22 @@ export class ListDealDtoResponse {
   @ApiProperty()
   @IsString()
   @Expose()
+  name: string;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
   description: string;
 
   @ApiProperty()
   @IsDate()
   @Expose()
-  deliveryStartDate: Date;
+  shippingStartDate: Date;
 
   @ApiProperty()
   @IsDate()
   @Expose()
-  deliveryEndDate: Date;
+  expectedShippingEndDate: Date;
 
   @ApiProperty()
   @IsNumber()

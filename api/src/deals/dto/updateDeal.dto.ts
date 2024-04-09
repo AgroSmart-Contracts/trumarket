@@ -3,49 +3,91 @@ import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateDealDto {
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  name: string;
+
+  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
   description: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsNumber()
+  @IsOptional()
+  @Expose()
+  contractId: number;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  origin: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  destination: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  presentation: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  variety: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  size: string;
+
+  @ApiProperty({ required: false })
   @IsDate()
   @IsOptional()
   @Expose()
-  deliveryStartDate: Date;
+  shippingStartDate: Date;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsDate()
   @IsOptional()
   @Expose()
-  deliveryEndDate: Date;
+  expectedShippingEndDate: Date;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
   @Expose()
   investmentAmount: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
   @Expose()
   revenue: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
   @Expose()
   netBalance: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
   @Expose()
   roi: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()

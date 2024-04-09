@@ -10,10 +10,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Opsin API')
-    .setDescription('The Opsin API description')
-    .setVersion('1.0')
-    .addTag('Opsin')
+    .setTitle('TruMarket Shipment API')
+    .setVersion('1.1')
+    .addTag('TruMarket')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);

@@ -1,7 +1,11 @@
 import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber } from 'class-validator';
 
 export class MilestoneDTO {
+  @Expose()
+  name: string;
+
   @Expose()
   description: string;
 
@@ -23,7 +27,45 @@ export class DealDtoResponse {
 
   @ApiProperty()
   @Expose()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
   description: string;
+
+  @ApiProperty()
+  @Expose()
+  status: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Expose()
+  contractId: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Expose()
+  nftId: number;
+
+  @ApiProperty()
+  @Expose()
+  origin: string;
+
+  @ApiProperty()
+  @Expose()
+  destination: string;
+
+  @ApiProperty()
+  @Expose()
+  presentation: string;
+
+  @ApiProperty()
+  @Expose()
+  variety: string;
+
+  @ApiProperty()
+  @Expose()
+  size: string;
 
   @ApiProperty({
     type: [String],
@@ -33,11 +75,16 @@ export class DealDtoResponse {
 
   @ApiProperty()
   @Expose()
-  deliveryStartDate: Date;
+  shippingStartDate: Date;
 
   @ApiProperty()
   @Expose()
-  deliveryEndDate: Date;
+  expectedShippingEndDate: Date;
+
+  @ApiProperty()
+  @IsNumber()
+  @Expose()
+  currentMilestone: number;
 
   @ApiProperty({
     type: [MilestoneDTO],
@@ -64,4 +111,12 @@ export class DealDtoResponse {
   @ApiProperty()
   @Expose()
   carbonFootprint: string;
+
+  @ApiProperty()
+  @Expose()
+  duration: string;
+
+  @ApiProperty()
+  @Expose()
+  daysLeft: number;
 }

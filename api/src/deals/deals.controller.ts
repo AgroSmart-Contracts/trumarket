@@ -86,7 +86,25 @@ export class DealsController {
     if (!deal) {
       throw new NotFoundError();
     }
-    return new DealDtoResponse(deal.toJSON());
+
+    const dealDto = new DealDtoResponse(deal.toJSON());
+
+    dealDto.milestones = dealDto.milestones.map((m, index) => {
+      let status = 'Completed';
+
+      if (dealDto.currentMilestone < index) {
+        status = 'Not Completed';
+      } else if (dealDto.currentMilestone === index) {
+        status = 'In Progress';
+      }
+
+      return {
+        ...m,
+        status,
+      };
+    });
+
+    return dealDto;
   }
 
   @Put(':dealId')

@@ -4,6 +4,7 @@ import {
   IsArray,
   IsDate,
   IsNumber,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -11,6 +12,11 @@ import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class MilestoneDTO {
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  name: string;
+
   @ApiProperty()
   @IsString()
   @Expose()
@@ -31,17 +37,55 @@ export class CreateDealDto {
   @ApiProperty()
   @IsString()
   @Expose()
+  name: string;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
   description: string;
 
   @ApiProperty()
-  @IsDate()
+  @IsNumber()
   @Expose()
-  deliveryStartDate: Date;
+  contractId: number;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  origin: string;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  destination: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  presentation: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  variety: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  size: string;
 
   @ApiProperty()
   @IsDate()
   @Expose()
-  deliveryEndDate: Date;
+  shippingStartDate: Date;
+
+  @ApiProperty()
+  @IsDate()
+  @Expose()
+  expectedShippingEndDate: Date;
 
   @ApiProperty({
     type: [MilestoneDTO],
