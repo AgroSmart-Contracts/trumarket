@@ -44,7 +44,7 @@ async function bootstrap() {
     }),
   );
 
-  schedule.scheduleJob('* * * * *', syncDealsLogs);
+  schedule.scheduleJob('*/10 * * * *', syncDealsLogs);
 
   await app.listen(3000);
 }

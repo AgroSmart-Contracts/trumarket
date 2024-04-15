@@ -35,6 +35,7 @@ import { createPublicClient, http, parseAbi, parseEventLogs } from 'viem';
 import { AssignNFTDto } from './dto/assignNFTID.dto';
 import DealsLogs from '../deals-logs/deals-logs.model';
 import { DealLogsDtoResponse } from './dto/dealLogsResponse.dto';
+import { config } from '../config';
 
 @ApiTags('deals')
 @Controller('deals')
@@ -327,7 +328,7 @@ export class DealsController {
     @Body() dto: AssignNFTDto,
   ): Promise<void> {
     const provider = await createPublicClient({
-      transport: http('http://host.docker.internal:8545/'),
+      transport: http(config.blockchainRpcUrl),
     });
 
     const receipt = await provider.getTransactionReceipt({
