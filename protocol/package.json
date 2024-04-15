@@ -1,0 +1,23 @@
+{
+  "name": "protocol",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "local:node": "npx hardhat node",
+    "local:deploy": "npx hardhat run scripts/deploy.ts --network localhost",
+    "local:mint-deal": "npx hardhat run scripts/mintDeal.ts --network localhost",
+    "local:faucet": "npx hardhat run scripts/faucet.ts --network localhost",
+    "local:setup": "npm run local:deploy && npm run local:mint-underlying && npm run local:faucet",
+    "test": "npx hardhat test --typecheck --show-stack-traces"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
+    "@nomicfoundation/hardhat-viem": "^2.0.0",
+    "@openzeppelin/contracts": "^5.0.1",
+    "hardhat": "^2.20.1",
+    "viem": "^2.9.18"
+  }
+}
