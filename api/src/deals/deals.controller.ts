@@ -31,6 +31,11 @@ import * as fs from 'fs';
 import { s3Service } from '../aws/s3.service';
 import { AdminAccessRestricted } from '../decorators/adminRestricted';
 import { WhitelistAccessRestricted } from '../decorators/whitelistRestricted';
+import { createPublicClient, http, parseAbi, parseEventLogs } from 'viem';
+import { AssignNFTDto } from './dto/assignNFTID.dto';
+import DealsLogs from '../deals-logs/deals-logs.model';
+import { DealLogsDtoResponse } from './dto/dealLogsResponse.dto';
+import { config } from '../config';
 
 @ApiTags('deals')
 @Controller('deals')
@@ -293,6 +298,59 @@ export class DealsController {
       { _id: id, 'milestones._id': milestoneId },
       {
         $pull: { 'milestones.$.docs': { _id: docId } },
+      },
+    );
+  }
+
+  @Get('/nft/:nftId/logs')
+  @ApiOperation({ summary: 'Get nft logs' })
+  @ApiResponse({
+    status: 200,
+    type: [DealLogsDtoResponse],
+    description: 'The nft logs were successfully got',
+  })
+  async getDealLogs(
+    @Param('nftId') id: string,
+  ): Promise<DealLogsDtoResponse[]> {
+    const logs = await DealsLogs.find({ dealId: id });
+    return logs.map((doc) => new DealLogsDtoResponse(doc.toJSON()));
+  }
+
+  @Post(':dealId/nft')
+  @AdminAccessRestricted()
+  @ApiOperation({ summary: 'Assign NFT to deal' })
+  @ApiResponse({
+    status: 200,
+    description: 'The NFT was successfully assigned',
+  })
+  async assignNFT(
+    @Param('dealId') id: string,
+    @Body() dto: AssignNFTDto,
+  ): Promise<void> {
+    const provider = await createPublicClient({
+      transport: http(config.blockchainRpcUrl),
+    });
+
+    const receipt = await provider.getTransactionReceipt({
+      hash: dto.txHash as `0x${string}`,
+    });
+
+    const logs = parseEventLogs({
+      abi: parseAbi([`event DealCreated(uint256 dealId)`]),
+      eventName: 'DealCreated',
+      logs: receipt.logs,
+    });
+
+    if (!logs.length) {
+      throw new InternalServerError('no deal created event was emitted');
+    }
+
+    const nftID = logs[0].args.dealId;
+
+    await DealModel.findOneAndUpdate(
+      { _id: id },
+      {
+        $set: { nftID: Number(nftID), mintTxHash: dto.txHash },
       },
     );
   }

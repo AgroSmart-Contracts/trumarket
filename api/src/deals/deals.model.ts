@@ -78,6 +78,10 @@ const dealSchema = new Schema({
     type: Number,
     required: false,
   },
+  mintTxHash: {
+    type: String,
+    required: false,
+  },
   origin: {
     type: String,
     required: true,

@@ -2,9 +2,11 @@ import { NestFactory, Reflector, HttpAdapterHost } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
+import * as schedule from 'node-schedule';
 
 import { AppModule } from './app.module';
 import { ErrorsFilter } from './errors.filter';
+import { syncDealsLogs } from './jobs/syncDealsLogs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -41,6 +43,8 @@ async function bootstrap() {
       excludeExtraneousValues: true,
     }),
   );
+
+  schedule.scheduleJob('*/10 * * * *', syncDealsLogs);
 
   await app.listen(3000);
 }
