@@ -1,0 +1,56 @@
+name: Build and deploy backend containers to DEVELOPMENT env
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  ENV: dev
+  COMMIT_HASH: ${{ github.sha }}
+
+jobs:
+  build-and-deploy-docker-image:
+    runs-on: ubuntu-latest
+    environment: DEV
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cache Docker images
+        uses: actions/cache@v2
+        with:
+          path: /var/lib/docker/image
+          key: docker-images-${{ runner.os }}-${{ hashFiles('**/dockerfile') }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Login
+        run: |
+          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 851725636846.dkr.ecr.eu-west-1.amazonaws.com
+
+      - name: Login, Build
+        run: |
+          docker build --build-arg COMMIT_HASH=$COMMIT_HASH -t 590183941756.dkr.ecr.eu-west-1.amazonaws.com/trumarket-api:$COMMIT_HASH -f ./infra/docker/prod/Dockerfile.api .
+
+      - name: Push images to ECR
+        run: |
+          docker push 590183941756.dkr.ecr.eu-west-1.amazonaws.com/trumarket-api:$COMMIT_HASH
+          docker push 851725636846.dkr.ecr.eu-west-1.amazonaws.com/trumarket-api:latest-$ENV
+
+      - name: Force ECS deployment
+        env:
+          ECS_CLUSTER: arn:aws:ecs:eu-west-1:590183941756:cluster/trumarket-dev
+        run: |
+          aws ecs update-service --cluster $ECS_CLUSTER --service trumarket-$ENV-api --force-new-deployment
