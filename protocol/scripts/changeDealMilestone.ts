@@ -1,8 +1,5 @@
-import { parseEther } from 'viem';
 import hre from 'hardhat';
 import deployed from './addresses/deployed.json';
-import * as fs from 'fs';
-import * as path from 'path';
 
 async function main() {
   const [deployerAccount, financialAccount, dealsManagerAccount] =
@@ -12,7 +9,9 @@ async function main() {
     'DealsManager' as string,
     deployed['Deals Manager'] as `0x${string}`,
     {
-      walletClient: dealsManagerAccount,
+      client: {
+        wallet: dealsManagerAccount,
+      },
     }
   );
 

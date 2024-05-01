@@ -8,7 +8,7 @@ export function decodeDealManagerEvents(receipt: TransactionReceipt, abi: any) {
   receipt.logs.forEach((log, index) => {
     console.log(index);
     try {
-      const data = decodeEventLog({
+      const data: any = decodeEventLog({
         abi: abi,
         data: log.data,
         topics: log.topics,
