@@ -485,7 +485,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
 ################################################################################
 
 resource "aws_route53_zone" "zone" {
-  name = var.domain
+  name = "trumarket.tech"
 
   tags = local.tags
 }

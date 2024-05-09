@@ -7,14 +7,14 @@ services:
     networks:
       - trumarket-network
     ports:
-      - 3000:3000
+      - 4000:4000
     volumes:
       - /app/node_modules
       - ./api/src:/app/api/src
       - ./logs/api:/app/logs
     environment:
       - DATABASE_URL=mongodb://mongo/trumarket-api
-      - PORT=3000
+      - PORT=4000
       - COMMIT_HASH=${COMMIT_HASH}
       - S3_BUCKET=api-bucket
       - AWS_ENDPOINT=http://localstack:4566

@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import UserModel, { RoleType } from '../users/users.model';
 import { ForbiddenError, UnauthorizedError } from '../errors';
+import UserModel, { RoleType, User } from '../auth/users.model';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
@@ -15,9 +15,9 @@ export class AdminGuard implements CanActivate {
 
     const { address } = request.user as any;
 
-    const user = await UserModel.findOne({ address });
+    const user: User = await UserModel.findOne({ address });
 
-    if (user && user.toJSON().role === RoleType.ADMIN) {
+    if (user && user.role === RoleType.ADMIN) {
       return true;
     }
 

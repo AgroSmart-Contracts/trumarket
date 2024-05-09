@@ -13,7 +13,5 @@
     "lint": "npm run lint --workspaces"
   },
   "author": "fabiodmferreira",
-  "license": "ISC",
-  "devDependencies": {},
-  "dependencies": {}
+  "license": "ISC"
 }
