@@ -1,12 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsIn, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 
 const accountType = ['supplier', 'buyer', 'investor'];
 
 export class SignupDto {
   @ApiProperty()
   @IsString()
+  @IsOptional()
   @Expose()
   auth0Token: string;
 
