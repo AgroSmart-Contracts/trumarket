@@ -7,3 +7,6 @@ logs
 .terraform
 .terraform*
 terraform.tfstate*
+
+
+.env

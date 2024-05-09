@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import DealModel from '../deals/deals.model';
 import { ForbiddenError, UnauthorizedError } from '../errors';
-import UserModel, { RoleType } from '../users/users.model';
+import UserModel, { RoleType } from '../auth/users.model';
 
 @Injectable()
 export class DealWhitelistGuard implements CanActivate {

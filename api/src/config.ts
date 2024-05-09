@@ -8,6 +8,7 @@ export const config = {
   awsEndpoint: process.env.AWS_ENDPOINT,
   awsRegion: process.env.AWS_REGION || 'us-east-1',
   jwtSecret: process.env.JWT_SECRET || 'yourjsonwebtokensecret',
+  auth0Domain: process.env.AUTH0_DOMAIN || 'trumarket-dev.eu.auth0.com',
   blockchainRpcUrl:
     process.env.BLOCKCHAIN_RPC_URL || 'http://host.docker.internal:8545/',
 };
