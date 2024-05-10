@@ -22,6 +22,8 @@ async function bootstrap() {
 
   app.useLogger(app.get(Logger));
 
+  app.enableCors();
+
   const httpAdapter = app.get(HttpAdapterHost);
   app.useGlobalFilters(new ErrorsFilter(httpAdapter));
 
