@@ -1,13 +1,16 @@
 import { Body, Controller, Post } from '@nestjs/common';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+
+import { DealsService } from '@/deals/deals.service';
+import { logger } from '@/logger';
+import { UsersService } from '@/users/users.service';
+
+import { InternalServerError } from '../errors';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/loginResponse.dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UsersService } from './users.service';
-import { SignupDto } from './dto/singup.dto';
 import { SignupResponseDto } from './dto/signupResponse.dto';
-import { InternalServerError } from '../errors';
-import { logger } from 'src/logger';
+import { SignupDto } from './dto/singup.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -15,6 +18,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private userService: UsersService,
+    private dealsService: DealsService,
   ) {}
 
   @Post('login')
@@ -35,7 +39,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     type: SignupResponseDto,
-    description: 'Login Token',
+    description: 'Signup',
   })
   async signup(@Body() signupDto: SignupDto): Promise<SignupResponseDto> {
     const { auth0Token, web3authToken, accountType } = signupDto;
@@ -59,12 +63,14 @@ export class AuthController {
       const walletType = wallet.type;
 
       // Create new user
-      await this.userService.create({
+      const user = await this.userService.create({
         email,
         walletAddress,
         walletType,
         accountType,
       });
+
+      await this.dealsService.assignUserToDeals(user);
 
       return new SignupResponseDto({
         token: await this.authService.login(web3authToken),

@@ -8,10 +8,6 @@ export class UploadDocumentResponseDTO {
 
   @ApiProperty()
   @Expose()
-  file: string;
-
-  @ApiProperty()
-  @Expose()
   id: string;
 
   @ApiProperty()

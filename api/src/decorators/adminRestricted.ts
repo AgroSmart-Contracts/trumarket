@@ -1,5 +1,6 @@
-import { UseGuards, applyDecorators } from '@nestjs/common';
+import { applyDecorators, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiForbiddenResponse } from '@nestjs/swagger';
+
 import { AdminGuard } from '../guards/admin.guard';
 import { AuthGuard } from '../guards/auth.guard';
 

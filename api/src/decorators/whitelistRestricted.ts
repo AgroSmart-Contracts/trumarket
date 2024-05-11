@@ -1,7 +1,8 @@
-import { UseGuards, applyDecorators } from '@nestjs/common';
+import { applyDecorators, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiForbiddenResponse } from '@nestjs/swagger';
-import { DealWhitelistGuard } from '../guards/dealWhitelist.guard';
+
 import { AuthGuard } from '../guards/auth.guard';
+import { DealWhitelistGuard } from '../guards/dealWhitelist.guard';
 
 export function WhitelistAccessRestricted() {
   return applyDecorators(

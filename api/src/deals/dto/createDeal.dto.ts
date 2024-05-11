@@ -1,15 +1,16 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Expose, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsDate,
+  IsEmail,
   IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Expose, Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class MilestoneDTO {
   @ApiProperty()
@@ -128,4 +129,16 @@ export class CreateDealDto {
   @IsString()
   @Expose()
   carbonFootprint: string;
+
+  @ApiProperty({ required: false })
+  @IsEmail()
+  @IsOptional()
+  @Expose()
+  proposalSupplierEmail?: string;
+
+  @ApiProperty({ required: false })
+  @IsEmail()
+  @IsOptional()
+  @Expose()
+  proposalBuyerEmail?: string;
 }

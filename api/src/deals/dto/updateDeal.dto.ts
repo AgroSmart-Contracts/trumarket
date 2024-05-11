@@ -1,6 +1,12 @@
-import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
+import {
+  IsBoolean,
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdateDealDto {
   @ApiProperty({ required: false })
@@ -92,4 +98,16 @@ export class UpdateDealDto {
   @IsOptional()
   @Expose()
   carbonFootprint: string;
+
+  @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  confirm: boolean;
+
+  @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  cancel: boolean;
 }

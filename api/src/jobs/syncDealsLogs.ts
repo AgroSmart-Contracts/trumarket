@@ -1,7 +1,8 @@
+import { createPublicClient, http, parseAbi } from 'viem';
+
 import DealsLogs from '../deals-logs/deals-logs.model';
 import SyncDealsLogsJob from '../deals-logs/sync-deals-logs-job.model';
 import { logger } from '../logger';
-import { createPublicClient, http, parseAbi } from 'viem';
 
 export const syncDealsLogs = async () => {
   logger.debug('Syncing deals logs');

@@ -147,18 +147,47 @@ const dealSchema = new Schema({
   },
   carbonFootprint: {
     type: String,
-    required: true,
   },
   whitelist: {
     type: [walletSchema],
     default: [],
+  },
+  status: {
+    type: String,
+    enum: ['proposal', 'confirmed', 'finished'],
+    default: 'proposal',
+  },
+  buyerId: {
+    type: String,
+    required: false,
+  },
+  supplierId: {
+    type: String,
+    required: false,
+  },
+  proposalBuyerEmail: {
+    type: String,
+    required: false,
+  },
+  proposalSupplierEmail: {
+    type: String,
+    required: false,
+  },
+  buyerConfirmed: {
+    type: Boolean,
+    default: false,
+  },
+  supplierConfirmed: {
+    type: Boolean,
+    default: false,
   },
 });
 
 dealSchema.set('toJSON', {
   transform: function (doc: any, ret) {
     ret.id = doc._id.toString();
-    ret.status = doc.currentMilestone === 8 ? 'Completed' : 'Ongoing';
+    // TODO: update status as completed in db when currentMilestone was changed to value 8
+    // ret.status = doc.currentMilestone === 8 ? 'Completed' : 'Ongoing';
 
     const startDate: Date = doc.shippingStartDate;
     const endDate: Date = doc.expectedShippingEndDate;
@@ -177,6 +206,6 @@ dealSchema.set('toJSON', {
   },
 });
 
-const DealModel = mongoose.model('Deal', dealSchema);
+const DealModel = mongoose.model<any>('Deal', dealSchema);
 
 export default DealModel;

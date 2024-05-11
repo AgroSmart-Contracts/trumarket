@@ -1,98 +1,111 @@
-import { UpdateDealDto } from './dto/updateDeal.dto';
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Put,
-  Delete,
-  Body,
-  Param,
-  UseInterceptors,
+  Query,
+  Request,
   UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiResponse,
-  ApiOperation,
   ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
+
+import { BlockchainService } from '../blockchain/blockchain.service';
+import { AdminAccessRestricted } from '../decorators/adminRestricted';
+// import { WhitelistAccessRestricted } from '../decorators/whitelistRestricted';
+import { NotFoundError } from '../errors';
+import fileInterceptor from '../file.interceptor';
+import { AuthGuard } from '../guards/auth.guard';
+import { filePipeValidator } from '../multer.options';
+import { User } from '../users/users.model';
+import { Deal } from './deals.entities';
+import { DealsService } from './deals.service';
+import { AssignNFTDto } from './dto/assignNFTID.dto';
 import { CreateDealDto } from './dto/createDeal.dto';
-import { ConflictError, InternalServerError, NotFoundError } from '../errors';
+import { DealLogsDtoResponse } from './dto/dealLogsResponse.dto';
 import { DealDtoResponse } from './dto/dealResponse.dto';
+import { ListDealsDto } from './dto/listDeals.dto';
 import { ListDealDtoResponse } from './dto/listDealsResponse.dto';
+import { UpdateDealDto } from './dto/updateDeal.dto';
 import { UploadDocumentDTO } from './dto/uploadDocument.dto';
 import { UploadDocumentResponseDTO } from './dto/uploadDocumentResponse.dto';
-import { WhitelistWalletDto } from './dto/whitelistWallet.dto';
-import { WalletResponseDTO } from './dto/walletResponse.dto';
-import DealModel from './deals.model';
-import fileInterceptor from '../file.interceptor';
-import { filePipeValidator } from '../multer.options';
-import * as fs from 'fs';
-import { s3Service } from '../aws/s3.service';
-import { AdminAccessRestricted } from '../decorators/adminRestricted';
-import { WhitelistAccessRestricted } from '../decorators/whitelistRestricted';
-import { createPublicClient, http, parseAbi, parseEventLogs } from 'viem';
-import { AssignNFTDto } from './dto/assignNFTID.dto';
-import DealsLogs from '../deals-logs/deals-logs.model';
-import { DealLogsDtoResponse } from './dto/dealLogsResponse.dto';
-import { config } from '../config';
 
 @ApiTags('deals')
 @Controller('deals')
 export class DealsController {
-  private async uploadFile(
-    file: { path: string; originalname: string },
-    dealId: string,
-  ): Promise<string | undefined> {
-    const fileBuffer = fs.readFileSync(file.path);
-
-    const timestamp = Date.now();
-    const key = `deals/${dealId}/${timestamp}-${file.originalname}`;
-
-    const uploadedUrl = await s3Service.uploadFile(key, fileBuffer);
-    return uploadedUrl;
-  }
+  constructor(
+    private readonly dealsService: DealsService,
+    private readonly blockchainService: BlockchainService,
+  ) {}
 
   @Get()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get all deals' })
   @ApiResponse({
     status: 200,
     type: [ListDealDtoResponse],
     description: 'Returns all deals',
   })
-  async findAll(): Promise<ListDealDtoResponse[]> {
-    const deals = await DealModel.find();
-    return deals.map((doc) => new ListDealDtoResponse(doc.toJSON()));
+  async findAll(
+    @Request() req,
+    @Query() query: ListDealsDto,
+  ): Promise<ListDealDtoResponse[]> {
+    const user: User = req.user;
+
+    const deals = await this.dealsService.findDealsByUser(user.id, query);
+
+    return deals.map((deal) => new ListDealDtoResponse(deal));
   }
 
   @Post()
-  @AdminAccessRestricted()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Create a deal' })
   @ApiResponse({
     status: 201,
     type: DealDtoResponse,
     description: 'The deal has been successfully created',
   })
-  async create(@Body() dealDto: CreateDealDto): Promise<DealDtoResponse> {
-    const deal = await DealModel.create(dealDto);
-    return new DealDtoResponse(deal.toJSON());
+  async create(
+    @Body() dealDto: CreateDealDto,
+    @Request() req,
+  ): Promise<DealDtoResponse> {
+    const user: User = req.user;
+
+    const deal = await this.dealsService.createDeal(user, dealDto);
+
+    return new DealDtoResponse(deal);
   }
 
   @Get(':dealId')
-  @WhitelistAccessRestricted()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get a deal' })
   @ApiResponse({
     status: 200,
     type: DealDtoResponse,
     description: 'Returns deal with id',
   })
-  async findOne(@Param('dealId') id: string): Promise<DealDtoResponse> {
-    const deal = await DealModel.findById(id);
+  async findOne(
+    @Param('dealId') id: string,
+    @Request() req,
+  ): Promise<DealDtoResponse> {
+    const user: User = req.user;
+    const deal = await this.dealsService.findById(id);
     if (!deal) {
       throw new NotFoundError();
     }
 
-    const dealDto = new DealDtoResponse(deal.toJSON());
+    await this.dealsService.checkDealAccess(deal, user);
+
+    const dealDto = new DealDtoResponse(deal);
 
     dealDto.milestones = dealDto.milestones.map((m, index) => {
       let status = 'Completed';
@@ -113,7 +126,7 @@ export class DealsController {
   }
 
   @Put(':dealId')
-  @AdminAccessRestricted()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Update a deal' })
   @ApiResponse({
     status: 200,
@@ -123,16 +136,23 @@ export class DealsController {
   async update(
     @Param('dealId') id: string,
     @Body() dealDto: UpdateDealDto,
+    @Request() req,
   ): Promise<DealDtoResponse> {
-    const deal = await DealModel.findByIdAndUpdate(
-      id,
-      { $set: dealDto },
-      { new: true },
-    );
-    if (!deal) {
-      throw new NotFoundError();
+    const user: User = req.user;
+
+    const { confirm, cancel, ...restDealDto } = dealDto;
+
+    let deal: Deal;
+
+    if (confirm) {
+      deal = await this.dealsService.confirmDeal(id, user);
+    } else if (cancel) {
+      deal = await this.dealsService.cancelDeal(id, user);
+    } else {
+      deal = await this.dealsService.updateDeal(id, restDealDto, user);
     }
-    return new DealDtoResponse(deal.toJSON());
+
+    return new DealDtoResponse(deal);
   }
 
   @Delete(':dealId')
@@ -143,11 +163,11 @@ export class DealsController {
     description: 'The deal has been successfully deleted',
   })
   async delete(@Param('dealId') id: string): Promise<void> {
-    await DealModel.findByIdAndDelete(id);
+    this.dealsService.deleteDeal(id);
   }
 
   @Post(':dealId/docs')
-  @AdminAccessRestricted()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
   @ApiResponse({
     status: 200,
@@ -160,20 +180,18 @@ export class DealsController {
     @Param('dealId') id: string,
     @Body() payload: UploadDocumentDTO,
     @UploadedFile(filePipeValidator) file: Express.Multer.File,
+    @Request() req,
   ): Promise<UploadDocumentResponseDTO> {
-    const fileUrl = await this.uploadFile(file, id);
+    const user: User = req.user;
 
-    const deal = await DealModel.findByIdAndUpdate(
+    const doc = await this.dealsService.uploadDealDocument(
       id,
-      {
-        $push: { docs: { url: fileUrl, ...payload } },
-      },
-      { new: true },
+      file,
+      payload.description,
+      user,
     );
 
-    const docs = deal.docs.pop();
-
-    return new UploadDocumentResponseDTO(docs.toJSON());
+    return new UploadDocumentResponseDTO(doc);
   }
 
   @Delete(':dealId/docs/:docId')
@@ -186,64 +204,64 @@ export class DealsController {
   async deleteDealDocument(
     @Param('dealId') id: string,
     @Param('docId') docId: string,
+    @Request() req,
   ): Promise<void> {
-    await DealModel.findByIdAndUpdate(id, {
-      $pull: { docs: { _id: docId } },
-    });
+    const user: User = req.user;
+    await this.dealsService.removeDocumentFromDeal(id, docId, user);
   }
 
-  @Post(':dealId/whitelist')
-  @AdminAccessRestricted()
-  @ApiOperation({ summary: 'Whitelist wallet' })
-  @ApiResponse({
-    status: 200,
-    type: WalletResponseDTO,
-    description: 'The wallet was successfully whitelisted',
-  })
-  async whitelistAddress(
-    @Param('dealId') id: string,
-    @Body() payload: WhitelistWalletDto,
-  ): Promise<WalletResponseDTO> {
-    const deal = await DealModel.findOneAndUpdate(
-      { _id: id, 'whitelist.address': { $ne: payload.address.toLowerCase() } },
-      {
-        $push: { whitelist: payload },
-      },
-      { new: true },
-    );
+  // @Post(':dealId/whitelist')
+  // @AdminAccessRestricted()
+  // @ApiOperation({ summary: 'Whitelist wallet' })
+  // @ApiResponse({
+  //   status: 200,
+  //   type: WalletResponseDTO,
+  //   description: 'The wallet was successfully whitelisted',
+  // })
+  // async whitelistAddress(
+  //   @Param('dealId') id: string,
+  //   @Body() payload: WhitelistWalletDto,
+  // ): Promise<WalletResponseDTO> {
+  //   const deal = await DealModel.findOneAndUpdate(
+  //     { _id: id, 'whitelist.address': { $ne: payload.address.toLowerCase() } },
+  //     {
+  //       $push: { whitelist: payload },
+  //     },
+  //     { new: true },
+  //   );
 
-    if (!deal) {
-      throw new ConflictError();
-    }
+  //   if (!deal) {
+  //     throw new ConflictError();
+  //   }
 
-    const whitelist = deal.whitelist;
+  //   const whitelist = deal.whitelist;
 
-    if (!whitelist.length) {
-      throw new InternalServerError('failed pusing wallet');
-    }
+  //   if (!whitelist.length) {
+  //     throw new InternalServerError('failed pusing wallet');
+  //   }
 
-    const wallet = whitelist.pop();
-    return new WalletResponseDTO(wallet.toJSON());
-  }
+  //   const wallet = whitelist.pop();
+  //   return new WalletResponseDTO(wallet.toJSON());
+  // }
 
-  @Delete(':dealId/whitelist/:walletId')
-  @AdminAccessRestricted()
-  @ApiOperation({ summary: 'Remove wallet from whitelist' })
-  @ApiResponse({
-    status: 200,
-    description: 'The wallet was successfully deleted from whitelist',
-  })
-  async blacklistAddress(
-    @Param('dealId') id: string,
-    @Param('walletId') walletId: string,
-  ): Promise<void> {
-    await DealModel.findByIdAndUpdate(id, {
-      $pull: { whitelist: { _id: walletId } },
-    });
-  }
+  // @Delete(':dealId/whitelist/:walletId')
+  // @AdminAccessRestricted()
+  // @ApiOperation({ summary: 'Remove wallet from whitelist' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'The wallet was successfully deleted from whitelist',
+  // })
+  // async blacklistAddress(
+  //   @Param('dealId') id: string,
+  //   @Param('walletId') walletId: string,
+  // ): Promise<void> {
+  //   await DealModel.findByIdAndUpdate(id, {
+  //     $pull: { whitelist: { _id: walletId } },
+  //   });
+  // }
 
   @Post(':dealId/milestones/:milestoneId/docs')
-  @AdminAccessRestricted()
+  @UseGuards(AuthGuard)
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
   @ApiResponse({
@@ -251,35 +269,25 @@ export class DealsController {
     type: UploadDocumentResponseDTO,
     description: 'The deal milestone document was successfully uploaded',
   })
-  @ApiConsumes('multipart/form-data')
   @UseInterceptors(fileInterceptor)
   async uploadMilestoneDocument(
     @Param('dealId') id: string,
     @Param('milestoneId') milestoneId: string,
     @Body() payload: UploadDocumentDTO,
     @UploadedFile(filePipeValidator) file: Express.Multer.File,
+    @Request() req,
   ): Promise<UploadDocumentResponseDTO> {
-    const fileUrl = await this.uploadFile(file, id);
+    const user: User = req.user;
 
-    const deal = await DealModel.findOneAndUpdate(
-      { _id: id, 'milestones._id': milestoneId },
-      {
-        $push: { 'milestones.$.docs': { url: fileUrl, ...payload } },
-      },
-      { new: true },
+    const doc = await this.dealsService.uploadDocumentToMilestone(
+      id,
+      milestoneId,
+      file,
+      payload.description,
+      user,
     );
 
-    const milestone = deal.milestones.find(
-      (m) => m.toJSON().id === milestoneId,
-    );
-
-    if (!milestone) {
-      throw new NotFoundError('milestone not found');
-    }
-
-    const docs = milestone.docs.pop();
-
-    return new UploadDocumentResponseDTO(docs.toJSON());
+    return new UploadDocumentResponseDTO(doc);
   }
 
   @Delete(':dealId/milestones/:milestoneId/docs/:docId')
@@ -293,16 +301,19 @@ export class DealsController {
     @Param('dealId') id: string,
     @Param('milestoneId') milestoneId: string,
     @Param('docId') docId: string,
+    @Request() req,
   ): Promise<void> {
-    await DealModel.findOneAndUpdate(
-      { _id: id, 'milestones._id': milestoneId },
-      {
-        $pull: { 'milestones.$.docs': { _id: docId } },
-      },
+    const user: User = req.user;
+    await this.dealsService.removeDocumentFromMilestone(
+      id,
+      milestoneId,
+      docId,
+      user,
     );
   }
 
   @Get('/nft/:nftId/logs')
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get nft logs' })
   @ApiResponse({
     status: 200,
@@ -311,9 +322,11 @@ export class DealsController {
   })
   async getDealLogs(
     @Param('nftId') id: string,
+    @Request() req,
   ): Promise<DealLogsDtoResponse[]> {
-    const logs = await DealsLogs.find({ dealId: id });
-    return logs.map((doc) => new DealLogsDtoResponse(doc.toJSON()));
+    const user: User = req.user;
+    const logs = await this.dealsService.findDealsLogs(id, user);
+    return logs.map((doc) => new DealLogsDtoResponse(doc));
   }
 
   @Post(':dealId/nft')
@@ -327,31 +340,8 @@ export class DealsController {
     @Param('dealId') id: string,
     @Body() dto: AssignNFTDto,
   ): Promise<void> {
-    const provider = await createPublicClient({
-      transport: http(config.blockchainRpcUrl),
-    });
+    const nftID = await this.blockchainService.getNftID(dto.txHash);
 
-    const receipt = await provider.getTransactionReceipt({
-      hash: dto.txHash as `0x${string}`,
-    });
-
-    const logs = parseEventLogs({
-      abi: parseAbi([`event DealCreated(uint256 dealId)`]),
-      eventName: 'DealCreated',
-      logs: receipt.logs,
-    });
-
-    if (!logs.length) {
-      throw new InternalServerError('no deal created event was emitted');
-    }
-
-    const nftID = logs[0].args.dealId;
-
-    await DealModel.findOneAndUpdate(
-      { _id: id },
-      {
-        $set: { nftID: Number(nftID), mintTxHash: dto.txHash },
-      },
-    );
+    await this.dealsService.assignNftIdToDeal(id, nftID, dto.txHash);
   }
 }

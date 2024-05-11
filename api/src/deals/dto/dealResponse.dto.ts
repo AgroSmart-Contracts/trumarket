@@ -1,6 +1,8 @@
-import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
 import { IsNumber } from 'class-validator';
+
+import { DocumentFile } from './../deals.entities';
 
 export class MilestoneDTO {
   @Expose()
@@ -45,7 +47,7 @@ export class DealDtoResponse {
   @ApiProperty()
   @IsNumber()
   @Expose()
-  nftId: number;
+  nftID: number;
 
   @ApiProperty()
   @Expose()
@@ -67,11 +69,9 @@ export class DealDtoResponse {
   @Expose()
   size: string;
 
-  @ApiProperty({
-    type: [String],
-  })
+  @ApiProperty()
   @Expose()
-  docs: string[];
+  docs: DocumentFile[];
 
   @ApiProperty()
   @Expose()

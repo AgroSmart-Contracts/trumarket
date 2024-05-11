@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as jose from 'jose';
-import UserModel from './users.model';
+
 import { config } from '../config';
+import UserModel, { User } from '../users/users.model';
 
 export interface Auth0Info {
   payload: {
@@ -43,6 +44,10 @@ export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
   async login(web3authToken: string): Promise<string> {
+    if (process.env.E2E_TEST) {
+      return this.generateJwtToken(JSON.parse(web3authToken));
+    }
+
     const userWallet = await this.verifyWeb3AuthJwtToken(web3authToken);
     if (!userWallet) {
       throw new Error('Invalid web3authToken');
@@ -55,17 +60,21 @@ export class AuthService {
       throw new Error('User not found');
     }
 
-    const token = await this.generateJwtToken(userWallet.address);
+    const token = await this.generateJwtToken(user);
 
     return token;
   }
 
-  async generateJwtToken(address: string): Promise<string> {
-    const accessToken = await this.jwtService.signAsync({ address });
+  async generateJwtToken(user: User): Promise<string> {
+    const accessToken = await this.jwtService.signAsync(user);
     return accessToken;
   }
 
   verifyAuth0JwtToken(token: string): Promise<Auth0Info> {
+    if (process.env.E2E_TEST) {
+      return JSON.parse(token);
+    }
+
     const jwks = jose.createRemoteJWKSet(
       new URL(`https://${config.auth0Domain}/.well-known/jwks.json`),
     );
@@ -76,13 +85,18 @@ export class AuthService {
   }
 
   async verifyWeb3AuthJwtToken(token: string): Promise<Wallet | undefined> {
-    const jwks = jose.createRemoteJWKSet(
-      new URL('https://authjs.web3auth.io/jwks'),
-    );
+    let decoded: Web3AuthInfo;
+    if (process.env.E2E_TEST) {
+      decoded = JSON.parse(token);
+    } else {
+      const jwks = jose.createRemoteJWKSet(
+        new URL('https://authjs.web3auth.io/jwks'),
+      );
 
-    const decoded: Web3AuthInfo = await jose.jwtVerify(token, jwks, {
-      algorithms: ['ES256'],
-    });
+      decoded = await jose.jwtVerify(token, jwks, {
+        algorithms: ['ES256'],
+      });
+    }
 
     const wallet = decoded.payload.wallets[0];
 
