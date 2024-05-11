@@ -1,9 +1,10 @@
-import { ApiOperation, ApiResponse, ApiProperty } from '@nestjs/swagger';
 import { Controller, Get, Inject } from '@nestjs/common';
-import { config } from './config';
+import { ApiOperation, ApiProperty, ApiResponse } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { providers } from './constants';
 import mongoose from 'mongoose';
+
+import { config } from './config';
+import { providers } from './constants';
 
 export enum ServiceStatus {
   UP = 'UP',

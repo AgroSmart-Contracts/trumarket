@@ -1,4 +1,4 @@
-import { ConnectOptions, Connection, connect } from 'mongoose';
+import { connect, Connection, ConnectOptions } from 'mongoose';
 
 export const connectDB = async (
   uri: string,

@@ -1,6 +1,6 @@
-import { IsDate, IsString } from 'class-validator';
-import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
+import { IsDate, IsString } from 'class-validator';
 
 export class DealLogsDtoResponse {
   constructor(res: DealLogsDtoResponse) {
@@ -15,7 +15,7 @@ export class DealLogsDtoResponse {
   @ApiProperty()
   @IsString()
   @Expose()
-  name: string;
+  event: string;
 
   @ApiProperty()
   @IsString()

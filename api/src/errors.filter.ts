@@ -1,13 +1,14 @@
 import {
-  type ExceptionFilter,
-  Catch,
   type ArgumentsHost,
-  HttpStatus,
-  Logger,
-  InternalServerErrorException,
   BadRequestException,
+  Catch,
+  type ExceptionFilter,
+  HttpStatus,
+  InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+
 import { HttpError } from './errors';
 import { logger } from './logger';
 

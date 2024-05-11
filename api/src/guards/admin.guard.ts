@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+
 import { ForbiddenError, UnauthorizedError } from '../errors';
-import UserModel, { RoleType, User } from '../auth/users.model';
+import UserModel, { RoleType, User } from '../users/users.model';
 
 @Injectable()
 export class AdminGuard implements CanActivate {

@@ -1,19 +1,20 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { DealsModule } from './deals/deals.module';
-import { loggerOptions } from './logger';
-import { config } from './config';
+import { Inject, Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { Connection } from 'mongoose';
 import { LoggerModule } from 'nestjs-pino';
 import pino from 'pino';
-import { connectDB } from './database';
-import { Connection } from 'mongoose';
-import { providers } from './constants';
+
+import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
-import { JwtModule } from '@nestjs/jwt';
+import { config } from './config';
+import { providers } from './constants';
+import { connectDB } from './database';
+import { DealsModule } from './deals/deals.module';
+import { loggerOptions } from './logger';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    DealsModule,
     LoggerModule.forRoot({
       pinoHttp:
         config.env === 'development'
@@ -52,6 +53,8 @@ import { JwtModule } from '@nestjs/jwt';
       global: true,
     }),
     AuthModule,
+    UsersModule,
+    DealsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -62,4 +65,10 @@ import { JwtModule } from '@nestjs/jwt';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(@Inject(providers.DatabaseConnection) private dbClient) {}
+
+  async onModuleDestroy() {
+    await this.dbClient.close();
+  }
+}

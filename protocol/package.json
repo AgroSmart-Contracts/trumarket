@@ -10,6 +10,7 @@
     "local:faucet": "npx hardhat run scripts/faucet.ts --network localhost",
     "local:setup": "npm run local:deploy && npm run local:mint-underlying && npm run local:faucet",
     "test": "npx hardhat test --typecheck --show-stack-traces",
+    "test:e2e": "echo 'No operation script'",
     "lint": "echo 'No operation script'",
     "typecheck": "tsc --noEmit"
   },

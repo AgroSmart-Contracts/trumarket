@@ -1,9 +1,10 @@
 import {
+  type _Object,
   ListObjectsV2Command,
   S3Client,
-  type _Object,
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
+
 import { config } from '../config';
 
 export class S3Service {

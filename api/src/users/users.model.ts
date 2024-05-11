@@ -6,12 +6,17 @@ export enum AccountType {
   Investor = 'investor',
 }
 
+export enum WalletType {
+  EVM = 'evm',
+}
+
 export enum RoleType {
   REGULAR = 0,
   ADMIN = 1,
 }
 
 export interface User {
+  id: string;
   email: string;
   accountType: string;
   walletAddress: string;
@@ -21,7 +26,7 @@ export interface User {
 }
 
 const UserSchema: Schema = new Schema({
-  email: { type: String },
+  email: { type: String, unique: true, sparse: true },
   accountType: {
     type: String,
     enum: Object.values(AccountType),
@@ -34,13 +39,26 @@ const UserSchema: Schema = new Schema({
     unique: true,
     sparse: true,
   },
-  walletType: { type: String, required: true },
+  walletType: {
+    type: String,
+    enum: Object.values(WalletType),
+    default: WalletType.EVM,
+    required: true,
+  },
   role: {
     type: Number,
     enum: RoleType,
     default: 0,
   },
   createdAt: { type: Date, default: Date.now },
+});
+
+UserSchema.set('toJSON', {
+  transform: function (doc: any, ret) {
+    ret.id = doc._id.toString();
+
+    delete ret.__v;
+  },
 });
 
 const UserModel = mongoose.model<User>('User', UserSchema);

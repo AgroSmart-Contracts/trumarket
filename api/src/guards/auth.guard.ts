@@ -1,4 +1,3 @@
-import { config } from '../config';
 import {
   type CanActivate,
   type ExecutionContext,
@@ -6,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { type Request } from 'express';
+
+import { config } from '../config';
 import { UnauthorizedError } from '../errors';
 
 @Injectable()
