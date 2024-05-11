@@ -1,6 +1,5 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { DeserializedData } from 'keyv';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as request from 'supertest';
 import TestAgent from 'supertest/lib/agent';
