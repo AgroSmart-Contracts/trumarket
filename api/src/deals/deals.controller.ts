@@ -140,7 +140,8 @@ export class DealsController {
   ): Promise<DealDtoResponse> {
     const user: User = req.user;
 
-    const { confirm, cancel, ...restDealDto } = dealDto;
+    const { confirm, cancel, currentMilestone, signature, ...restDealDto } =
+      dealDto;
 
     let deal: Deal;
 
@@ -148,6 +149,13 @@ export class DealsController {
       deal = await this.dealsService.confirmDeal(id, user);
     } else if (cancel) {
       deal = await this.dealsService.cancelDeal(id, user);
+    } else if (currentMilestone) {
+      deal = await this.dealsService.updateCurrentMilestone(
+        id,
+        currentMilestone,
+        signature,
+        user,
+      );
     } else {
       deal = await this.dealsService.updateDeal(id, restDealDto, user);
     }

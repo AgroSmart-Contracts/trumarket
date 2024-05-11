@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 
 import { s3Service } from '@/aws/s3.service';
+import { BlockchainService } from '@/blockchain/blockchain.service';
 import {
   BadRequestError,
+  ForbiddenError,
   InternalServerError,
   UnauthorizedError,
 } from '@/errors';
@@ -25,12 +27,18 @@ export class DealsService {
     private readonly dealsRepository: DealsRepository,
     private readonly usersService: UsersService,
     private readonly notifications: NotificationsService,
+    private readonly blockchain: BlockchainService,
   ) {}
 
   private async uploadFile(
     file: { path: string; originalname: string },
     dealId: string,
   ): Promise<string | undefined> {
+    if (process.env.E2E_TEST) {
+      fs.unlinkSync(file.path);
+      return Math.random().toString(36).substring(2, 10);
+    }
+
     const fileBuffer = fs.readFileSync(file.path);
 
     const timestamp = Date.now();
@@ -295,10 +303,18 @@ export class DealsService {
         'You are not allowed to upload documents for this deal',
       );
     }
+
+    if (deal.milestones[deal.currentMilestone].id !== milestoneId) {
+      throw new ForbiddenError(
+        'You are not allowed to upload documents for this milestone',
+      );
+    }
+
     const milestone = deal.milestones.find((m) => m.id === milestoneId);
     if (!milestone) {
       throw new BadRequestError('Milestone not found');
     }
+
     const uploadedUrl = await this.uploadFile(file, dealId);
     const document = await this.dealsRepository.pushMilestoneDocument(
       dealId,
@@ -369,5 +385,55 @@ export class DealsService {
       user.email,
       user.accountType as AccountType,
     );
+  }
+
+  async updateCurrentMilestone(
+    dealId: string,
+    currentMilestone: number,
+    signature: string,
+    user: User,
+  ): Promise<Deal> {
+    const deal = await this.findById(dealId);
+    if (deal.buyerId !== user.id) {
+      throw new UnauthorizedError(
+        'You are not allowed to update the current milestone for this deal',
+      );
+    }
+
+    if (deal.nftID === undefined) {
+      throw new BadRequestError(
+        'NFT ID is not assigned to the deal. Mint milestone NFT first.',
+      );
+    }
+
+    const validSignature = await this.blockchain.verifyMessage(
+      user.walletAddress as `0x${string}`,
+      `Approve milestone ${currentMilestone} of deal ${deal.nftID}`,
+      signature as `0x${string}`,
+    );
+
+    if (!validSignature) {
+      throw new ForbiddenError('Invalid signature');
+    }
+
+    if (
+      currentMilestone < 0 ||
+      currentMilestone >= deal.milestones.length ||
+      deal.currentMilestone + 1 !== currentMilestone
+    ) {
+      throw new BadRequestError('Invalid milestone');
+    }
+
+    // TODO: update in smart contract before updating in database
+
+    await this.notifications.sendMilestoneApprovedNotification(
+      this.selectDealEmailBasedOnUser(user, deal),
+      deal,
+      deal.milestones[currentMilestone],
+    );
+
+    return this.dealsRepository.updateById(dealId, {
+      currentMilestone: deal.currentMilestone + 1,
+    });
   }
 }
