@@ -1,0 +1,255 @@
+import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { DeserializedData } from 'keyv';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import * as request from 'supertest';
+import TestAgent from 'supertest/lib/agent';
+
+import { AppModule } from '@/app.module';
+import { config } from '@/config';
+import { Deal } from '@/deals/deals.entities';
+import { CreateDealDto } from '@/deals/dto/createDeal.dto';
+import UserModel, { AccountType, User } from '@/users/users.model';
+
+export const randomEmail = (): string => {
+  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let email = '';
+  for (let i = 0; i < 10; i++) {
+    email += characters[Math.floor(Math.random() * characters.length)];
+  }
+  email += '@example.com';
+  return email;
+};
+
+export const randomEvmAddress = () =>
+  '0x' + Math.random().toString(16).slice(2, 42);
+
+export const generateDealDto = (dealDto: Partial<Deal> = {}): CreateDealDto => {
+  return Object.assign(
+    {
+      name: 'test',
+      description: 'test',
+      contractId: 1,
+      roi: 1,
+      netBalance: 1,
+      revenue: 1,
+      investmentAmount: 1,
+      shippingStartDate: new Date(),
+      expectedShippingEndDate: new Date(),
+      destination: 'US',
+      origin: 'CN',
+      milestones: [
+        {
+          name: 'Milestone 1',
+          description: 'Description of Milestone 1',
+          date: new Date(),
+          location: 'Location 1',
+        },
+        {
+          name: 'Milestone 2',
+          description: 'Description of Milestone 2',
+          date: new Date(),
+          location: 'Location 2',
+        },
+        {
+          name: 'Milestone 3',
+          description: 'Description of Milestone 3',
+          date: new Date(),
+          location: 'Location 3',
+        },
+        {
+          name: 'Milestone 4',
+          description: 'Description of Milestone 4',
+          date: new Date(),
+          location: 'Location 4',
+        },
+        {
+          name: 'Milestone 5',
+          description: 'Description of Milestone 5',
+          date: new Date(),
+          location: 'Location 5',
+        },
+        {
+          name: 'Milestone 6',
+          description: 'Description of Milestone 6',
+          date: new Date(),
+          location: 'Location 6',
+        },
+        {
+          name: 'Milestone 7',
+          description: 'Description of Milestone 7',
+          date: new Date(),
+          location: 'Location 7',
+        },
+      ],
+    } as CreateDealDto,
+    dealDto,
+  );
+};
+
+export async function getLoginToken(app: INestApplication, user: User) {
+  const loginReq = await request(app.getHttpServer())
+    .post('/auth/login')
+    .send({ web3authToken: JSON.stringify(user) })
+    .expect(201);
+
+  return loginReq.body.token;
+}
+
+export const setupApp = async () => {
+  const mongoServer = await MongoMemoryServer.create();
+  config.databaseUrl = mongoServer.getUri();
+
+  const moduleFixture: TestingModule = await Test.createTestingModule({
+    imports: [AppModule],
+  }).compile();
+
+  const app = moduleFixture.createNestApplication();
+  await app.init();
+
+  return {
+    app,
+    mongoServer,
+  };
+};
+
+export const teardownApp = async (app, mongoServer) => {
+  await app.close();
+  await mongoServer.stop();
+};
+
+export class TestApp {
+  app: INestApplication;
+  mongoServer: MongoMemoryServer;
+
+  async setup() {
+    const pack = await setupApp();
+    this.app = pack.app;
+    this.mongoServer = pack.mongoServer;
+  }
+
+  async teardown() {
+    await teardownApp(this.app, this.mongoServer);
+  }
+
+  request(): TestAgent {
+    return request(this.app.getHttpServer());
+  }
+
+  async createUser(user: Partial<User>): Promise<User> {
+    return UserModel.create({
+      ...{
+        email: randomEmail(),
+        accountType: AccountType.Buyer,
+        walletAddress: randomEvmAddress(),
+      },
+      ...user,
+    });
+  }
+
+  async login(user: User) {
+    const loginReq = await this.request()
+      .post('/auth/login')
+      .send({ web3authToken: JSON.stringify(user) })
+      .expect(201);
+
+    return loginReq.body.token;
+  }
+
+  async createUserDeal(user: User) {
+    const token = await this.login(user);
+    // create deal
+    const dealReq = await this.request()
+      .post('/deals')
+      .set('Authorization', `Bearer ${token}`)
+      .send(
+        generateDealDto({
+          proposalSupplierEmail: randomEmail(),
+        }),
+      );
+
+    return dealReq.body as Deal;
+  }
+
+  async createUserConfirmedDeal(user: User) {
+    const token = await this.login(user);
+    const dealDto: Partial<Deal> = {};
+    let otherUser: User;
+
+    if (user.accountType === AccountType.Buyer) {
+      otherUser = await this.createUser({
+        accountType: AccountType.Supplier,
+      });
+      dealDto.proposalSupplierEmail = otherUser.email;
+    } else {
+      otherUser = await this.createUser({
+        accountType: AccountType.Supplier,
+      });
+      dealDto.proposalBuyerEmail = otherUser.email;
+    }
+
+    // create deal
+    const dealReq = await this.request()
+      .post('/deals')
+      .set('Authorization', `Bearer ${token}`)
+      .send(
+        generateDealDto({
+          ...dealDto,
+        }),
+      );
+
+    // confirm deal
+    const confirmDealReq = await this.request()
+      .put(`/deals/${dealReq.body.id}`)
+      .set('Authorization', `Bearer ${await this.login(otherUser)}`)
+      .send({ confirm: true });
+
+    return confirmDealReq.body as Deal;
+  }
+
+  async setupDeal(dealDto: Partial<Deal> = {}, buyer?: User, supplier?: User) {
+    // create buyer and supplier users
+    if (!buyer) {
+      buyer = await this.createUser({
+        email: randomEmail(),
+        accountType: AccountType.Buyer,
+      } as User);
+    }
+
+    if (!supplier) {
+      supplier = await this.createUser({
+        email: randomEmail(),
+        accountType: AccountType.Supplier,
+        walletAddress: randomEmail(),
+      } as User);
+    }
+
+    // authenticate buyer and supplier
+    const buyerToken = await this.login(buyer);
+    const supplierToken = await this.login(supplier);
+
+    // create deal
+    const dealReq = await this.request()
+      .post('/deals')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .send(
+        generateDealDto({
+          ...dealDto,
+          proposalSupplierEmail: supplier.email,
+        }),
+      );
+
+    // accept deal with supplier account
+    await this.request()
+      .put(`/deals/${dealReq.body.id}`)
+      .set('Authorization', `Bearer ${supplierToken}`)
+      .send({ confirm: true })
+      .expect(200);
+
+    return {
+      deal: dealReq.body as Deal,
+      buyerToken,
+      supplierToken,
+    };
+  }
+}

@@ -6,7 +6,7 @@ const pinoOptions: LoggerOptions = { level: config.logLevel };
 let pinoTransport: any;
 let pinoLogger: Logger;
 
-if (config.env === 'development') {
+if (config.env === 'development' || config.prettyLogs) {
   pinoTransport = pino.transport({
     targets: [
       {
@@ -27,7 +27,7 @@ if (config.env === 'development') {
 }
 
 // eslint-disable-next-line
-pinoLogger = pino(pinoOptions, pinoTransport)
+pinoLogger = pino(pinoOptions, pinoTransport);
 
 export const loggerOptions = pinoOptions;
 export const logger = pinoLogger;

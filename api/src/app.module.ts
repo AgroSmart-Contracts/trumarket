@@ -17,7 +17,7 @@ import { UsersModule } from './users/users.module';
   imports: [
     LoggerModule.forRoot({
       pinoHttp:
-        config.env === 'development'
+        config.env === 'development' || config.prettyLogs
           ? {
               serializers: {
                 req: ({ id, method, url, params, query }) => {

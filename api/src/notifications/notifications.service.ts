@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { Deal } from '@/deals/deals.entities';
+import { Deal, Milestone } from '@/deals/deals.entities';
 import { logger } from '@/logger';
 
 @Injectable()
@@ -49,7 +49,18 @@ export class NotificationsService {
   ): Promise<void> {
     await this._sendNotification(
       recipient,
-      `New document uploaded notification ${deal}`,
+      `New document uploaded notification ${deal} `,
+    );
+  }
+
+  async sendMilestoneApprovedNotification(
+    recipient: string,
+    deal: Deal,
+    milestone: Milestone,
+  ): Promise<void> {
+    await this._sendNotification(
+      recipient,
+      `Milestone approved notification ${deal} ${milestone}`,
     );
   }
 

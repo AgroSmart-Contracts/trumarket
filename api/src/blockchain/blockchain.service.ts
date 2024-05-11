@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { parseAbi, parseEventLogs, PublicClient } from 'viem';
+import { parseAbi, parseEventLogs, PublicClient, verifyMessage } from 'viem';
 
 import { InternalServerError } from '../errors';
 
@@ -26,5 +26,17 @@ export class BlockchainService {
     }
 
     return Number(logs[0].args.dealId);
+  }
+
+  async verifyMessage(
+    walletAddress: `0x${string}`,
+    message: string,
+    signature: `0x${string}`,
+  ): Promise<boolean> {
+    return verifyMessage({
+      address: walletAddress,
+      message: message,
+      signature: signature,
+    });
   }
 }

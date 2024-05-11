@@ -110,4 +110,16 @@ export class UpdateDealDto {
   @IsOptional()
   @Expose()
   cancel: boolean;
+
+  @ApiProperty({ required: false })
+  @IsNumber()
+  @IsOptional()
+  @Expose()
+  currentMilestone: number;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  signature: string;
 }
