@@ -126,7 +126,7 @@ export class DealsService {
   }
 
   async findById(dealId: string): Promise<Deal> {
-    const deal = this.dealsRepository.findById(dealId);
+    const deal = await this.dealsRepository.findById(dealId);
     if (!deal) {
       throw new BadRequestError('Deal not found');
     }
@@ -396,13 +396,21 @@ export class DealsService {
     const deal = await this.findById(dealId);
     if (deal.buyerId !== user.id) {
       throw new UnauthorizedError(
-        'You are not allowed to update the current milestone for this deal',
+        'User not authorized to update the current milestone for this deal',
       );
     }
 
     if (deal.nftID === undefined) {
+      throw new BadRequestError('Deal NFT must be minted first');
+    }
+
+    if (
+      currentMilestone < 0 ||
+      currentMilestone >= deal.milestones.length ||
+      deal.currentMilestone + 1 !== currentMilestone
+    ) {
       throw new BadRequestError(
-        'NFT ID is not assigned to the deal. Mint milestone NFT first.',
+        `Cannot update milestone. The next milestone to update is Milestone ${deal.currentMilestone + 1}`,
       );
     }
 
@@ -414,14 +422,6 @@ export class DealsService {
 
     if (!validSignature) {
       throw new ForbiddenError('Invalid signature');
-    }
-
-    if (
-      currentMilestone < 0 ||
-      currentMilestone >= deal.milestones.length ||
-      deal.currentMilestone + 1 !== currentMilestone
-    ) {
-      throw new BadRequestError('Invalid milestone');
     }
 
     // TODO: update in smart contract before updating in database
