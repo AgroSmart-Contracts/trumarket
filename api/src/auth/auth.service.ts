@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as jose from 'jose';
 
+import { logger } from '@/logger';
 import { UsersService } from '@/users/users.service';
 
 import { config } from '../config';
@@ -71,6 +72,7 @@ export class AuthService {
   }
 
   async generateJwtToken(user: User): Promise<string> {
+    logger.debug({ user }, 'Generating JWT token');
     const accessToken = await this.jwtService.signAsync(user);
     return accessToken;
   }
