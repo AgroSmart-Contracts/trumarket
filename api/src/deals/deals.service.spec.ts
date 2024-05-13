@@ -16,7 +16,6 @@ describe('DealsService', () => {
   let usersService: UsersService;
   let notificationsService: NotificationsService;
   let blockchainService: BlockchainService;
-  let usersRepository: UsersRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,7 +41,6 @@ describe('DealsService', () => {
     blockchainService = module.get<BlockchainService>(BlockchainService);
     notificationsService =
       module.get<NotificationsService>(NotificationsService);
-    usersRepository = module.get<UsersRepository>(UsersRepository);
   });
 
   describe('createDeal', () => {
