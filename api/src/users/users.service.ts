@@ -1,17 +1,23 @@
 import { Injectable } from '@nestjs/common';
 
 import { logger } from '../logger';
-import UserModel, { User } from './users.model';
+import { User } from './users.model';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
-  async findByEmail(email: string): Promise<User | undefined> {
-    return UserModel.findOne({ email }).exec();
+  constructor(private readonly users: UsersRepository) {}
+
+  async findByWalletAddress(walletAddress: string): Promise<User | undefined> {
+    return this.users.findByWalletAddress(walletAddress);
+  }
+
+  async findByEmail(walletAddress: string): Promise<User | undefined> {
+    return this.users.findByEmail(walletAddress);
   }
 
   async create(createUserDto: Partial<User>): Promise<User> {
     logger.debug({ createUserDto }, 'Creating new user');
-    const user = new UserModel(createUserDto);
-    return user.save();
+    return this.users.create(createUserDto);
   }
 }

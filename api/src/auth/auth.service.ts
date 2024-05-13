@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as jose from 'jose';
 
+import { UsersService } from '@/users/users.service';
+
 import { config } from '../config';
-import UserModel, { User } from '../users/users.model';
+import { User } from '../users/users.model';
 
 export interface Auth0Info {
   payload: {
@@ -41,7 +43,10 @@ export interface Web3AuthInfo {
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly users: UsersService,
+  ) {}
 
   async login(web3authToken: string): Promise<string> {
     if (process.env.E2E_TEST) {
@@ -53,9 +58,9 @@ export class AuthService {
       throw new Error('Invalid web3authToken');
     }
 
-    const user = await UserModel.findOne({
-      walletAddress: userWallet.address,
-    });
+    const user = await this.users.findByWalletAddress(
+      userWallet.address.toLowerCase(),
+    );
     if (!user) {
       throw new Error('User not found');
     }
