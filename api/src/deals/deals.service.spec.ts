@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BlockchainService } from '@/blockchain/blockchain.service';
 import { NotificationsService } from '@/notifications/notifications.service';
 import { AccountType, User } from '@/users/users.model';
+import { UsersRepository } from '@/users/users.repository';
 import { UsersService } from '@/users/users.service';
 
 import { Deal, DealStatus } from './deals.entities';
@@ -15,6 +16,7 @@ describe('DealsService', () => {
   let usersService: UsersService;
   let notificationsService: NotificationsService;
   let blockchainService: BlockchainService;
+  let usersRepository: UsersRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -30,6 +32,7 @@ describe('DealsService', () => {
             getTransactionReceipt: jest.fn(),
           },
         },
+        UsersRepository,
       ],
     }).compile();
 
@@ -39,6 +42,7 @@ describe('DealsService', () => {
     blockchainService = module.get<BlockchainService>(BlockchainService);
     notificationsService =
       module.get<NotificationsService>(NotificationsService);
+    usersRepository = module.get<UsersRepository>(UsersRepository);
   });
 
   describe('createDeal', () => {
