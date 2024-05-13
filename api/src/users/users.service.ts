@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { logger } from '../logger';
-import { User } from './users.model';
+import { User, WalletType } from './users.model';
 import { UsersRepository } from './users.repository';
 
 @Injectable()
@@ -18,6 +18,11 @@ export class UsersService {
 
   async create(createUserDto: Partial<User>): Promise<User> {
     logger.debug({ createUserDto }, 'Creating new user');
+
+    if (createUserDto.walletType === 'ethereum') {
+      createUserDto.walletType = WalletType.EVM;
+    }
+
     return this.users.create(createUserDto);
   }
 }
