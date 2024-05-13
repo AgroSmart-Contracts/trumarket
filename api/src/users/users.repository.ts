@@ -8,4 +8,12 @@ export class UsersRepository extends MongooseRepository<User> {
   constructor() {
     super(UserModel);
   }
+
+  findByWalletAddress(walletAddress: string): Promise<User | undefined> {
+    return this.findOne({ walletAddress });
+  }
+
+  findByEmail(email: string): Promise<User | undefined> {
+    return this.findOne({ email });
+  }
 }
