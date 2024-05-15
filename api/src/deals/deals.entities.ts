@@ -10,10 +10,8 @@ export interface Wallet {
 
 export interface Milestone {
   id?: string;
-  name: string;
   description: string;
-  location: string;
-  date: Date;
+  fundsDistribution: number;
   docs?: DocumentFile[];
 }
 
@@ -36,6 +34,10 @@ export interface Deal {
   presentation: string;
   size: string;
   variety: string;
+  quality: string;
+  offerUnitPrice: number;
+  quantity: number;
+  totalValue: number;
   shippingStartDate: Date;
   expectedShippingEndDate: Date;
   docs: DocumentFile[];

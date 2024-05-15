@@ -1,5 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
+import { ConflictError } from '@/errors';
+
 const documentSchema = new Schema({
   description: {
     type: String,
@@ -32,21 +34,24 @@ walletSchema.set('toJSON', {
 
 // Define the Milestone schema
 const milestoneSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
   description: {
     type: String,
     required: true,
   },
+  fundsDistribution: {
+    type: Number,
+    required: true,
+    default: 0,
+    min: 0,
+    max: 100,
+  },
   location: {
     type: String,
-    required: true,
+    required: false,
   },
   date: {
     type: Date,
-    required: true,
+    required: false,
   },
   docs: {
     type: [documentSchema],
@@ -67,7 +72,7 @@ const dealSchema = new Schema({
   },
   description: {
     type: String,
-    required: true,
+    required: false,
   },
   // Shipping Properties
   contractId: {
@@ -101,6 +106,18 @@ const dealSchema = new Schema({
   variety: {
     type: String,
     required: false,
+  },
+  quality: {
+    type: String,
+    required: false,
+  },
+  offerUnitPrice: {
+    type: Number,
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    required: true,
   },
   shippingStartDate: {
     type: Date,
@@ -183,6 +200,20 @@ const dealSchema = new Schema({
   },
 });
 
+dealSchema.pre('save', function (next) {
+  const totalFundsDistribution = this.milestones.reduce(
+    (sum, milestone) => sum + milestone.fundsDistribution,
+    0,
+  );
+  if (totalFundsDistribution !== 100) {
+    throw new ConflictError(
+      'Sum of all milestones fundsDistribution must be 100',
+    );
+  }
+
+  next();
+});
+
 dealSchema.set('toJSON', {
   transform: function (doc: any, ret) {
     ret.id = doc._id.toString();
@@ -203,6 +234,7 @@ dealSchema.set('toJSON', {
 
     ret.duration = duration + ' week' + (duration === 1 ? '' : 's');
     ret.daysLeft = totalDaysLeft;
+    ret.totalValue = doc.offerUnitPrice * doc.quantity;
   },
 });
 

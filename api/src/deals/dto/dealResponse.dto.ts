@@ -6,16 +6,10 @@ import { DocumentFile } from './../deals.entities';
 
 export class MilestoneDTO {
   @Expose()
-  name: string;
-
-  @Expose()
   description: string;
 
   @Expose()
-  location: string;
-
-  @Expose()
-  date: Date;
+  fundsDistribution: number;
 }
 
 export class DealDtoResponse {
@@ -119,4 +113,20 @@ export class DealDtoResponse {
   @ApiProperty()
   @Expose()
   daysLeft: number;
+
+  @ApiProperty()
+  @Expose()
+  quality: string;
+
+  @ApiProperty()
+  @Expose()
+  offerUnitPrice: number;
+
+  @ApiProperty()
+  @Expose()
+  quantity: number;
+
+  @ApiProperty()
+  @Expose()
+  totalValue: number;
 }
