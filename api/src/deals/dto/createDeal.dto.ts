@@ -16,22 +16,12 @@ export class MilestoneDTO {
   @ApiProperty()
   @IsString()
   @Expose()
-  name: string;
-
-  @ApiProperty()
-  @IsString()
-  @Expose()
   description: string;
 
   @ApiProperty()
   @IsString()
   @Expose()
-  location: string;
-
-  @ApiProperty()
-  @IsDate()
-  @Expose()
-  date: Date;
+  fundsDistribution: number;
 }
 
 export class CreateDealDto {
@@ -40,10 +30,11 @@ export class CreateDealDto {
   @Expose()
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsString()
+  @IsOptional()
   @Expose()
-  description: string;
+  description?: string;
 
   @ApiProperty()
   @IsNumber()
@@ -64,19 +55,19 @@ export class CreateDealDto {
   @IsString()
   @IsOptional()
   @Expose()
-  presentation: string;
+  presentation?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  variety: string;
+  variety?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  size: string;
+  size?: string;
 
   @ApiProperty()
   @IsDate()
@@ -125,10 +116,11 @@ export class CreateDealDto {
   @Expose()
   roi: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsString()
+  @IsOptional()
   @Expose()
-  carbonFootprint: string;
+  carbonFootprint?: string;
 
   @ApiProperty({ required: false })
   @IsEmail()
@@ -141,4 +133,20 @@ export class CreateDealDto {
   @IsOptional()
   @Expose()
   proposalBuyerEmail?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  quality?: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Expose()
+  offerUnitPrice: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Expose()
+  quantity: number;
 }
