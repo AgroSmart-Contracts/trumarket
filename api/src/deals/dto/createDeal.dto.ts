@@ -19,7 +19,7 @@ export class MilestoneDTO {
   description: string;
 
   @ApiProperty()
-  @IsString()
+  @IsNumber()
   @Expose()
   fundsDistribution: number;
 }
