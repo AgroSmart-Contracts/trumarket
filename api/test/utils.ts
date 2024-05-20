@@ -7,6 +7,7 @@ import TestAgent from 'supertest/lib/agent';
 import { AppModule } from '@/app.module';
 import { config } from '@/config';
 import { Deal } from '@/deals/deals.entities';
+import DealModel from '@/deals/deals.model';
 import { CreateDealDto } from '@/deals/dto/createDeal.dto';
 import UserModel, { AccountType, User } from '@/users/users.model';
 
@@ -24,54 +25,52 @@ export const randomEvmAddress = () =>
   '0x' + Math.random().toString(16).slice(2, 42);
 
 export const generateDealDto = (dealDto: Partial<Deal> = {}): CreateDealDto => {
-  return Object.assign(
-    {
-      name: 'test',
-      description: 'test',
-      contractId: 1,
-      roi: 1,
-      netBalance: 1,
-      revenue: 1,
-      investmentAmount: 1,
-      shippingStartDate: new Date(),
-      expectedShippingEndDate: new Date(),
-      destination: 'US',
-      origin: 'CN',
-      quantity: 1,
-      offerUnitPrice: 1,
-      milestones: [
-        {
-          description: 'Description of Milestone 1',
-          fundsDistribution: 20,
-        },
-        {
-          description: 'Description of Milestone 2',
-          fundsDistribution: 50,
-        },
-        {
-          description: 'Description of Milestone 3',
-          fundsDistribution: 0,
-        },
-        {
-          description: 'Description of Milestone 4',
-          fundsDistribution: 0,
-        },
-        {
-          description: 'Description of Milestone 5',
-          fundsDistribution: 0,
-        },
-        {
-          description: 'Description of Milestone 6',
-          fundsDistribution: 0,
-        },
-        {
-          description: 'Description of Milestone 7',
-          fundsDistribution: 30,
-        },
-      ],
-    } as CreateDealDto,
-    dealDto,
-  );
+  return {
+    name: 'test',
+    description: 'test',
+    contractId: 1,
+    roi: 1,
+    netBalance: 1,
+    revenue: 1,
+    investmentAmount: 1,
+    shippingStartDate: new Date(),
+    expectedShippingEndDate: new Date(),
+    destination: 'US',
+    origin: 'CN',
+    quantity: 1,
+    offerUnitPrice: 1,
+    milestones: [
+      {
+        description: 'Description of Milestone 1',
+        fundsDistribution: 20,
+      },
+      {
+        description: 'Description of Milestone 2',
+        fundsDistribution: 50,
+      },
+      {
+        description: 'Description of Milestone 3',
+        fundsDistribution: 0,
+      },
+      {
+        description: 'Description of Milestone 4',
+        fundsDistribution: 0,
+      },
+      {
+        description: 'Description of Milestone 5',
+        fundsDistribution: 0,
+      },
+      {
+        description: 'Description of Milestone 6',
+        fundsDistribution: 0,
+      },
+      {
+        description: 'Description of Milestone 7',
+        fundsDistribution: 30,
+      },
+    ],
+    ...dealDto,
+  } as CreateDealDto;
 };
 
 export async function getLoginToken(app: INestApplication, user: User) {
@@ -228,19 +227,27 @@ export class TestApp {
     const supplierToken = await this.login(supplier);
 
     // create deal
-    const dealReq = await this.request()
+    const createDealDto = generateDealDto({
+      ...dealDto,
+      proposalSupplierEmail: supplier.email,
+    });
+
+    const createDealReq = await this.request()
       .post('/deals')
       .set('Authorization', `Bearer ${buyerToken}`)
-      .send(
-        generateDealDto({
-          ...dealDto,
-          proposalSupplierEmail: supplier.email,
-        }),
+      .send(createDealDto)
+      .expect(201);
+
+    if (dealDto.nftID) {
+      await DealModel.updateOne(
+        { _id: createDealReq.body.id },
+        { nftID: dealDto.nftID },
       );
+    }
 
     // accept deal with supplier account
-    await this.request()
-      .put(`/deals/${dealReq.body.id}`)
+    const dealReq = await this.request()
+      .put(`/deals/${createDealReq.body.id}`)
       .set('Authorization', `Bearer ${supplierToken}`)
       .send({ confirm: true })
       .expect(200);

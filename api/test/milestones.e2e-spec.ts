@@ -34,26 +34,35 @@ describe('Milestone flows (e2e)', () => {
     // supplier uploads document to current milestone
     const milestone = deal.milestones[deal.currentMilestone];
 
-    await app
+    const successUploadReq = await app
       .request()
       .post(`/deals/${deal.id}/milestones/${milestone.id}/docs`)
       .set('Authorization', `Bearer ${supplierToken}`)
-      .attach('file', 'test/fixtures/test.pdf')
-      .expect(201);
+      .field('description', 'Test document')
+      .attach('file', 'test/fixtures/test.pdf');
+
+    expect(successUploadReq.body).toHaveProperty('id');
+    expect(successUploadReq.status).toBe(201);
 
     // buyer not allowed to upload documents
-    await app
+    const forbiddenUploadReq = await app
       .request()
       .post(`/deals/${deal.id}/milestones/${milestone.id}/docs`)
       .set('Authorization', `Bearer ${buyerToken}`)
+      .field('description', 'Test document')
       .attach('file', 'test/fixtures/test.pdf')
       .expect(401);
+
+    expect(forbiddenUploadReq.body.message).toEqual(
+      'You are not allowed to upload documents for this deal',
+    );
 
     // supplier forbidden to upload documents to milestones other than the current one
     await app
       .request()
       .post(`/deals/${deal.id}/milestones/${deal.milestones[3].id}/docs`)
       .set('Authorization', `Bearer ${supplierToken}`)
+      .field('description', 'Test document')
       .attach('file', 'test/fixtures/test.pdf')
       .expect(403);
 
