@@ -79,6 +79,10 @@ const dealSchema = new Schema({
     type: Number,
     required: true,
   },
+  contractAddress: {
+    type: String,
+    required: false,
+  },
   nftID: {
     type: Number,
     required: false,
@@ -92,6 +96,18 @@ const dealSchema = new Schema({
     required: true,
   },
   destination: {
+    type: String,
+    required: true,
+  },
+  portOfOrigin: {
+    type: String,
+    required: true,
+  },
+  portOfDestination: {
+    type: String,
+    required: true,
+  },
+  transport: {
     type: String,
     required: true,
   },
@@ -126,6 +142,10 @@ const dealSchema = new Schema({
   expectedShippingEndDate: {
     type: Date,
     required: true,
+  },
+  coverImageUrl: {
+    type: String,
+    required: false,
   },
   docs: {
     type: [documentSchema],

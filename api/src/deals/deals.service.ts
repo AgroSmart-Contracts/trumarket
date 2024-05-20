@@ -274,6 +274,26 @@ export class DealsService {
     });
   }
 
+  async uploadDealCoverImage(
+    dealId: string,
+    file: { path: string; originalname: string },
+    user: User,
+  ): Promise<Deal> {
+    const deal = await this.findById(dealId);
+
+    if (deal.supplierId !== user.id && deal.buyerId !== user.id) {
+      throw new UnauthorizedError(
+        'You are not allowed to upload the cover image for this deal',
+      );
+    }
+
+    const uploadedUrl = await this.uploadFile(file, dealId);
+
+    return this.dealsRepository.updateById(dealId, {
+      coverImageUrl: uploadedUrl,
+    });
+  }
+
   async removeDocumentFromDeal(
     dealId: string,
     documentId: string,

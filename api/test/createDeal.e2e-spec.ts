@@ -53,7 +53,10 @@ describe('Create Deal (e2e)', () => {
         expectedShippingEndDate: new Date('2023-09-01T00:00:00.000Z'),
         shippingStartDate: new Date('2023-09-01T00:00:00.000Z'),
         destination: `Porto Alegre, Brazil`,
+        portOfDestination: 'Porto Alegre',
         origin: `Lima, Peru`,
+        portOfOrigin: 'Lima',
+        transport: 'ship',
         contractId: 1,
         milestones: [],
       } as CreateDealDto)
@@ -81,6 +84,9 @@ describe('Create Deal (e2e)', () => {
         shippingStartDate: new Date('2023-09-01T00:00:00.000Z'),
         destination: `Porto Alegre, Brazil`,
         origin: `Lima, Peru`,
+        portOfDestination: 'Porto Alegre',
+        portOfOrigin: 'Lima',
+        transport: 'ship',
         contractId: 1,
         milestones: [
           {
@@ -150,6 +156,9 @@ describe('Create Deal (e2e)', () => {
         shippingStartDate: new Date('2023-09-01T00:00:00.000Z'),
         destination: `Porto Alegre, Brazil`,
         origin: `Lima, Peru`,
+        portOfDestination: 'Porto Alegre',
+        portOfOrigin: 'Lima',
+        transport: 'ship',
         contractId: 1,
         milestones: [
           {

@@ -5,7 +5,7 @@ import { IsEnum, IsOptional } from 'class-validator';
 import { DealStatus } from '../deals.entities';
 
 export class ListDealsDto {
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, enum: DealStatus })
   @IsEnum(DealStatus)
   @IsOptional()
   @Expose()

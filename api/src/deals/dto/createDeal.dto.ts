@@ -12,17 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-export class MilestoneDTO {
-  @ApiProperty()
-  @IsString()
-  @Expose()
-  description: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @Expose()
-  fundsDistribution: number;
-}
+import { MilestoneDTO } from './milestone.dto';
 
 export class CreateDealDto {
   @ApiProperty()
@@ -50,6 +40,21 @@ export class CreateDealDto {
   @IsString()
   @Expose()
   destination: string;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  portOfOrigin: string;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  portOfDestination: string;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  transport: string;
 
   @ApiProperty({ required: false })
   @IsString()
