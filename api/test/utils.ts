@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as request from 'supertest';
@@ -92,6 +92,18 @@ export const setupApp = async () => {
   }).compile();
 
   const app = moduleFixture.createNestApplication();
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+        exposeUnsetFields: false,
+        excludeExtraneousValues: true,
+      },
+    }),
+  );
+
   await app.init();
 
   return {

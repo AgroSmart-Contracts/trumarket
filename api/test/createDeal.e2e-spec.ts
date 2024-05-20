@@ -57,11 +57,11 @@ describe('Create Deal (e2e)', () => {
         contractId: 1,
         milestones: [],
       } as CreateDealDto)
-      .expect(409);
+      .expect(400);
 
-    expect(invalidNumberOfMilestonesReq.body.message).toEqual(
-      'Deal validation failed: milestones: Milestones array must have exactly 7 elements',
-    );
+    expect(invalidNumberOfMilestonesReq.body.message).toEqual([
+      'Milestones array must have at least 7 elements',
+    ]);
 
     const invalidMilestonesFundsDistributionReq = await app
       .request()
