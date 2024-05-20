@@ -80,7 +80,7 @@ export class DealsRepository extends MongooseRepository<Deal> {
 
     const doc = milestone.docs.pop();
 
-    return doc;
+    return doc.toJSON();
   }
 
   async pullMilestoneDocument(
