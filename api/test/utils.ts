@@ -36,7 +36,10 @@ export const generateDealDto = (dealDto: Partial<Deal> = {}): CreateDealDto => {
     shippingStartDate: new Date(),
     expectedShippingEndDate: new Date(),
     destination: 'US',
+    portOfDestination: 'US',
     origin: 'CN',
+    portOfOrigin: 'CN',
+    transport: 'ship',
     quantity: 1,
     offerUnitPrice: 1,
     milestones: [
@@ -157,14 +160,14 @@ export class TestApp {
   async createUserDeal(user: User) {
     const token = await this.login(user);
     // create deal
+    const deal = generateDealDto({
+      proposalSupplierEmail: randomEmail(),
+    });
     const dealReq = await this.request()
       .post('/deals')
       .set('Authorization', `Bearer ${token}`)
-      .send(
-        generateDealDto({
-          proposalSupplierEmail: randomEmail(),
-        }),
-      );
+      .send(deal)
+      .expect(201);
 
     return dealReq.body as Deal;
   }
@@ -187,20 +190,21 @@ export class TestApp {
     }
 
     // create deal
+    const deal = generateDealDto({
+      ...dealDto,
+    });
     const dealReq = await this.request()
       .post('/deals')
       .set('Authorization', `Bearer ${token}`)
-      .send(
-        generateDealDto({
-          ...dealDto,
-        }),
-      );
+      .send(deal)
+      .expect(201);
 
     // confirm deal
     const confirmDealReq = await this.request()
       .put(`/deals/${dealReq.body.id}`)
       .set('Authorization', `Bearer ${await this.login(otherUser)}`)
-      .send({ confirm: true });
+      .send({ confirm: true })
+      .expect(200);
 
     return confirmDealReq.body as Deal;
   }
@@ -246,14 +250,14 @@ export class TestApp {
     }
 
     // accept deal with supplier account
-    const dealReq = await this.request()
+    const confirmDealReq = await this.request()
       .put(`/deals/${createDealReq.body.id}`)
       .set('Authorization', `Bearer ${supplierToken}`)
       .send({ confirm: true })
       .expect(200);
 
     return {
-      deal: dealReq.body as Deal,
+      deal: confirmDealReq.body as Deal,
       buyerToken,
       supplierToken,
     };

@@ -27,10 +27,14 @@ export interface Deal {
   name: string;
   description: string;
   contractId: number;
+  contractAddress: string;
   nftID: number;
   mintTxHash: string;
   origin: string;
   destination: string;
+  portOfOrigin: string;
+  portOfDestination: string;
+  transport: string;
   presentation: string;
   size: string;
   variety: string;
@@ -40,6 +44,7 @@ export interface Deal {
   totalValue: number;
   shippingStartDate: Date;
   expectedShippingEndDate: Date;
+  coverImageUrl: string;
   docs: DocumentFile[];
   currentMilestone: number;
   milestones: Milestone[];

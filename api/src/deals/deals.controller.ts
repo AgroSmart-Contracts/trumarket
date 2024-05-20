@@ -174,6 +174,29 @@ export class DealsController {
     this.dealsService.deleteDeal(id);
   }
 
+  @Put(':dealId/cover-image')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Upload deal cover image' })
+  @ApiResponse({
+    status: 200,
+    type: DealDtoResponse,
+    description: 'The deal cover image was successfully uploaded',
+  })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(fileInterceptor)
+  async uploadDealCoverImage(
+    @Param('dealId') id: string,
+    @UploadedFile(filePipeValidator) file: Express.Multer.File,
+    @Request() req,
+  ): Promise<DealDtoResponse> {
+    const user: User = req.user;
+
+    console.log('uploading deal cover image');
+    const deal = await this.dealsService.uploadDealCoverImage(id, file, user);
+
+    return new DealDtoResponse(deal);
+  }
+
   @Post(':dealId/docs')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
@@ -270,13 +293,13 @@ export class DealsController {
 
   @Post(':dealId/milestones/:milestoneId/docs')
   @UseGuards(AuthGuard)
-  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
   @ApiResponse({
     status: 200,
     type: UploadDocumentResponseDTO,
     description: 'The deal milestone document was successfully uploaded',
   })
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(fileInterceptor)
   async uploadMilestoneDocument(
     @Param('dealId') id: string,

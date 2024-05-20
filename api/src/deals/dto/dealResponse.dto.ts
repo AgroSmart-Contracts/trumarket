@@ -34,12 +34,14 @@ export class DealDtoResponse {
   status: string;
 
   @ApiProperty()
-  @IsNumber()
   @Expose()
   contractId: number;
 
   @ApiProperty()
-  @IsNumber()
+  @Expose()
+  contractAddress: string;
+
+  @ApiProperty()
   @Expose()
   nftID: number;
 
@@ -53,6 +55,18 @@ export class DealDtoResponse {
 
   @ApiProperty()
   @Expose()
+  portOfOrigin: string;
+
+  @ApiProperty()
+  @Expose()
+  portOfDestination: string;
+
+  @ApiProperty()
+  @Expose()
+  transport: string;
+
+  @ApiProperty()
+  @Expose()
   presentation: string;
 
   @ApiProperty()
@@ -62,6 +76,10 @@ export class DealDtoResponse {
   @ApiProperty()
   @Expose()
   size: string;
+
+  @ApiProperty()
+  @Expose()
+  coverImageUrl: string;
 
   @ApiProperty()
   @Expose()
@@ -129,4 +147,20 @@ export class DealDtoResponse {
   @ApiProperty()
   @Expose()
   totalValue: number;
+
+  @ApiProperty()
+  @Expose()
+  proposalBuyerEmail: string;
+
+  @ApiProperty()
+  @Expose()
+  proposalSupplierEmail: string;
+
+  @ApiProperty()
+  @Expose()
+  buyerConfirmed: boolean;
+
+  @ApiProperty()
+  @Expose()
+  supplierConfirmed: boolean;
 }
