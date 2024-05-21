@@ -19,133 +19,117 @@ export class UpdateDealDto {
   @IsString()
   @IsOptional()
   @Expose()
-  name: string;
+  name?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  description: string;
+  description?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  carbonFootprint?: string;
+
+  // shipping properties
 
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
   @Expose()
-  contractId: number;
+  contractId?: number;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  contractAddress: string;
+  contractAddress?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  origin: string;
+  origin?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  destination: string;
+  destination?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  portOfOrigin: string;
+  portOfOrigin?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  portOfDestination: string;
+  portOfDestination?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  transport: string;
+  transport?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  presentation: string;
+  presentation?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  quality: string;
+  size?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  variety: string;
+  variety?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  size: string;
-
-  @ApiProperty({ required: false })
-  @IsDate()
-  @IsOptional()
-  @Expose()
-  shippingStartDate: Date;
-
-  @ApiProperty({ required: false })
-  @IsDate()
-  @IsOptional()
-  @Expose()
-  expectedShippingEndDate: Date;
-
-  @ApiProperty({ required: false })
-  @IsNumber()
-  @IsOptional()
-  @Expose()
-  investmentAmount: number;
-
-  @ApiProperty({ required: false })
-  @IsNumber()
-  @IsOptional()
-  @Expose()
-  offerUnitPrice: number;
-
-  @ApiProperty({ required: false })
-  @IsNumber()
-  @IsOptional()
-  @Expose()
-  revenue: number;
-
-  @ApiProperty({ required: false })
-  @IsNumber()
-  @IsOptional()
-  @Expose()
-  netBalance: number;
-
-  @ApiProperty({ required: false })
-  @IsNumber()
-  @IsOptional()
-  @Expose()
-  roi: number;
-
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  @Expose()
-  carbonFootprint: string;
+  quality?: string;
 
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
   @Expose()
   quantity?: number;
+
+  @ApiProperty({ required: false })
+  @IsNumber()
+  @IsOptional()
+  @Expose()
+  offerUnitPrice?: number;
+
+  // totalValue is calculated as offerUnitPrice * quantity
+
+  @ApiProperty({ required: false })
+  @IsDate()
+  @IsOptional()
+  @Expose()
+  shippingStartDate?: Date;
+
+  @ApiProperty({ required: false })
+  @IsDate()
+  @IsOptional()
+  @Expose()
+  expectedShippingEndDate?: Date;
+
+  // duration and daysLeft are calculated based on shippingStartDate and expectedShippingEndDate
+
+  // state properties
 
   @ApiProperty({
     type: [MilestoneDTO],
@@ -166,27 +150,67 @@ export class UpdateDealDto {
   @Expose()
   milestones?: MilestoneDTO[];
 
-  @ApiProperty({ required: false })
-  @IsBoolean()
+  @ApiProperty({
+    required: false,
+    description:
+      'Current milestone only can be updated by the buyer and should be incremented sequentally. The first milestone is 0. The last milestone is 6.',
+  })
+  @IsNumber()
   @IsOptional()
   @Expose()
-  confirm: boolean;
+  currentMilestone?: number;
 
-  @ApiProperty({ required: false })
-  @IsBoolean()
-  @IsOptional()
-  @Expose()
-  cancel: boolean;
+  // financial properties
 
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
   @Expose()
-  currentMilestone: number;
+  investmentAmount?: number;
 
   @ApiProperty({ required: false })
+  @IsNumber()
+  @IsOptional()
+  @Expose()
+  revenue?: number;
+
+  @ApiProperty({ required: false })
+  @IsNumber()
+  @IsOptional()
+  @Expose()
+  netBalance?: number;
+
+  @ApiProperty({ required: false })
+  @IsNumber()
+  @IsOptional()
+  @Expose()
+  roi?: number;
+
+  // actions
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Confirm the deal on buyer or supplier party. Having both parties confirming the deal settle the deal. If buyer or supplier updates the deal the other party needs to confirm the deal again.',
+  })
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  confirm?: boolean;
+
+  @ApiProperty({ required: false, description: 'Rejects deal conditions.' })
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  cancel?: boolean;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Some deal updates like changing the currentMilestone requires the buyer or supplier wallet signature',
+  })
   @IsString()
   @IsOptional()
   @Expose()
-  signature: string;
+  signature?: string;
 }
