@@ -22,7 +22,6 @@ import {
 import { BlockchainService } from '../blockchain/blockchain.service';
 import { AdminAccessRestricted } from '../decorators/adminRestricted';
 // import { WhitelistAccessRestricted } from '../decorators/whitelistRestricted';
-import { NotFoundError } from '../errors';
 import fileInterceptor from '../file.interceptor';
 import { AuthGuard } from '../guards/auth.guard';
 import { filePipeValidator } from '../multer.options';
@@ -98,29 +97,9 @@ export class DealsController {
     @Request() req,
   ): Promise<DealDtoResponse> {
     const user: User = req.user;
-    const deal = await this.dealsService.findById(id);
-    if (!deal) {
-      throw new NotFoundError();
-    }
-
-    await this.dealsService.checkDealAccess(deal, user);
+    const deal = await this.dealsService.findUserDealById(id, user);
 
     const dealDto = new DealDtoResponse(deal);
-
-    dealDto.milestones = dealDto.milestones.map((m, index) => {
-      let status = 'Completed';
-
-      if (dealDto.currentMilestone < index) {
-        status = 'Not Completed';
-      } else if (dealDto.currentMilestone === index) {
-        status = 'In Progress';
-      }
-
-      return {
-        ...m,
-        status,
-      };
-    });
 
     return dealDto;
   }
@@ -140,8 +119,15 @@ export class DealsController {
   ): Promise<DealDtoResponse> {
     const user: User = req.user;
 
-    const { confirm, cancel, currentMilestone, signature, ...restDealDto } =
-      dealDto;
+    const {
+      confirm,
+      cancel,
+      currentMilestone,
+      signature,
+      view,
+      viewDocuments,
+      ...restDealDto
+    } = dealDto;
 
     let deal: Deal;
 
@@ -156,6 +142,10 @@ export class DealsController {
         signature,
         user,
       );
+    } else if (view) {
+      deal = await this.dealsService.setDealAsViewed(id, user);
+    } else if (viewDocuments) {
+      deal = await this.dealsService.setDocumentsAsViewed(id, user);
     } else {
       deal = await this.dealsService.updateDeal(id, restDealDto, user);
     }

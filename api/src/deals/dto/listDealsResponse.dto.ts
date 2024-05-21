@@ -118,4 +118,25 @@ export class ListDealDtoResponse {
   @ApiProperty()
   @Expose()
   proposalSupplierEmail: string;
+
+  @ApiProperty()
+  @Expose()
+  buyerId: string;
+
+  @ApiProperty()
+  @Expose()
+  supplierId: string;
+
+  // ui helper properties
+  @ApiProperty()
+  @Expose()
+  newForBuyer: boolean;
+
+  @ApiProperty()
+  @Expose()
+  new: boolean;
+
+  @ApiProperty()
+  @Expose()
+  newDocuments: boolean;
 }

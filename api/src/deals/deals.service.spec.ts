@@ -84,6 +84,7 @@ describe('DealsService', () => {
       );
       expect(dealsRepository.create).toHaveBeenCalledWith({
         buyerConfirmed: true,
+        newForSupplier: true,
         buyerId: 'user1',
         description: 'This is a new deal',
         investmentAmount: 100,
@@ -145,6 +146,7 @@ describe('DealsService', () => {
         description: 'This is a new deal',
         investmentAmount: 100,
         name: 'New Deal',
+        newForBuyer: true,
         proposalBuyerEmail: 'buyer@example.com',
         proposalSupplierEmail: 'supplier@example.com',
         status: DealStatus.Proposal,
@@ -202,6 +204,7 @@ describe('DealsService', () => {
       );
       expect(dealsRepository.create).toHaveBeenCalledWith({
         buyerConfirmed: true,
+        newForSupplier: true,
         buyerId: 'user1',
         supplierId: 'user2',
         description: 'This is a new deal',
@@ -271,6 +274,7 @@ describe('DealsService', () => {
         name: 'New Deal',
         proposalBuyerEmail: 'buyer@example.com',
         proposalSupplierEmail: 'supplier@example.com',
+        newForBuyer: true,
         status: DealStatus.Proposal,
       });
       expect(
