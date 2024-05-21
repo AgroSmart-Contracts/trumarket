@@ -490,9 +490,10 @@ export class DealsService {
       );
     }
 
-    if (deal.nftID === undefined) {
-      throw new BadRequestError('Deal NFT must be minted first');
-    }
+    // TODO: uncomment this after implementing NFT minting
+    // if (deal.nftID === undefined) {
+    //   throw new BadRequestError('Deal NFT must be minted first');
+    // }
 
     if (
       currentMilestone < 0 ||
