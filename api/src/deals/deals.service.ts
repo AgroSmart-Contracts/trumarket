@@ -72,6 +72,7 @@ export class DealsService {
       dealPayload.buyerId = user.id;
       dealPayload.buyerConfirmed = true;
       dealPayload.proposalBuyerEmail = user.email;
+      dealPayload.newForSupplier = true;
 
       if (!dealPayload.proposalSupplierEmail) {
         throw new BadRequestError('proposalSupplierEmail is required');
@@ -94,6 +95,7 @@ export class DealsService {
       dealPayload.supplierId = user.id;
       dealPayload.supplierConfirmed = true;
       dealPayload.proposalSupplierEmail = user.email;
+      dealPayload.newForBuyer = true;
 
       if (!dealPayload.proposalBuyerEmail) {
         throw new BadRequestError('proposalBuyerEmail is required');
@@ -130,6 +132,42 @@ export class DealsService {
     if (!deal) {
       throw new BadRequestError('Deal not found');
     }
+
+    return deal;
+  }
+
+  async findUserDealById(dealId: string, user: User): Promise<Deal> {
+    const deal = await this.dealsRepository.findById(dealId);
+    if (!deal) {
+      throw new BadRequestError('Deal not found');
+    }
+
+    await this.checkDealAccess(deal, user);
+
+    if (user.accountType === AccountType.Buyer && deal.newForBuyer) {
+      deal.new = true;
+    } else if (
+      user.accountType === AccountType.Supplier &&
+      deal.newForSupplier
+    ) {
+      deal.new = true;
+    }
+
+    deal.milestones = deal.milestones.map((m, index) => {
+      let status = 'Completed';
+
+      if (deal.currentMilestone < index) {
+        status = 'Not Completed';
+      } else if (deal.currentMilestone === index) {
+        status = 'In Progress';
+      }
+
+      return {
+        ...m,
+        status,
+      };
+    });
+
     return deal;
   }
 
@@ -204,6 +242,38 @@ export class DealsService {
     );
 
     return this.dealsRepository.updateById(dealId, dealUpdate);
+  }
+
+  async setDealAsViewed(dealId: string, user: User): Promise<Deal> {
+    const deal = await this.findById(dealId);
+
+    await this.checkAuthorizedToUpdateDeal(deal, user);
+
+    const update: Partial<Deal> = {};
+
+    if (user.accountType === AccountType.Buyer) {
+      update.newForBuyer = false;
+    } else if (user.accountType === AccountType.Supplier) {
+      update.newForSupplier = false;
+    }
+
+    const dealUpdated = await this.dealsRepository.updateById(dealId, update);
+
+    dealUpdated.new = false;
+
+    return dealUpdated;
+  }
+
+  async setDocumentsAsViewed(dealId: string, user: User): Promise<Deal> {
+    const deal = await this.findById(dealId);
+
+    await this.checkAuthorizedToUpdateDeal(deal, user);
+
+    const dealUpdated = await this.dealsRepository.updateById(dealId, {
+      newDocuments: false,
+    });
+
+    return dealUpdated;
   }
 
   async updateDeal(

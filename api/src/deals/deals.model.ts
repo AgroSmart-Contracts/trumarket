@@ -228,6 +228,20 @@ const dealSchema = new Schema({
     type: String,
     required: false,
   },
+
+  // ui helper properties
+  newForBuyer: {
+    type: Boolean,
+    default: false,
+  },
+  newForSupplier: {
+    type: Boolean,
+    default: false,
+  },
+  newDocuments: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 dealSchema.pre('save', function (next) {

@@ -250,7 +250,7 @@ describe('Create Deal (e2e)', () => {
           fundsDistribution: 30,
         },
       ],
-      buyerId: buyer.id,
+      proposalBuyerEmail: buyer.email,
       status: DealStatus.Proposal,
     } as Deal);
   });

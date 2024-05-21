@@ -1,5 +1,3 @@
-import exp from 'constants';
-
 import { AccountType } from '@/users/users.model';
 
 import { TestApp } from './utils';
@@ -88,6 +86,7 @@ describe('List deals (e2e)', () => {
       status: 'confirmed',
       supplierConfirmed: true,
       totalValue: 1,
+      transport: 'ship',
     });
   });
 

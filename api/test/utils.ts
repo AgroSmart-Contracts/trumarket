@@ -226,16 +226,14 @@ export class TestApp {
     // create buyer and supplier users
     if (!buyer) {
       buyer = await this.createUser({
-        email: randomEmail(),
         accountType: AccountType.Buyer,
       } as User);
     }
 
     if (!supplier) {
       supplier = await this.createUser({
-        email: randomEmail(),
         accountType: AccountType.Supplier,
-        walletAddress: randomEmail(),
+        walletAddress: randomEvmAddress(),
       } as User);
     }
 
@@ -246,14 +244,17 @@ export class TestApp {
     // create deal
     const createDealDto = generateDealDto({
       ...dealDto,
+      proposalBuyerEmail: buyer.email,
       proposalSupplierEmail: supplier.email,
     });
 
     const createDealReq = await this.request()
       .post('/deals')
       .set('Authorization', `Bearer ${buyerToken}`)
-      .send(createDealDto)
-      .expect(201);
+      .send(createDealDto);
+
+    expect(createDealReq.body).toHaveProperty('id');
+    expect(createDealReq.status).toBe(201);
 
     if (dealDto.nftID) {
       await DealModel.updateOne(

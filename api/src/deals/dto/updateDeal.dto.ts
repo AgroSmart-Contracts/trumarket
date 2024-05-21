@@ -206,6 +206,24 @@ export class UpdateDealDto {
 
   @ApiProperty({
     required: false,
+    description: 'Change deal status as viewed',
+  })
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  view?: boolean;
+
+  @ApiProperty({
+    required: false,
+    description: 'Change deal documents as viewed',
+  })
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  viewDocuments?: boolean;
+
+  @ApiProperty({
+    required: false,
     description:
       'Some deal updates like changing the currentMilestone requires the buyer or supplier wallet signature',
   })

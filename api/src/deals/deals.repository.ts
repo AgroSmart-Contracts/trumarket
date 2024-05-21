@@ -20,9 +20,19 @@ export class DealsRepository extends MongooseRepository<Deal> {
   }
 
   async findByUser(userId: string, query: FindByUserQuery): Promise<Deal[]> {
-    return this.find({
-      $or: [{ buyerId: userId }, { supplierId: userId }],
-      ...query,
+    return (
+      await this.find({
+        $or: [{ buyerId: userId }, { supplierId: userId }],
+        ...query,
+      })
+    ).map((deal) => {
+      if (deal.buyerId === userId && deal.newForBuyer) {
+        deal.new = true;
+      } else if (deal.supplierId === userId && deal.newForSupplier) {
+        deal.new = true;
+      }
+
+      return deal;
     });
   }
 
@@ -65,6 +75,7 @@ export class DealsRepository extends MongooseRepository<Deal> {
     const deal = await DealModel.findOneAndUpdate(
       { _id: dealId, 'milestones._id': milestoneId },
       {
+        $set: { newDocuments: true },
         $push: { 'milestones.$.docs': document },
       },
       { new: true },

@@ -73,6 +73,12 @@ export class Deal {
   supplierId: string;
   proposalBuyerEmail: string;
   proposalSupplierEmail: string;
+
+  // ui helper properties
+  newForBuyer: boolean;
+  newForSupplier: boolean;
+  newDocuments: boolean;
+  new: boolean;
 }
 
 export interface DealLog {
