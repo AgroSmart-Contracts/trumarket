@@ -1,8 +1,10 @@
+import exp from 'constants';
+
 import { AccountType } from '@/users/users.model';
 
 import { TestApp } from './utils';
 
-describe('Misc Routes (e2e)', () => {
+describe('List deals (e2e)', () => {
   let app: TestApp;
 
   beforeEach(async () => {
@@ -14,7 +16,82 @@ describe('Misc Routes (e2e)', () => {
     await app.teardown();
   });
 
-  it('list user deals', async () => {
+  it('list deals details', async () => {
+    const { buyerToken } = await app.setupDeal();
+
+    const dealsReq = await app
+      .request()
+      .get('/deals')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(200);
+
+    expect(dealsReq.body).toHaveLength(1);
+    expect(dealsReq.body[0].id).toBeDefined();
+    expect(dealsReq.body[0].shippingStartDate).toBeDefined();
+    expect(dealsReq.body[0].proposalBuyerEmail).toBeDefined();
+    expect(dealsReq.body[0].proposalSupplierEmail).toBeDefined();
+    expect(dealsReq.body[0].expectedShippingEndDate).toBeDefined();
+
+    expect(dealsReq.body[0]).toMatchObject({
+      buyerConfirmed: true,
+      contractId: 1,
+      currentMilestone: 0,
+      daysLeft: -1,
+      description: 'test',
+      destination: 'US',
+      duration: '0 weeks',
+      investmentAmount: 1,
+      milestones: [
+        {
+          description: 'Description of Milestone 1',
+          docs: [],
+          fundsDistribution: 20,
+        },
+        {
+          description: 'Description of Milestone 2',
+          docs: [],
+          fundsDistribution: 50,
+        },
+        {
+          description: 'Description of Milestone 3',
+          docs: [],
+          fundsDistribution: 0,
+        },
+        {
+          description: 'Description of Milestone 4',
+          docs: [],
+          fundsDistribution: 0,
+        },
+        {
+          description: 'Description of Milestone 5',
+          docs: [],
+          fundsDistribution: 0,
+        },
+        {
+          description: 'Description of Milestone 6',
+          docs: [],
+          fundsDistribution: 0,
+        },
+        {
+          description: 'Description of Milestone 7',
+          docs: [],
+          fundsDistribution: 30,
+        },
+      ],
+      name: 'test',
+      netBalance: 1,
+      origin: 'CN',
+      portOfDestination: 'US',
+      portOfOrigin: 'CN',
+      revenue: 1,
+      roi: 1,
+      status: 'confirmed',
+      supplierConfirmed: true,
+      totalValue: 1,
+    });
+  });
+
+  it('list user deals by status', async () => {
     const buyer = await app.createUser({
       accountType: AccountType.Buyer,
     });
