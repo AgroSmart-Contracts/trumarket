@@ -26,10 +26,24 @@ export class CreateDealDto {
   @Expose()
   description?: string;
 
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  carbonFootprint?: string;
+
+  // shipping properties
+
   @ApiProperty()
   @IsNumber()
   @Expose()
   contractId: number;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  contractAddress?: string;
 
   @ApiProperty()
   @IsString()
@@ -66,13 +80,29 @@ export class CreateDealDto {
   @IsString()
   @IsOptional()
   @Expose()
+  size?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
   variety?: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   @Expose()
-  size?: string;
+  quality?: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Expose()
+  offerUnitPrice: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Expose()
+  quantity: number;
 
   @ApiProperty()
   @IsDate()
@@ -83,6 +113,8 @@ export class CreateDealDto {
   @IsDate()
   @Expose()
   expectedShippingEndDate: Date;
+
+  // state properties
 
   @ApiProperty({
     type: [MilestoneDTO],
@@ -100,6 +132,8 @@ export class CreateDealDto {
   @Type(() => MilestoneDTO)
   @Expose()
   milestones: MilestoneDTO[];
+
+  // financial properties
 
   @ApiProperty()
   @IsNumber()
@@ -121,11 +155,7 @@ export class CreateDealDto {
   @Expose()
   roi: number;
 
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  @Expose()
-  carbonFootprint?: string;
+  // ownership properties
 
   @ApiProperty({ required: false })
   @IsEmail()
@@ -138,20 +168,4 @@ export class CreateDealDto {
   @IsOptional()
   @Expose()
   proposalBuyerEmail?: string;
-
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  @Expose()
-  quality?: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @Expose()
-  offerUnitPrice: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @Expose()
-  quantity: number;
 }

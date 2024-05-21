@@ -74,20 +74,33 @@ const dealSchema = new Schema({
     type: String,
     required: false,
   },
-  // Shipping Properties
-  contractId: {
-    type: Number,
-    required: true,
-  },
-  contractAddress: {
+  coverImageUrl: {
     type: String,
     required: false,
   },
+  docs: {
+    type: [documentSchema],
+  },
+  carbonFootprint: {
+    type: String,
+  },
+
+  // smart contract properties
   nftID: {
     type: Number,
     required: false,
   },
   mintTxHash: {
+    type: String,
+    required: false,
+  },
+
+  // shipping properties
+  contractId: {
+    type: Number,
+    required: true,
+  },
+  contractAddress: {
     type: String,
     required: false,
   },
@@ -135,6 +148,7 @@ const dealSchema = new Schema({
     type: Number,
     required: true,
   },
+  // totalValue is generated dynamically
   shippingStartDate: {
     type: Date,
     required: true,
@@ -143,13 +157,9 @@ const dealSchema = new Schema({
     type: Date,
     required: true,
   },
-  coverImageUrl: {
-    type: String,
-    required: false,
-  },
-  docs: {
-    type: [documentSchema],
-  },
+  // duration and daysLeft are generated dynamically
+
+  // state properties
   currentMilestone: {
     type: Number,
     required: true,
@@ -165,7 +175,21 @@ const dealSchema = new Schema({
     ],
     required: true,
   },
-  // Financial Properties
+  status: {
+    type: String,
+    enum: ['proposal', 'confirmed', 'finished'],
+    default: 'proposal',
+  },
+  buyerConfirmed: {
+    type: Boolean,
+    default: false,
+  },
+  supplierConfirmed: {
+    type: Boolean,
+    default: false,
+  },
+
+  // financial properties
   investmentAmount: {
     type: Number,
     required: true,
@@ -182,18 +206,12 @@ const dealSchema = new Schema({
     type: Number,
     required: true,
   },
-  carbonFootprint: {
-    type: String,
-  },
-  whitelist: {
-    type: [walletSchema],
-    default: [],
-  },
-  status: {
-    type: String,
-    enum: ['proposal', 'confirmed', 'finished'],
-    default: 'proposal',
-  },
+
+  // ownership properties
+  // whitelist: {
+  //   type: [walletSchema],
+  //   default: [],
+  // },
   buyerId: {
     type: String,
     required: false,
@@ -209,14 +227,6 @@ const dealSchema = new Schema({
   proposalSupplierEmail: {
     type: String,
     required: false,
-  },
-  buyerConfirmed: {
-    type: Boolean,
-    default: false,
-  },
-  supplierConfirmed: {
-    type: Boolean,
-    default: false,
   },
 });
 

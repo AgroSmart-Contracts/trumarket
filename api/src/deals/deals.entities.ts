@@ -26,10 +26,17 @@ export interface Deal {
   id: string;
   name: string;
   description: string;
-  contractId: number;
-  contractAddress: string;
+  coverImageUrl: string;
+  docs: DocumentFile[];
+  carbonFootprint: string;
+
+  // smart contract properties
   nftID: number;
   mintTxHash: string;
+
+  // shipping properties
+  contractId: number;
+  contractAddress: string;
   origin: string;
   destination: string;
   portOfOrigin: string;
@@ -44,25 +51,28 @@ export interface Deal {
   totalValue: number;
   shippingStartDate: Date;
   expectedShippingEndDate: Date;
-  coverImageUrl: string;
-  docs: DocumentFile[];
+  duration: string;
+  daysLeft: number;
+
+  // state properties
   currentMilestone: number;
   milestones: Milestone[];
+  status: DealStatus;
+  buyerConfirmed: boolean;
+  supplierConfirmed: boolean;
+
+  // financial properties
   investmentAmount: number;
   revenue: number;
   netBalance: number;
   roi: number;
-  carbonFootprint: string;
-  whitelist: Wallet[];
-  status: DealStatus;
+
+  // ownership properties
+  // whitelist: Wallet[];
   buyerId: string;
   supplierId: string;
   proposalBuyerEmail: string;
   proposalSupplierEmail: string;
-  buyerConfirmed: boolean;
-  supplierConfirmed: boolean;
-  duration: string;
-  daysLeft: number;
 }
 
 export interface DealLog {
