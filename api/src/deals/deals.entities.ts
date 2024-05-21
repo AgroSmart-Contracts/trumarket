@@ -8,7 +8,7 @@ export interface Wallet {
   address: string;
 }
 
-export interface Milestone {
+export class Milestone {
   id?: string;
   description: string;
   fundsDistribution: number;
@@ -22,7 +22,7 @@ export enum DealStatus {
   Cancelled = 'cancelled',
 }
 
-export interface Deal {
+export class Deal {
   id: string;
   name: string;
   description: string;

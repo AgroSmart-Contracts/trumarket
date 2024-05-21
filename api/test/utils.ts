@@ -1,4 +1,9 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as request from 'supertest';
@@ -103,6 +108,14 @@ export const setupApp = async () => {
         exposeUnsetFields: false,
         excludeExtraneousValues: true,
       },
+    }),
+  );
+
+  const reflector = app.get(Reflector);
+
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(reflector, {
+      excludeExtraneousValues: true,
     }),
   );
 
