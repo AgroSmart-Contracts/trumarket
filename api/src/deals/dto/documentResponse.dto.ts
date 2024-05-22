@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class UploadDocumentResponseDTO {
-  constructor(res: UploadDocumentResponseDTO) {
+export class documentResponseDTO {
+  constructor(res: documentResponseDTO) {
     Object.assign(this, res);
   }
 

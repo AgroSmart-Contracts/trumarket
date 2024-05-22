@@ -32,14 +32,15 @@ import { AssignNFTDto } from './dto/assignNFTID.dto';
 import { CreateDealDto } from './dto/createDeal.dto';
 import { DealLogsDtoResponse } from './dto/dealLogsResponse.dto';
 import { DealDtoResponse } from './dto/dealResponse.dto';
+import { documentResponseDTO } from './dto/documentResponse.dto';
 import { ListDealsDto } from './dto/listDeals.dto';
 import { ListDealDtoResponse } from './dto/listDealsResponse.dto';
 import { MilestoneDto } from './dto/milestone.dto';
 import { MilestoneResponseDto } from './dto/milestoneResponse.dto';
 import { UpdateDealDto } from './dto/updateDeal.dto';
+import { UpdateDocumentDto } from './dto/updateDocument.dto';
 import { UpdateMilestoneDto } from './dto/updateMilestone.dto';
 import { UploadDocumentDTO } from './dto/uploadDocument.dto';
-import { UploadDocumentResponseDTO } from './dto/uploadDocumentResponse.dto';
 
 @ApiTags('deals')
 @Controller('deals')
@@ -180,7 +181,7 @@ export class DealsController {
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
   @ApiResponse({
     status: 200,
-    type: UploadDocumentResponseDTO,
+    type: documentResponseDTO,
     description: 'The deal document was successfully uploaded',
   })
   @ApiConsumes('multipart/form-data')
@@ -190,7 +191,7 @@ export class DealsController {
     @Body() payload: UploadDocumentDTO,
     @UploadedFile(filePipeValidator) file: Express.Multer.File,
     @Request() req,
-  ): Promise<UploadDocumentResponseDTO> {
+  ): Promise<documentResponseDTO> {
     const user: User = req.user;
 
     const doc = await this.dealsService.uploadDealDocument(
@@ -200,7 +201,7 @@ export class DealsController {
       user,
     );
 
-    return new UploadDocumentResponseDTO(doc);
+    return new documentResponseDTO(doc);
   }
 
   @Delete(':dealId/docs/:docId')
@@ -315,7 +316,7 @@ export class DealsController {
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
   @ApiResponse({
     status: 200,
-    type: UploadDocumentResponseDTO,
+    type: documentResponseDTO,
     description: 'The deal milestone document was successfully uploaded',
   })
   @ApiConsumes('multipart/form-data')
@@ -326,7 +327,7 @@ export class DealsController {
     @Body() payload: UploadDocumentDTO,
     @UploadedFile(filePipeValidator) file: Express.Multer.File,
     @Request() req,
-  ): Promise<UploadDocumentResponseDTO> {
+  ): Promise<documentResponseDTO> {
     const user: User = req.user;
 
     const doc = await this.dealsService.uploadDocumentToMilestone(
@@ -337,7 +338,36 @@ export class DealsController {
       user,
     );
 
-    return new UploadDocumentResponseDTO(doc);
+    return new documentResponseDTO(doc);
+  }
+
+  @Put(':dealId/milestones/:milestoneId/docs/:docId')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Update document description' })
+  @ApiResponse({
+    status: 200,
+    type: documentResponseDTO,
+    description:
+      'The deal milestone document description was successfully updated',
+  })
+  async updateMilestoneDocument(
+    @Param('dealId') id: string,
+    @Param('milestoneId') milestoneId: string,
+    @Param('docId') docId: string,
+    @Body() payload: UpdateDocumentDto,
+    @Request() req,
+  ): Promise<documentResponseDTO> {
+    const user: User = req.user;
+
+    const doc = await this.dealsService.updateMilestoneDocument(
+      id,
+      milestoneId,
+      docId,
+      payload.description,
+      user,
+    );
+
+    return new documentResponseDTO(doc);
   }
 
   @Delete(':dealId/milestones/:milestoneId/docs/:docId')
