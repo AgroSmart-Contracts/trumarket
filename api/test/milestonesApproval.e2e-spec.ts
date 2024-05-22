@@ -114,4 +114,45 @@ describe('Milestone approval flows (e2e)', () => {
       currentMilestone: 1,
     });
   });
+
+  it('should approve all milestones', async () => {
+    // setup deal
+    const { deal, buyerToken, supplierToken } = await app.setupDeal(
+      {},
+      null,
+      null,
+    );
+
+    expect(deal.currentMilestone).toEqual(0);
+
+    // supplier uploads document to current milestone
+
+    for (let i = 0; i < deal.milestones.length; i++) {
+      const milestone = deal.milestones[i];
+
+      await app
+        .request()
+        .put(`/deals/${deal.id}/milestones/${milestone.id}`)
+        .set('Authorization', `Bearer ${supplierToken}`)
+        .send({ submitToReview: true })
+        .expect(200);
+
+      await app
+        .request()
+        .put(`/deals/${deal.id}/milestones/${milestone.id}`)
+        .set('Authorization', `Bearer ${buyerToken}`)
+        .send({ approve: true })
+        .expect(200);
+    }
+
+    const dealReq = await app
+      .request()
+      .get(`/deals/${deal.id}`)
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(200);
+
+    expect(dealReq.body).toMatchObject({
+      currentMilestone: 7,
+    });
+  });
 });
