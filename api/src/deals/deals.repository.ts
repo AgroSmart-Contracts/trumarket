@@ -132,6 +132,32 @@ export class DealsRepository extends MongooseRepository<Deal> {
     return milestone.toJSON();
   }
 
+  async updateMilestoneDocument(
+    dealId: string,
+    milestoneId: string,
+    docId: string,
+    description: string,
+  ): Promise<DocumentFile> {
+    const deal = await DealModel.findOneAndUpdate(
+      {
+        _id: dealId,
+        'milestones.docs._id': docId,
+      },
+      {
+        $set: { 'milestones.$.docs.$[doc].description': description },
+      },
+      { new: true, arrayFilters: [{ 'doc._id': docId }] },
+    );
+
+    const dealJson = deal.toJSON();
+
+    const milestone = dealJson.milestones.find((m) => m.id === milestoneId);
+
+    const doc = milestone.docs.find((d) => d.id === docId);
+
+    return doc;
+  }
+
   async pullMilestoneDocument(
     dealId: string,
     milestoneId: string,

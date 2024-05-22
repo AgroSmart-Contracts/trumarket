@@ -91,4 +91,54 @@ describe('Milestone flows (e2e)', () => {
     expect(dealUpdatedReq.body.milestones[0].docs).toHaveLength(1);
     expect(dealUpdatedReq.body.currentMilestone).toBe(1);
   });
+
+  it('should update milestone document description after upload', async () => {
+    const buyer = await app.createUser({});
+
+    // setup deal
+    const { deal, supplierToken } = await app.setupDeal(
+      { nftID: 3 },
+      buyer,
+      null,
+    );
+
+    // supplier uploads document to current milestone
+    const milestone = deal.milestones[deal.currentMilestone];
+
+    const successUploadReq = await app
+      .request()
+      .post(`/deals/${deal.id}/milestones/${milestone.id}/docs`)
+      .set('Authorization', `Bearer ${supplierToken}`)
+      .field('description', 'Test document')
+      .attach('file', 'test/fixtures/test.pdf');
+
+    expect(successUploadReq.body).toHaveProperty('id');
+    expect(successUploadReq.status).toBe(201);
+
+    const dealReq = await app
+      .request()
+      .get(`/deals/${deal.id}`)
+      .set('Authorization', `Bearer ${supplierToken}`);
+
+    expect(dealReq.body.milestones[0].docs).toHaveLength(1);
+
+    const document = dealReq.body.milestones[0].docs[0];
+
+    const updateDocReq = await app
+      .request()
+      .put(`/deals/${deal.id}/milestones/${milestone.id}/docs/${document.id}`)
+      .set('Authorization', `Bearer ${supplierToken}`)
+      .send({ description: 'Updated description' });
+
+    expect(updateDocReq.body.description).toEqual('Updated description');
+
+    const dealUpdatedReq = await app
+      .request()
+      .get(`/deals/${deal.id}`)
+      .set('Authorization', `Bearer ${supplierToken}`);
+
+    expect(dealUpdatedReq.body.milestones[0].docs[0].description).toEqual(
+      'Updated description',
+    );
+  });
 });

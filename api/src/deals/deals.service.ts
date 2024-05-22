@@ -415,6 +415,43 @@ export class DealsService {
     return document;
   }
 
+  async updateMilestoneDocument(
+    dealId: string,
+    milestoneId: string,
+    docId: string,
+    description: string,
+    user: User,
+  ): Promise<DocumentFile> {
+    const deal = await this.findById(dealId);
+    if (deal.supplierId !== user.id) {
+      throw new UnauthorizedError(
+        'You are not allowed to update documents in this deal',
+      );
+    }
+
+    if (deal.milestones[deal.currentMilestone].id !== milestoneId) {
+      throw new ForbiddenError(
+        'You are not allowed to update documents in this milestone',
+      );
+    }
+
+    const milestone = deal.milestones.find((m) => m.id === milestoneId);
+    if (!milestone) {
+      throw new BadRequestError('Milestone not found');
+    }
+
+    const document = await this.dealsRepository.updateMilestoneDocument(
+      dealId,
+      milestoneId,
+      docId,
+      description,
+    );
+
+    console.log(document);
+
+    return document;
+  }
+
   async removeDocumentFromMilestone(
     dealId: string,
     milestoneId: string,
