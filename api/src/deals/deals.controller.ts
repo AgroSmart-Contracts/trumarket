@@ -34,7 +34,10 @@ import { DealLogsDtoResponse } from './dto/dealLogsResponse.dto';
 import { DealDtoResponse } from './dto/dealResponse.dto';
 import { ListDealsDto } from './dto/listDeals.dto';
 import { ListDealDtoResponse } from './dto/listDealsResponse.dto';
+import { MilestoneDto } from './dto/milestone.dto';
+import { MilestoneResponseDto } from './dto/milestoneResponse.dto';
 import { UpdateDealDto } from './dto/updateDeal.dto';
+import { UpdateMilestoneDto } from './dto/updateMilestone.dto';
 import { UploadDocumentDTO } from './dto/uploadDocument.dto';
 import { UploadDocumentResponseDTO } from './dto/uploadDocumentResponse.dto';
 
@@ -119,15 +122,7 @@ export class DealsController {
   ): Promise<DealDtoResponse> {
     const user: User = req.user;
 
-    const {
-      confirm,
-      cancel,
-      currentMilestone,
-      signature,
-      view,
-      viewDocuments,
-      ...restDealDto
-    } = dealDto;
+    const { confirm, cancel, view, viewDocuments, ...restDealDto } = dealDto;
 
     let deal: Deal;
 
@@ -135,13 +130,6 @@ export class DealsController {
       deal = await this.dealsService.confirmDeal(id, user);
     } else if (cancel) {
       deal = await this.dealsService.cancelDeal(id, user);
-    } else if (currentMilestone) {
-      deal = await this.dealsService.updateCurrentMilestone(
-        id,
-        currentMilestone,
-        signature,
-        user,
-      );
     } else if (view) {
       deal = await this.dealsService.setDealAsViewed(id, user);
     } else if (viewDocuments) {
@@ -280,6 +268,47 @@ export class DealsController {
   //     $pull: { whitelist: { _id: walletId } },
   //   });
   // }
+
+  @Put(':dealId/milestones/:milestoneId')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Update milestone status' })
+  @ApiResponse({
+    status: 200,
+    type: MilestoneDto,
+    description: 'The deal milestone document was successfully uploaded',
+  })
+  async updateMilestone(
+    @Param('dealId') id: string,
+    @Param('milestoneId') milestoneId: string,
+    @Body() payload: UpdateMilestoneDto,
+    @Request() req,
+  ): Promise<MilestoneDto> {
+    const user: User = req.user;
+
+    const { submitToReview, approve, deny } = payload;
+
+    let milestone: MilestoneResponseDto;
+
+    if (submitToReview) {
+      milestone = await this.dealsService.submitMilestoneReviewRequest(
+        id,
+        milestoneId,
+        user,
+      );
+    } else if (approve) {
+      milestone = await this.dealsService.approveMilestone(
+        id,
+        milestoneId,
+        user,
+      );
+    } else if (deny) {
+      milestone = await this.dealsService.denyMilestone(id, milestoneId, user);
+    } else {
+      throw new Error('Invalid payload');
+    }
+
+    return new MilestoneResponseDto(milestone);
+  }
 
   @Post(':dealId/milestones/:milestoneId/docs')
   @UseGuards(AuthGuard)

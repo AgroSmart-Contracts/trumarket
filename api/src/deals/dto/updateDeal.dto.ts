@@ -12,7 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { MilestoneDTO } from './milestone.dto';
+import { MilestoneDto } from './milestone.dto';
 
 export class UpdateDealDto {
   @ApiProperty({ required: false })
@@ -132,7 +132,7 @@ export class UpdateDealDto {
   // state properties
 
   @ApiProperty({
-    type: [MilestoneDTO],
+    type: [MilestoneDto],
     description: 'Array of 7 milestone objects',
     example: [{ description: '...', location: '...', date: 'YYYY-MM-DD' }],
     maxLength: 7,
@@ -146,19 +146,9 @@ export class UpdateDealDto {
   @ArrayMaxSize(7, { message: 'Milestones array must have at most 7 elements' })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => MilestoneDTO)
+  @Type(() => MilestoneDto)
   @Expose()
-  milestones?: MilestoneDTO[];
-
-  @ApiProperty({
-    required: false,
-    description:
-      'Current milestone only can be updated by the buyer and should be incremented sequentally. The first milestone is 0. The last milestone is 6.',
-  })
-  @IsNumber()
-  @IsOptional()
-  @Expose()
-  currentMilestone?: number;
+  milestones?: MilestoneDto[];
 
   // financial properties
 
@@ -221,14 +211,4 @@ export class UpdateDealDto {
   @IsOptional()
   @Expose()
   viewDocuments?: boolean;
-
-  @ApiProperty({
-    required: false,
-    description:
-      'Some deal updates like changing the currentMilestone requires the buyer or supplier wallet signature',
-  })
-  @IsString()
-  @IsOptional()
-  @Expose()
-  signature?: string;
 }
