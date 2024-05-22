@@ -2,6 +2,8 @@ import mongoose, { Schema } from 'mongoose';
 
 import { ConflictError } from '@/errors';
 
+import { MilestoneStatus } from './deals.entities';
+
 const documentSchema = new Schema({
   description: {
     type: String,
@@ -279,6 +281,21 @@ dealSchema.set('toJSON', {
     ret.duration = duration + ' week' + (duration === 1 ? '' : 's');
     ret.daysLeft = totalDaysLeft;
     ret.totalValue = doc.offerUnitPrice * doc.quantity;
+
+    ret.milestones = ret.milestones.map((m, index) => {
+      let status = MilestoneStatus.Completed;
+
+      if (ret.currentMilestone < index) {
+        status = MilestoneStatus.NotCompleted;
+      } else if (ret.currentMilestone === index) {
+        status = MilestoneStatus.InProgress;
+      }
+
+      return {
+        ...m,
+        status,
+      };
+    });
   },
 });
 

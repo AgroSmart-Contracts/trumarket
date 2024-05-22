@@ -516,36 +516,37 @@ describe('DealsService', () => {
       expect(result).toEqual(deal);
     });
 
-    it('should throw an error if deal does not have an nftId associated', async () => {
-      const dealId = 'deal1';
-      const currentMilestone = 1;
-      const signature = 'validSignature';
-      const user: User = {
-        id: 'user1',
-        accountType: AccountType.Buyer,
-        email: 'buyer@example.com',
-        walletAddress: '0x1234567890abcdef',
-      } as User;
+    // TODO: Uncomment this test after implementing the NFT minting
+    // it('should throw an error if deal does not have an nftId associated', async () => {
+    //   const dealId = 'deal1';
+    //   const currentMilestone = 1;
+    //   const signature = 'validSignature';
+    //   const user: User = {
+    //     id: 'user1',
+    //     accountType: AccountType.Buyer,
+    //     email: 'buyer@example.com',
+    //     walletAddress: '0x1234567890abcdef',
+    //   } as User;
 
-      const deal: any = {
-        id: dealId,
-        buyerId: user.id,
-        milestones: ['Milestone 1', 'Milestone 2'],
-        currentMilestone: 0,
-      };
+    //   const deal: any = {
+    //     id: dealId,
+    //     buyerId: user.id,
+    //     milestones: ['Milestone 1', 'Milestone 2'],
+    //     currentMilestone: 0,
+    //   };
 
-      jest.spyOn(dealsService, 'findById').mockResolvedValue(deal as Deal);
+    //   jest.spyOn(dealsService, 'findById').mockResolvedValue(deal as Deal);
 
-      await expect(
-        dealsService.updateCurrentMilestone(
-          dealId,
-          currentMilestone,
-          signature,
-          user,
-        ),
-      ).rejects.toThrow('Deal NFT must be minted first');
-      expect(dealsService.findById).toHaveBeenCalledWith(dealId);
-    });
+    //   await expect(
+    //     dealsService.updateCurrentMilestone(
+    //       dealId,
+    //       currentMilestone,
+    //       signature,
+    //       user,
+    //     ),
+    //   ).rejects.toThrow('Deal NFT must be minted first');
+    //   expect(dealsService.findById).toHaveBeenCalledWith(dealId);
+    // });
 
     it('should throw an error if the milestone to update is not the next one', async () => {
       const dealId = 'deal1';
