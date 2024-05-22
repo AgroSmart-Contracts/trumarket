@@ -1,3 +1,6 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
+
 export interface DocumentFile {
   id: string;
   description: string;
@@ -9,10 +12,25 @@ export interface Wallet {
 }
 
 export class Milestone {
+  @ApiProperty()
+  @Expose()
   id?: string;
+
+  @ApiProperty()
+  @Expose()
   description: string;
+
+  @ApiProperty()
+  @Expose()
   fundsDistribution: number;
+
+  @ApiProperty()
+  @Expose()
   docs?: DocumentFile[];
+
+  @ApiProperty()
+  @Expose()
+  status?: string;
 }
 
 export enum DealStatus {
@@ -20,6 +38,12 @@ export enum DealStatus {
   Confirmed = 'confirmed',
   Finished = 'finished',
   Cancelled = 'cancelled',
+}
+
+export enum MilestoneStatus {
+  InProgress = 'in progress',
+  NotCompleted = 'not completed',
+  Completed = 'completed',
 }
 
 export class Deal {

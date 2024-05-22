@@ -153,21 +153,6 @@ export class DealsService {
       deal.new = true;
     }
 
-    deal.milestones = deal.milestones.map((m, index) => {
-      let status = 'Completed';
-
-      if (deal.currentMilestone < index) {
-        status = 'Not Completed';
-      } else if (deal.currentMilestone === index) {
-        status = 'In Progress';
-      }
-
-      return {
-        ...m,
-        status,
-      };
-    });
-
     return deal;
   }
 
