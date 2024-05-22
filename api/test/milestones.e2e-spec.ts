@@ -67,23 +67,28 @@ describe('Milestone flows (e2e)', () => {
       .expect(403);
 
     // buyer gives approval for the milestone
-
-    // Sign a message
-    const message = `Approve milestone 1 of deal ${deal.nftID}`;
-    const signature = await wallet.signMessage({
-      message,
-    });
-
-    const updatedDealReq = await app
+    await app
       .request()
-      .put(`/deals/${deal.id}`)
-      .set('Authorization', `Bearer ${buyerToken}`)
-      .send({ currentMilestone: deal.currentMilestone + 1, signature })
+      .put(`/deals/${deal.id}/milestones/${milestone.id}`)
+      .set('Authorization', `Bearer ${supplierToken}`)
+      .send({ submitToReview: true })
       .expect(200);
 
-    const dealUpdated = updatedDealReq.body;
+    await app
+      .request()
+      .put(`/deals/${deal.id}/milestones/${milestone.id}`)
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .send({ approve: true })
+      .expect(200);
 
-    expect(dealUpdated.milestones[0].docs).toHaveLength(1);
-    expect(dealUpdated.currentMilestone).toBe(1);
+    const dealUpdatedReq = await app
+      .request()
+      .get(`/deals/${deal.id}`)
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .send({ approve: true })
+      .expect(200);
+
+    expect(dealUpdatedReq.body.milestones[0].docs).toHaveLength(1);
+    expect(dealUpdatedReq.body.currentMilestone).toBe(1);
   });
 });

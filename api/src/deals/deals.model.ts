@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 import { ConflictError } from '@/errors';
 
-import { MilestoneStatus } from './deals.entities';
+import { MilestoneApprovalStatus, MilestoneStatus } from './deals.entities';
 
 const documentSchema = new Schema({
   description: {
@@ -57,6 +57,11 @@ const milestoneSchema = new Schema({
   },
   docs: {
     type: [documentSchema],
+  },
+  approvalStatus: {
+    type: String,
+    enum: ['pending', 'submitted', 'approved', 'denied'],
+    default: MilestoneApprovalStatus.Pending,
   },
 });
 

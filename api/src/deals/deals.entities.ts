@@ -30,7 +30,11 @@ export class Milestone {
 
   @ApiProperty()
   @Expose()
-  status?: string;
+  status?: MilestoneStatus;
+
+  @ApiProperty()
+  @Expose()
+  approvalStatus?: MilestoneApprovalStatus;
 }
 
 export enum DealStatus {
@@ -44,6 +48,13 @@ export enum MilestoneStatus {
   InProgress = 'in progress',
   NotCompleted = 'not completed',
   Completed = 'completed',
+}
+
+export enum MilestoneApprovalStatus {
+  Pending = 'pending',
+  Submitted = 'submitted',
+  Approved = 'approved',
+  Denied = 'denied',
 }
 
 export class Deal {

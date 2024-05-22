@@ -14,7 +14,14 @@ import { NotificationsService } from '@/notifications/notifications.service';
 import { AccountType, User } from '@/users/users.model';
 import { UsersService } from '@/users/users.service';
 
-import { Deal, DealLog, DealStatus, DocumentFile } from './deals.entities';
+import {
+  Deal,
+  DealLog,
+  DealStatus,
+  DocumentFile,
+  Milestone,
+  MilestoneApprovalStatus,
+} from './deals.entities';
 import { DealsRepository } from './deals.repository';
 
 export interface ListDealsQuery {
@@ -511,5 +518,108 @@ export class DealsService {
     return this.dealsRepository.updateById(dealId, {
       currentMilestone: deal.currentMilestone + 1,
     });
+  }
+
+  async submitMilestoneReviewRequest(
+    dealId: string,
+    milestoneId: string,
+    user: User,
+  ): Promise<Milestone> {
+    const deal = await this.findById(dealId);
+
+    if (user.id !== deal.supplierId) {
+      throw new UnauthorizedError(
+        'Only supplier can submit milestone review request',
+      );
+    }
+
+    const milestoneIndex = deal.milestones.findIndex(
+      (m) => m.id === milestoneId,
+    );
+    if (milestoneIndex === -1) {
+      throw new Error('Milestone not found');
+    } else if (milestoneIndex !== deal.currentMilestone) {
+      throw new BadRequestError('Milestone is not the current milestone');
+    } else if (
+      ![
+        MilestoneApprovalStatus.Pending,
+        MilestoneApprovalStatus.Denied,
+      ].includes(deal.milestones[milestoneIndex].approvalStatus)
+    ) {
+      throw new BadRequestError('Milestone is not pending or denied');
+    }
+
+    return this.dealsRepository.upadteMilestoneStatus(
+      dealId,
+      milestoneId,
+      MilestoneApprovalStatus.Submitted,
+    );
+  }
+
+  async approveMilestone(
+    dealId: string,
+    milestoneId: string,
+    user: User,
+  ): Promise<Milestone> {
+    const deal = await this.findById(dealId);
+
+    if (user.id !== deal.buyerId) {
+      throw new UnauthorizedError('Only buyer can approve milestone');
+    }
+
+    const milestoneIndex = deal.milestones.findIndex(
+      (m) => m.id === milestoneId,
+    );
+    if (milestoneIndex === -1) {
+      throw new Error('Milestone not found');
+    } else if (milestoneIndex !== deal.currentMilestone) {
+      throw new BadRequestError('Milestone is not the current milestone');
+    } else if (
+      deal.milestones[milestoneIndex].approvalStatus !==
+      MilestoneApprovalStatus.Submitted
+    ) {
+      throw new BadRequestError('Milestone review was not submitted');
+    }
+
+    // TODO: call smart contract to approve milestone
+    // check updateCurrentMilestone method for reference
+
+    return this.dealsRepository.upadteMilestoneStatus(
+      dealId,
+      milestoneId,
+      MilestoneApprovalStatus.Approved,
+    );
+  }
+
+  async denyMilestone(
+    dealId: string,
+    milestoneId: string,
+    user: User,
+  ): Promise<Milestone> {
+    const deal = await this.findById(dealId);
+
+    if (user.id !== deal.buyerId) {
+      throw new UnauthorizedError('Only buyer can deny milestone');
+    }
+
+    const milestoneIndex = deal.milestones.findIndex(
+      (m) => m.id === milestoneId,
+    );
+    if (milestoneIndex === -1) {
+      throw new Error('Milestone not found');
+    } else if (milestoneIndex !== deal.currentMilestone) {
+      throw new BadRequestError('Milestone is not the current milestone');
+    } else if (
+      deal.milestones[milestoneIndex].approvalStatus !==
+      MilestoneApprovalStatus.Submitted
+    ) {
+      throw new BadRequestError('Milestone review was not submitted');
+    }
+
+    return this.dealsRepository.upadteMilestoneStatus(
+      dealId,
+      milestoneId,
+      MilestoneApprovalStatus.Denied,
+    );
   }
 }

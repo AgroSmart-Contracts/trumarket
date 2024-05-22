@@ -12,7 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { MilestoneDTO } from './milestone.dto';
+import { MilestoneDto } from './milestone.dto';
 
 export class CreateDealDto {
   @ApiProperty()
@@ -117,7 +117,7 @@ export class CreateDealDto {
   // state properties
 
   @ApiProperty({
-    type: [MilestoneDTO],
+    type: [MilestoneDto],
     description: 'Array of 7 milestone objects',
     example: [{ description: '...', location: '...', date: 'YYYY-MM-DD' }],
     maxLength: 7,
@@ -129,9 +129,9 @@ export class CreateDealDto {
   @ArrayMaxSize(7, { message: 'Milestones array must have at most 7 elements' })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => MilestoneDTO)
+  @Type(() => MilestoneDto)
   @Expose()
-  milestones: MilestoneDTO[];
+  milestones: MilestoneDto[];
 
   // financial properties
 
