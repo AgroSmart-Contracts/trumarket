@@ -1,7 +1,6 @@
 import hre from 'hardhat';
 import * as fs from 'fs';
 import * as path from 'path';
-import { parseEther } from 'viem';
 
 async function main() {
   const [deployerAccount, financialAccount, dealsManagerAccount] =
