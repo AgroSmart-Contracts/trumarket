@@ -209,6 +209,13 @@ module "alb" {
       ip_protocol = "tcp"
       cidr_ipv4   = "0.0.0.0/0"
     }
+    all_https = {
+      from_port   = 443
+      to_port     = 443
+      ip_protocol = "tcp"
+      description = "HTTPS web traffic"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
   }
   security_group_egress_rules = {
     all = {
@@ -222,11 +229,19 @@ module "alb" {
       port     = 80
       protocol = "HTTP"
 
+      redirect = {
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
+    }
+    https = {
+      port            = 443
+      protocol        = "HTTPS"
+      certificate_arn = "arn:aws:acm:eu-west-1:590183941756:certificate/a1e6fac0-2030-411a-92a7-76ee2e786a34"
+
       forward = {
         target_group_key = "trumarket_dev_ecs"
-      }
-
-      rules = {
       }
     }
   }
