@@ -371,7 +371,7 @@ export class DealsController {
   }
 
   @Delete(':dealId/milestones/:milestoneId/docs/:docId')
-  @AdminAccessRestricted()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a milestone document' })
   @ApiResponse({
     status: 200,
