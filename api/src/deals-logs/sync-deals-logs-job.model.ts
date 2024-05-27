@@ -2,7 +2,6 @@ import * as mongoose from 'mongoose';
 
 // Define the interface for SyncDealsLogsJob document
 interface ISyncDealsLogsJob extends mongoose.Document {
-  chainProvider: string;
   type: string;
   contract: string;
   lastBlock: number;
@@ -12,10 +11,6 @@ interface ISyncDealsLogsJob extends mongoose.Document {
 
 // Define the Mongoose Schema for SyncDealsLogsJob
 const SyncDealsLogsJobSchema = new mongoose.Schema({
-  chainProvider: {
-    type: String,
-    required: true,
-  },
   type: {
     type: String,
     required: true,

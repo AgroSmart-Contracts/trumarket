@@ -16,4 +16,8 @@ export class UsersRepository extends MongooseRepository<User> {
   findByEmail(email: string): Promise<User | undefined> {
     return this.findOne({ email });
   }
+
+  findByEmails(emails: string[]): Promise<User[] | undefined> {
+    return this.find({ email: { $in: emails } });
+  }
 }

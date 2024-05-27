@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
 import { Deal, DealStatus, Milestone } from '../deals.entities';
+import { CompanyDTO, ParticipantDTO } from './dealResponse.dto';
 
 export class ListDealDtoResponse {
   constructor(res: Partial<Deal>) {
@@ -111,21 +112,29 @@ export class ListDealDtoResponse {
 
   // ownership properties
 
-  @ApiProperty()
+  @ApiProperty({
+    type: [ParticipantDTO],
+  })
   @Expose()
-  proposalBuyerEmail: string;
+  buyers: ParticipantDTO[];
 
-  @ApiProperty()
+  @ApiProperty({
+    type: [ParticipantDTO],
+  })
   @Expose()
-  proposalSupplierEmail: string;
+  suppliers: ParticipantDTO[];
 
-  @ApiProperty()
+  @ApiProperty({
+    type: CompanyDTO,
+  })
   @Expose()
-  buyerId: string;
+  buyerCompany: CompanyDTO;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: CompanyDTO,
+  })
   @Expose()
-  supplierId: string;
+  supplierCompany: CompanyDTO;
 
   // ui helper properties
   @ApiProperty()

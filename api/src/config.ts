@@ -12,4 +12,6 @@ export const config = {
   auth0Domain: process.env.AUTH0_DOMAIN || 'trumarket-dev.eu.auth0.com',
   blockchainRpcUrl:
     process.env.BLOCKCHAIN_RPC_URL || 'http://host.docker.internal:8545/',
+  blockchainPrivateKey: process.env.BLOCKCHAIN_PRIVATE_KEY || '',
+  dealsManagerContractAddress: process.env.DEALS_MANAGER_CONTRACT_ADDRESS || '',
 };

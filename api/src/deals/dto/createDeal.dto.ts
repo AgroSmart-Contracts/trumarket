@@ -6,6 +6,7 @@ import {
   IsArray,
   IsDate,
   IsEmail,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -13,6 +14,23 @@ import {
 } from 'class-validator';
 
 import { MilestoneDto } from './milestone.dto';
+
+class CompanyDTO {
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  name: string;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  country: string;
+
+  @ApiProperty()
+  @IsString()
+  @Expose()
+  taxId: string;
+}
 
 export class CreateDealDto {
   @ApiProperty()
@@ -157,15 +175,27 @@ export class CreateDealDto {
 
   // ownership properties
 
-  @ApiProperty({ required: false })
-  @IsEmail()
-  @IsOptional()
+  @ApiProperty()
+  @IsEmail({}, { each: true })
+  @IsArray()
   @Expose()
-  proposalSupplierEmail?: string;
+  buyersEmails: string[];
 
-  @ApiProperty({ required: false })
-  @IsEmail()
-  @IsOptional()
+  @ApiProperty()
+  @IsEmail({}, { each: true })
+  @IsArray()
   @Expose()
-  proposalBuyerEmail?: string;
+  suppliersEmails: string[];
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @Type(() => CompanyDTO)
+  @Expose()
+  buyerCompany: CompanyDTO;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @Type(() => CompanyDTO)
+  @Expose()
+  supplierCompany: CompanyDTO;
 }

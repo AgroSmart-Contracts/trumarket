@@ -10,6 +10,7 @@ import * as request from 'supertest';
 import TestAgent from 'supertest/lib/agent';
 
 import { AppModule } from '@/app.module';
+import { BlockchainService } from '@/blockchain/blockchain.service';
 import { config } from '@/config';
 import { Deal } from '@/deals/deals.entities';
 import DealModel from '@/deals/deals.model';
@@ -29,7 +30,9 @@ export const randomEmail = (): string => {
 export const randomEvmAddress = () =>
   '0x' + Math.random().toString(16).slice(2, 42);
 
-export const generateDealDto = (dealDto: Partial<Deal> = {}): CreateDealDto => {
+export const generateDealDto = (
+  dealDto: Partial<CreateDealDto> = {},
+): CreateDealDto => {
   return {
     name: 'test',
     description: 'test',
@@ -77,6 +80,16 @@ export const generateDealDto = (dealDto: Partial<Deal> = {}): CreateDealDto => {
         fundsDistribution: 30,
       },
     ],
+    buyerCompany: {
+      name: 'Buyer Company',
+      country: 'Brazil',
+      taxId: '123456',
+    },
+    supplierCompany: {
+      name: 'Supplier Company',
+      country: 'Peru',
+      taxId: '654321',
+    },
     ...dealDto,
   } as CreateDealDto;
 };
@@ -96,7 +109,15 @@ export const setupApp = async () => {
 
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  })
+    .overrideProvider(BlockchainService)
+    .useValue({
+      getNftID: jest.fn(),
+      mintNFT: jest.fn(),
+      changeMilestoneStatus: jest.fn(),
+      verifyMessage: jest.fn(),
+    })
+    .compile();
 
   const app = moduleFixture.createNestApplication();
 
@@ -173,33 +194,45 @@ export class TestApp {
   async createUserDeal(user: User) {
     const token = await this.login(user);
     // create deal
-    const deal = generateDealDto({
-      proposalSupplierEmail: randomEmail(),
-    });
+    const dto: Partial<CreateDealDto> = {};
+
+    if (user.accountType === AccountType.Buyer) {
+      dto.suppliersEmails = [randomEmail()];
+      dto.buyersEmails = [user.email];
+    } else if (user.accountType === AccountType.Supplier) {
+      dto.buyersEmails = [randomEmail()];
+      dto.suppliersEmails = [user.email];
+    }
+
+    const deal = generateDealDto(dto);
     const dealReq = await this.request()
       .post('/deals')
       .set('Authorization', `Bearer ${token}`)
-      .send(deal)
-      .expect(201);
+      .send(deal);
+
+    expect(dealReq.body).toHaveProperty('id');
+    expect(dealReq.status).toBe(201);
 
     return dealReq.body as Deal;
   }
 
   async createUserConfirmedDeal(user: User) {
     const token = await this.login(user);
-    const dealDto: Partial<Deal> = {};
+    const dealDto: Partial<CreateDealDto> = {};
     let otherUser: User;
 
     if (user.accountType === AccountType.Buyer) {
       otherUser = await this.createUser({
         accountType: AccountType.Supplier,
       });
-      dealDto.proposalSupplierEmail = otherUser.email;
+      dealDto.suppliersEmails = [otherUser.email];
+      dealDto.buyersEmails = [user.email];
     } else {
       otherUser = await this.createUser({
         accountType: AccountType.Supplier,
       });
-      dealDto.proposalBuyerEmail = otherUser.email;
+      dealDto.buyersEmails = [otherUser.email];
+      dealDto.suppliersEmails = [user.email];
     }
 
     // create deal
@@ -244,8 +277,8 @@ export class TestApp {
     // create deal
     const createDealDto = generateDealDto({
       ...dealDto,
-      proposalBuyerEmail: buyer.email,
-      proposalSupplierEmail: supplier.email,
+      buyersEmails: [buyer.email],
+      suppliersEmails: [supplier.email],
     });
 
     const createDealReq = await this.request()

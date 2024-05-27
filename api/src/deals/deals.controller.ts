@@ -9,7 +9,6 @@ import {
   Query,
   Request,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -19,16 +18,18 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { AuthenticatedRestricted } from '@/decorators/authenticatedRestricted';
+import { InternalServerError } from '@/errors';
+
 import { BlockchainService } from '../blockchain/blockchain.service';
 import { AdminAccessRestricted } from '../decorators/adminRestricted';
 // import { WhitelistAccessRestricted } from '../decorators/whitelistRestricted';
 import fileInterceptor from '../file.interceptor';
-import { AuthGuard } from '../guards/auth.guard';
 import { filePipeValidator } from '../multer.options';
 import { User } from '../users/users.model';
 import { Deal } from './deals.entities';
 import { DealsService } from './deals.service';
-import { AssignNFTDto } from './dto/assignNFTID.dto';
+// import { AssignNFTDto } from './dto/assignNFTID.dto';
 import { CreateDealDto } from './dto/createDeal.dto';
 import { DealLogsDtoResponse } from './dto/dealLogsResponse.dto';
 import { DealDtoResponse } from './dto/dealResponse.dto';
@@ -51,7 +52,7 @@ export class DealsController {
   ) {}
 
   @Get()
-  @UseGuards(AuthGuard)
+  @AuthenticatedRestricted()
   @ApiOperation({ summary: 'Get all deals' })
   @ApiResponse({
     status: 200,
@@ -70,7 +71,7 @@ export class DealsController {
   }
 
   @Post()
-  @UseGuards(AuthGuard)
+  @AuthenticatedRestricted()
   @ApiOperation({ summary: 'Create a deal' })
   @ApiResponse({
     status: 201,
@@ -83,13 +84,23 @@ export class DealsController {
   ): Promise<DealDtoResponse> {
     const user: User = req.user;
 
-    const deal = await this.dealsService.createDeal(user, dealDto);
+    const dealPayload: Partial<Deal> = dealDto;
+
+    dealPayload.buyers = await this.dealsService.getDealsParticipantsByEmails(
+      dealDto.buyersEmails,
+    );
+    dealPayload.suppliers =
+      await this.dealsService.getDealsParticipantsByEmails(
+        dealDto.suppliersEmails,
+      );
+
+    const deal = await this.dealsService.createDeal(user, dealPayload);
 
     return new DealDtoResponse(deal);
   }
 
   @Get(':dealId')
-  @UseGuards(AuthGuard)
+  @AuthenticatedRestricted()
   @ApiOperation({ summary: 'Get a deal' })
   @ApiResponse({
     status: 200,
@@ -109,7 +120,7 @@ export class DealsController {
   }
 
   @Put(':dealId')
-  @UseGuards(AuthGuard)
+  @AuthenticatedRestricted()
   @ApiOperation({ summary: 'Update a deal' })
   @ApiResponse({
     status: 200,
@@ -142,19 +153,8 @@ export class DealsController {
     return new DealDtoResponse(deal);
   }
 
-  @Delete(':dealId')
-  @AdminAccessRestricted()
-  @ApiOperation({ summary: 'Delete a deal' })
-  @ApiResponse({
-    status: 200,
-    description: 'The deal has been successfully deleted',
-  })
-  async delete(@Param('dealId') id: string): Promise<void> {
-    this.dealsService.deleteDeal(id);
-  }
-
   @Put(':dealId/cover-image')
-  @UseGuards(AuthGuard)
+  @AuthenticatedRestricted()
   @ApiOperation({ summary: 'Upload deal cover image' })
   @ApiResponse({
     status: 200,
@@ -176,49 +176,49 @@ export class DealsController {
     return new DealDtoResponse(deal);
   }
 
-  @Post(':dealId/docs')
-  @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Upload document to a deal milestone' })
-  @ApiResponse({
-    status: 200,
-    type: documentResponseDTO,
-    description: 'The deal document was successfully uploaded',
-  })
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(fileInterceptor)
-  async uploadDealDocument(
-    @Param('dealId') id: string,
-    @Body() payload: UploadDocumentDTO,
-    @UploadedFile(filePipeValidator) file: Express.Multer.File,
-    @Request() req,
-  ): Promise<documentResponseDTO> {
-    const user: User = req.user;
+  // @Post(':dealId/docs')
+  // @AuthenticatedRestricted()
+  // @ApiOperation({ summary: 'Upload document to a deal milestone' })
+  // @ApiResponse({
+  //   status: 200,
+  //   type: documentResponseDTO,
+  //   description: 'The deal document was successfully uploaded',
+  // })
+  // @ApiConsumes('multipart/form-data')
+  // @UseInterceptors(fileInterceptor)
+  // async uploadDealDocument(
+  //   @Param('dealId') id: string,
+  //   @Body() payload: UploadDocumentDTO,
+  //   @UploadedFile(filePipeValidator) file: Express.Multer.File,
+  //   @Request() req,
+  // ): Promise<documentResponseDTO> {
+  //   const user: User = req.user;
 
-    const doc = await this.dealsService.uploadDealDocument(
-      id,
-      file,
-      payload.description,
-      user,
-    );
+  //   const doc = await this.dealsService.uploadDealDocument(
+  //     id,
+  //     file,
+  //     payload.description,
+  //     user,
+  //   );
 
-    return new documentResponseDTO(doc);
-  }
+  //   return new documentResponseDTO(doc);
+  // }
 
-  @Delete(':dealId/docs/:docId')
-  @AdminAccessRestricted()
-  @ApiOperation({ summary: 'Delete deal document' })
-  @ApiResponse({
-    status: 200,
-    description: 'The deal document was successfully deleted',
-  })
-  async deleteDealDocument(
-    @Param('dealId') id: string,
-    @Param('docId') docId: string,
-    @Request() req,
-  ): Promise<void> {
-    const user: User = req.user;
-    await this.dealsService.removeDocumentFromDeal(id, docId, user);
-  }
+  // @Delete(':dealId/docs/:docId')
+  // @AdminAccessRestricted()
+  // @ApiOperation({ summary: 'Delete deal document' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'The deal document was successfully deleted',
+  // })
+  // async deleteDealDocument(
+  //   @Param('dealId') id: string,
+  //   @Param('docId') docId: string,
+  //   @Request() req,
+  // ): Promise<void> {
+  //   const user: User = req.user;
+  //   await this.dealsService.removeDocumentFromDeal(id, docId, user);
+  // }
 
   // @Post(':dealId/whitelist')
   // @AdminAccessRestricted()
@@ -270,8 +270,27 @@ export class DealsController {
   //   });
   // }
 
+  @Get('/:dealId/logs')
+  @AuthenticatedRestricted()
+  @ApiOperation({ summary: 'Get nft logs' })
+  @ApiResponse({
+    status: 200,
+    type: [DealLogsDtoResponse],
+    description: 'The nft logs were successfully got',
+  })
+  async getDealLogs(
+    @Param('dealId') id: string,
+    @Request() req,
+  ): Promise<DealLogsDtoResponse[]> {
+    const user: User = req.user;
+    const logs = await this.dealsService.findDealsLogs(id, user);
+    return logs.map((doc) => new DealLogsDtoResponse(doc));
+  }
+
+  // Milestones routes
+
   @Put(':dealId/milestones/:milestoneId')
-  @UseGuards(AuthGuard)
+  @AuthenticatedRestricted()
   @ApiOperation({ summary: 'Update milestone status' })
   @ApiResponse({
     status: 200,
@@ -312,7 +331,7 @@ export class DealsController {
   }
 
   @Post(':dealId/milestones/:milestoneId/docs')
-  @UseGuards(AuthGuard)
+  @AuthenticatedRestricted()
   @ApiOperation({ summary: 'Upload document to a deal milestone' })
   @ApiResponse({
     status: 200,
@@ -342,7 +361,7 @@ export class DealsController {
   }
 
   @Put(':dealId/milestones/:milestoneId/docs/:docId')
-  @UseGuards(AuthGuard)
+  @AuthenticatedRestricted()
   @ApiOperation({ summary: 'Update document description' })
   @ApiResponse({
     status: 200,
@@ -371,7 +390,7 @@ export class DealsController {
   }
 
   @Delete(':dealId/milestones/:milestoneId/docs/:docId')
-  @UseGuards(AuthGuard)
+  @AuthenticatedRestricted()
   @ApiOperation({ summary: 'Delete a milestone document' })
   @ApiResponse({
     status: 200,
@@ -392,36 +411,56 @@ export class DealsController {
     );
   }
 
-  @Get('/nft/:nftId/logs')
-  @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Get nft logs' })
-  @ApiResponse({
-    status: 200,
-    type: [DealLogsDtoResponse],
-    description: 'The nft logs were successfully got',
-  })
-  async getDealLogs(
-    @Param('nftId') id: string,
-    @Request() req,
-  ): Promise<DealLogsDtoResponse[]> {
-    const user: User = req.user;
-    const logs = await this.dealsService.findDealsLogs(id, user);
-    return logs.map((doc) => new DealLogsDtoResponse(doc));
-  }
+  // ADMIN ROUTES
 
-  @Post(':dealId/nft')
+  @Delete(':dealId')
   @AdminAccessRestricted()
-  @ApiOperation({ summary: 'Assign NFT to deal' })
+  @ApiOperation({ summary: 'Delete a deal' })
   @ApiResponse({
     status: 200,
-    description: 'The NFT was successfully assigned',
+    description: 'The deal has been successfully deleted',
   })
-  async assignNFT(
-    @Param('dealId') id: string,
-    @Body() dto: AssignNFTDto,
-  ): Promise<void> {
-    const nftID = await this.blockchainService.getNftID(dto.txHash);
-
-    await this.dealsService.assignNftIdToDeal(id, nftID, dto.txHash);
+  async delete(@Param('dealId') id: string): Promise<void> {
+    this.dealsService.deleteDeal(id);
   }
+
+  @Post(':dealId/nft/mint')
+  @AdminAccessRestricted()
+  @ApiOperation({ summary: 'Mint a NFT representing the deal' })
+  @ApiResponse({
+    status: 200,
+    description: 'The deal nft has been successfully minted',
+  })
+  async mintDealNFT(@Param('dealId') id: string): Promise<void> {
+    const deal = await this.dealsService.findById(id);
+
+    if (typeof deal.nftID === 'number') {
+      throw new InternalServerError('Deal already has a NFT');
+    }
+
+    const txHash = await this.blockchainService.mintNFT(
+      deal.milestones.map((m) => m.fundsDistribution),
+    );
+
+    const nftID = await this.blockchainService.getNftID(txHash);
+
+    await this.dealsService.assignNftIdToDeal(id, nftID, txHash);
+  }
+
+  // DEPRECATED: tx to assign nft to deal is now done in the blockchain service
+  // @Post(':dealId/nft')
+  // @AdminAccessRestricted()
+  // @ApiOperation({ summary: 'Assign NFT to deal' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'The NFT was successfully assigned',
+  // })
+  // async assignNFT(
+  //   @Param('dealId') id: string,
+  //   @Body() dto: AssignNFTDto,
+  // ): Promise<void> {
+  //   const nftID = await this.blockchainService.getNftID(dto.txHash);
+
+  //   await this.dealsService.assignNftIdToDeal(id, nftID, dto.txHash);
+  // }
 }

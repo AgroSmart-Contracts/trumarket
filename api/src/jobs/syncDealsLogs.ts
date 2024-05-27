@@ -1,5 +1,7 @@
 import { createPublicClient, http, parseAbi } from 'viem';
 
+import { config } from '@/config';
+
 import DealsLogs from '../deals-logs/deals-logs.model';
 import SyncDealsLogsJob from '../deals-logs/sync-deals-logs-job.model';
 import { logger } from '../logger';
@@ -9,11 +11,20 @@ export const syncDealsLogs = async () => {
 
   const jobs = await SyncDealsLogsJob.find();
 
+  if (!jobs.length) {
+    const job = await SyncDealsLogsJob.create({
+      contract: config.dealsManagerContractAddress,
+      lastBlock: 0,
+      type: 'syncDealsLogs',
+    });
+    jobs.push(job);
+  }
+
   await Promise.all(
     jobs.map(async (job) => {
       try {
         const client = createPublicClient({
-          transport: http(job.chainProvider),
+          transport: http(config.blockchainRpcUrl as string),
         });
 
         const fromBlock = job.lastBlock
@@ -30,7 +41,6 @@ export const syncDealsLogs = async () => {
             fromBlock,
             toBlock,
             contractAddress: job.contract,
-            provider: job.chainProvider,
           },
           'syncing deals logs from deals contract',
         );

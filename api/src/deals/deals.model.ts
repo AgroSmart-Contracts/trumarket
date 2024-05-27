@@ -34,6 +34,31 @@ walletSchema.set('toJSON', {
   },
 });
 
+const participantSchema = new Schema({
+  id: String,
+  email: String,
+  approved: Boolean,
+  new: Boolean,
+});
+
+participantSchema.set('toJSON', {
+  transform: function (doc, ret) {
+    return ret;
+  },
+});
+
+const companySchema = new Schema({
+  name: String,
+  country: String,
+  taxId: String,
+});
+
+companySchema.set('toJSON', {
+  transform: function (doc, ret) {
+    return ret;
+  },
+});
+
 // Define the Milestone schema
 const milestoneSchema = new Schema({
   description: {
@@ -219,20 +244,22 @@ const dealSchema = new Schema({
   //   type: [walletSchema],
   //   default: [],
   // },
-  buyerId: {
-    type: String,
+  buyers: {
+    type: [participantSchema],
+    default: [],
+    required: true,
+  },
+  suppliers: {
+    type: [participantSchema],
+    default: [],
+    required: true,
+  },
+  buyerCompany: {
+    type: companySchema,
     required: false,
   },
-  supplierId: {
-    type: String,
-    required: false,
-  },
-  proposalBuyerEmail: {
-    type: String,
-    required: false,
-  },
-  proposalSupplierEmail: {
-    type: String,
+  supplierCompany: {
+    type: companySchema,
     required: false,
   },
 
