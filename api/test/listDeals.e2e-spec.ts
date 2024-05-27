@@ -27,12 +27,13 @@ describe('List deals (e2e)', () => {
     expect(dealsReq.body).toHaveLength(1);
     expect(dealsReq.body[0].id).toBeDefined();
     expect(dealsReq.body[0].shippingStartDate).toBeDefined();
-    expect(dealsReq.body[0].proposalBuyerEmail).toBeDefined();
-    expect(dealsReq.body[0].proposalSupplierEmail).toBeDefined();
+    expect(dealsReq.body[0].buyers).toHaveLength(1);
+    expect(dealsReq.body[0].suppliers).toHaveLength(1);
     expect(dealsReq.body[0].expectedShippingEndDate).toBeDefined();
 
     expect(dealsReq.body[0]).toMatchObject({
-      buyerConfirmed: true,
+      buyers: [{ approved: true }],
+      suppliers: [{ approved: true }],
       contractId: 1,
       currentMilestone: 0,
       daysLeft: -1,
@@ -92,7 +93,6 @@ describe('List deals (e2e)', () => {
       revenue: 1,
       roi: 1,
       status: 'confirmed',
-      supplierConfirmed: true,
       totalValue: 1,
       transport: 'ship',
     });

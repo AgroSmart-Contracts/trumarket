@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateQuery } from 'mongoose';
 
-import { logger } from '@/logger';
-import { AccountType } from '@/users/users.model';
-
 import DealsLogs from '../deals-logs/deals-logs.model';
 import { NotFoundError } from '../errors';
 import { MongooseRepository } from '../repository.mongoose';
@@ -30,14 +27,20 @@ export class DealsRepository extends MongooseRepository<Deal> {
   async findByUser(userId: string, query: FindByUserQuery): Promise<Deal[]> {
     return (
       await this.find({
-        $or: [{ buyerId: userId }, { supplierId: userId }],
+        $or: [{ 'buyers.id': userId }, { 'suppliers.id': userId }],
         ...query,
       })
     ).map((deal) => {
-      if (deal.buyerId === userId && deal.newForBuyer) {
-        deal.new = true;
-      } else if (deal.supplierId === userId && deal.newForSupplier) {
-        deal.new = true;
+      const participant = deal.buyers.find((b) => b.id === userId);
+      if (participant) {
+        if (participant.new) {
+          deal.new = true;
+        }
+      } else {
+        const participant = deal.suppliers.find((s) => s.id === userId);
+        if (participant.new) {
+          deal.new = true;
+        }
       }
 
       return deal;
@@ -172,29 +175,18 @@ export class DealsRepository extends MongooseRepository<Deal> {
     );
   }
 
-  async assignUserToDeals(
-    userId: string,
-    userEmail: string,
-    accountType: AccountType,
-  ): Promise<void> {
-    if (accountType === AccountType.Buyer) {
-      await DealModel.updateMany(
-        { proposalBuyerEmail: userEmail },
-        { $set: { buyerId: userId } },
-      );
-    } else if (accountType === AccountType.Supplier) {
-      await DealModel.updateMany(
-        { proposalSupplierEmail: userEmail },
-        { $set: { supplierId: userId } },
-      );
-    } else {
-      logger.warn(
-        `Impossible to assign user to deal with account type ${accountType}`,
-      );
-    }
+  async assignUserToDeals(userId: string, userEmail: string): Promise<void> {
+    await DealModel.updateMany(
+      { 'buyers.email': userEmail },
+      { $set: { 'buyers.$.id': userId } },
+    );
+    await DealModel.updateMany(
+      { 'suppliers.email': userEmail },
+      { $set: { 'suppliers.$.id': userId } },
+    );
   }
 
-  async findDealsLogs(dealId: string): Promise<DealLog[]> {
+  async findDealsLogs(dealId: number): Promise<DealLog[]> {
     const logs = await DealsLogs.find({ dealId });
     return logs.map((l) => l.toJSON());
   }

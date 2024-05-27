@@ -28,6 +28,18 @@ data "aws_ssm_parameter" "api_database" {
   name = "/${var.name}/api-database"
 }
 
+data "aws_ssm_parameter" "deals_manager_address" {
+  name = "/${var.name}/deals-manager-address"
+}
+
+data "aws_ssm_parameter" "private_key" {
+  name = "/${var.name}/private-key"
+}
+
+data "aws_ssm_parameter" "rpc_url" {
+  name = "/${var.name}/rpc-url"
+}
+
 data "aws_ssm_parameter" "ecs_optimized_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended"
 }
@@ -117,6 +129,18 @@ module "ecs_service_api" {
           name = "DATABASE_URL",
           # value = "mongodb://${local.mongo_name}/"
           value = data.aws_ssm_parameter.api_database.value
+        },
+        {
+          name  = "BLOCKCHAIN_RPC_URL",
+          value = data.aws_ssm_parameter.rpc_url.value
+        },
+        {
+          name  = "BLOCKCHAIN_PRIVATE_KEY",
+          value = data.aws_ssm_parameter.private_key.value
+        },
+        {
+          name  = "DEALS_MANAGER_CONTRACT_ADDRESS",
+          value = data.aws_ssm_parameter.deals_manager_address.value
         },
         {
           name  = "PORT",

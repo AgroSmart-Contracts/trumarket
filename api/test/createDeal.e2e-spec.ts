@@ -59,6 +59,18 @@ describe('Create Deal (e2e)', () => {
         transport: 'ship',
         contractId: 1,
         milestones: [],
+        buyerCompany: {
+          name: 'Buyer Company',
+          country: 'Brazil',
+          taxId: '123456',
+        },
+        supplierCompany: {
+          name: 'Supplier Company',
+          country: 'Peru',
+          taxId: '654321',
+        },
+        buyersEmails: [],
+        suppliersEmails: [],
       } as CreateDealDto)
       .expect(400);
 
@@ -118,6 +130,18 @@ describe('Create Deal (e2e)', () => {
             fundsDistribution: 20,
           },
         ],
+        buyerCompany: {
+          name: 'Buyer Company',
+          country: 'Brazil',
+          taxId: '123456',
+        },
+        supplierCompany: {
+          name: 'Supplier Company',
+          country: 'Peru',
+          taxId: '654321',
+        },
+        buyersEmails: [],
+        suppliersEmails: [],
       } as CreateDealDto)
       .expect(409);
 
@@ -190,6 +214,18 @@ describe('Create Deal (e2e)', () => {
             fundsDistribution: 30,
           },
         ],
+        buyerCompany: {
+          name: 'Buyer Company',
+          country: 'Brazil',
+          taxId: '123456',
+        },
+        supplierCompany: {
+          name: 'Supplier Company',
+          country: 'Peru',
+          taxId: '654321',
+        },
+        buyersEmails: ['buyer@example.com'],
+        suppliersEmails: ['supplier@example.com'],
       } as CreateDealDto)
       .expect(201);
 
@@ -209,7 +245,6 @@ describe('Create Deal (e2e)', () => {
       offerUnitPrice: 100,
       quantity: 10,
       totalValue: 1000,
-      proposalSupplierEmail: 'supplier@example.com',
       // maybe need to be removed
       roi: 100,
       netBalance: 100,
@@ -250,8 +285,28 @@ describe('Create Deal (e2e)', () => {
           fundsDistribution: 30,
         },
       ],
-      proposalBuyerEmail: buyer.email,
       status: DealStatus.Proposal,
+      buyerCompany: {
+        name: 'Buyer Company',
+        country: 'Brazil',
+        taxId: '123456',
+      },
+      supplierCompany: {
+        name: 'Supplier Company',
+        country: 'Peru',
+        taxId: '654321',
+      },
+      buyers: [
+        {
+          id: buyer.id,
+          email: buyer.email,
+        },
+      ],
+      suppliers: [
+        {
+          email: 'supplier@example.com',
+        },
+      ],
     } as Deal);
   });
 });

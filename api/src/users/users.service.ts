@@ -12,8 +12,12 @@ export class UsersService {
     return this.users.findByWalletAddress(walletAddress);
   }
 
-  async findByEmail(walletAddress: string): Promise<User | undefined> {
-    return this.users.findByEmail(walletAddress);
+  async findByEmail(email: string): Promise<User | undefined> {
+    return this.users.findByEmail(email);
+  }
+
+  async findByEmails(emails: string[]): Promise<User[] | undefined> {
+    return this.users.findByEmails(emails);
   }
 
   async create(createUserDto: Partial<User>): Promise<User> {

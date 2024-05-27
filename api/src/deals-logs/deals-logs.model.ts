@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 
 // Define the interface for DealsLogs document
 export interface IDealsLogs extends mongoose.Document {
-  dealId: string;
+  dealId: number;
   event: string;
   args: any;
   blockNumber: number;
@@ -14,7 +14,7 @@ export interface IDealsLogs extends mongoose.Document {
 // Define the Mongoose Schema for DealsLogs
 const DealsLogsSchema = new mongoose.Schema({
   dealId: {
-    type: String,
+    type: Number,
     required: true,
   },
   event: {

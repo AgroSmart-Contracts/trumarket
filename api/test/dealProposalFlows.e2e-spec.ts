@@ -39,7 +39,8 @@ describe('Deal Proposal Flows (e2e)', () => {
       .set('Authorization', `Bearer ${buyerToken}`)
       .send(
         generateDealDto({
-          proposalSupplierEmail: supplier.email,
+          buyersEmails: [buyer.email],
+          suppliersEmails: [supplier.email],
         }),
       );
 
@@ -55,12 +56,8 @@ describe('Deal Proposal Flows (e2e)', () => {
 
     expect(getDealRequest.body).toMatchObject({
       id: dealReq.body.id,
-      buyerConfirmed: true,
-      supplierConfirmed: false,
-      proposalBuyerEmail: buyer.email,
-      proposalSupplierEmail: supplier.email,
-      buyerId: buyer.id,
-      supplierId: supplier.id,
+      buyers: [{ email: buyer.email, id: buyer.id }],
+      suppliers: [{ email: supplier.email, id: supplier.id }],
       status: DealStatus.Proposal,
     } as Deal);
 
@@ -76,8 +73,6 @@ describe('Deal Proposal Flows (e2e)', () => {
     expect(acceptDealReq.body).toMatchObject({
       id: dealReq.body.id,
       status: DealStatus.Confirmed,
-      buyerConfirmed: true,
-      supplierConfirmed: true,
     });
 
     // check deal updates are locked
@@ -113,7 +108,8 @@ describe('Deal Proposal Flows (e2e)', () => {
       .set('Authorization', `Bearer ${supplierToken}`)
       .send(
         generateDealDto({
-          proposalBuyerEmail: buyer.email,
+          buyersEmails: [buyer.email],
+          suppliersEmails: [supplier.email],
         }),
       );
 
@@ -129,12 +125,8 @@ describe('Deal Proposal Flows (e2e)', () => {
 
     expect(getDealRequest.body).toMatchObject({
       id: dealReq.body.id,
-      buyerConfirmed: false,
-      supplierConfirmed: true,
-      proposalBuyerEmail: buyer.email,
-      proposalSupplierEmail: supplier.email,
-      buyerId: buyer.id,
-      supplierId: supplier.id,
+      buyers: [{ email: buyer.email, id: buyer.id }],
+      suppliers: [{ email: supplier.email, id: supplier.id }],
       status: DealStatus.Proposal,
     } as Deal);
 
@@ -150,8 +142,8 @@ describe('Deal Proposal Flows (e2e)', () => {
     expect(changeDealReq.body).toMatchObject({
       id: dealReq.body.id,
       status: DealStatus.Proposal,
-      buyerConfirmed: true,
-      supplierConfirmed: false,
+      buyers: [{ email: buyer.email, id: buyer.id, approved: true }],
+      suppliers: [{ email: supplier.email, id: supplier.id, approved: false }],
     });
 
     // accept deal with supplier account
@@ -166,8 +158,8 @@ describe('Deal Proposal Flows (e2e)', () => {
     expect(acceptDealReq.body).toMatchObject({
       id: dealReq.body.id,
       status: DealStatus.Confirmed,
-      buyerConfirmed: true,
-      supplierConfirmed: true,
+      buyers: [{ email: buyer.email, id: buyer.id, approved: true }],
+      suppliers: [{ email: supplier.email, id: supplier.id, approved: true }],
     });
 
     // check deal updates are locked
@@ -198,12 +190,13 @@ describe('Deal Proposal Flows (e2e)', () => {
       .set('Authorization', `Bearer ${supplierToken}`)
       .send(
         generateDealDto({
-          proposalBuyerEmail: buyerEmail,
+          buyersEmails: [buyerEmail],
+          suppliersEmails: [supplier.email],
         }),
       );
 
     expect(dealReq.body).toHaveProperty('id');
-    expect(dealReq.body.supplierId).toEqual(supplier.id);
+    expect(dealReq.body.suppliers[0].id).toEqual(supplier.id);
 
     // signup buyer
     const buyerSignupReq = await app
@@ -231,7 +224,7 @@ describe('Deal Proposal Flows (e2e)', () => {
       .expect(200);
 
     // check deal status
-    expect(getDealReq.body.buyerId).toEqual(buyer.id);
-    expect(getDealReq.body.supplierId).toEqual(supplier.id);
+    expect(getDealReq.body.buyers[0].id).toEqual(buyer.id);
+    expect(getDealReq.body.suppliers[0].id).toEqual(supplier.id);
   });
 });

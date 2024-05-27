@@ -1,17 +1,25 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { parseAbi, parseEventLogs, PublicClient, verifyMessage } from 'viem';
+import {
+  parseAbi,
+  parseEther,
+  parseEventLogs,
+  PublicClient,
+  verifyMessage,
+} from 'viem';
 
 import { InternalServerError } from '../errors';
 
 @Injectable()
 export class BlockchainService {
   constructor(
-    @Inject('EvmProvider')
-    private evmProvider: PublicClient,
+    @Inject('DealsManager')
+    private dealsManager: any,
+    @Inject('PublicClient')
+    private publicClient: PublicClient,
   ) {}
 
   async getNftID(txHash: string): Promise<number> {
-    const receipt = await this.evmProvider.getTransactionReceipt({
+    const receipt = await this.publicClient.getTransactionReceipt({
       hash: txHash as `0x${string}`,
     });
 
@@ -26,6 +34,24 @@ export class BlockchainService {
     }
 
     return Number(logs[0].args.dealId);
+  }
+
+  async mintNFT(distributions: number[]): Promise<string> {
+    const tx = await this.dealsManager.write.mint([
+      distributions,
+      parseEther('0'),
+    ]);
+
+    return tx;
+  }
+
+  async changeMilestoneStatus(
+    nftId: number,
+    milestone: number,
+  ): Promise<string> {
+    const tx = await this.dealsManager.write.proceed([nftId, milestone]);
+
+    return tx;
   }
 
   async verifyMessage(

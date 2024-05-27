@@ -57,6 +57,19 @@ export enum MilestoneApprovalStatus {
   Denied = 'denied',
 }
 
+export class DealParticipant {
+  id?: string;
+  email: string;
+  approved?: boolean;
+  new?: boolean;
+}
+
+export class DealCompany {
+  name: string;
+  country: string;
+  taxId: string;
+}
+
 export class Deal {
   id: string;
   name: string;
@@ -93,8 +106,6 @@ export class Deal {
   currentMilestone: number;
   milestones: Milestone[];
   status: DealStatus;
-  buyerConfirmed: boolean;
-  supplierConfirmed: boolean;
 
   // financial properties
   investmentAmount: number;
@@ -104,14 +115,12 @@ export class Deal {
 
   // ownership properties
   // whitelist: Wallet[];
-  buyerId: string;
-  supplierId: string;
-  proposalBuyerEmail: string;
-  proposalSupplierEmail: string;
+  buyers: DealParticipant[];
+  suppliers: DealParticipant[];
+  buyerCompany: DealCompany;
+  supplierCompany: DealCompany;
 
   // ui helper properties
-  newForBuyer: boolean;
-  newForSupplier: boolean;
   newDocuments: boolean;
   new: boolean;
 }

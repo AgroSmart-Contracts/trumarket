@@ -13,7 +13,6 @@ import { DealsService, ListDealsQuery } from './deals.service';
 describe('DealsService', () => {
   let dealsService: DealsService;
   let dealsRepository: DealsRepository;
-  let usersService: UsersService;
   let notificationsService: NotificationsService;
   let blockchainService: BlockchainService;
 
@@ -26,7 +25,15 @@ describe('DealsService', () => {
         NotificationsService,
         BlockchainService,
         {
-          provide: 'EvmProvider',
+          provide: 'DealsManager',
+          useValue: {
+            write: {
+              proceed: jest.fn(),
+            },
+          },
+        },
+        {
+          provide: 'PublicClient',
           useValue: {
             getTransactionReceipt: jest.fn(),
           },
@@ -37,7 +44,6 @@ describe('DealsService', () => {
 
     dealsService = module.get<DealsService>(DealsService);
     dealsRepository = module.get<DealsRepository>(DealsRepository);
-    usersService = module.get<UsersService>(UsersService);
     blockchainService = module.get<BlockchainService>(BlockchainService);
     notificationsService =
       module.get<NotificationsService>(NotificationsService);
@@ -55,18 +61,28 @@ describe('DealsService', () => {
         name: 'New Deal',
         description: 'This is a new deal',
         investmentAmount: 100,
-        proposalSupplierEmail: 'supplier@mail.com',
+        buyers: [{ email: 'buyer@example.com' }],
+        suppliers: [{ email: 'supplier@mail.com' }],
       };
 
       const createdDeal: Deal = {
         name: 'New Deal',
-        proposalBuyerEmail: user.email,
-        proposalSupplierEmail: user.email,
+        buyers: [
+          {
+            email: 'buyer@example.com',
+            new: true,
+          },
+        ],
+        suppliers: [
+          {
+            email: 'supplier@example.com',
+            new: true,
+          },
+        ],
         description: 'This is a new deal',
         investmentAmount: 100,
       } as Deal;
 
-      jest.spyOn(usersService, 'findByEmail').mockResolvedValue(null);
       jest
         .spyOn(notificationsService, 'sendInviteToSignupNotification')
         .mockResolvedValue(undefined);
@@ -79,24 +95,18 @@ describe('DealsService', () => {
 
       const result = await dealsService.createDeal(user, dealPayload);
 
-      expect(usersService.findByEmail).toHaveBeenCalledWith(
-        dealPayload.proposalSupplierEmail,
-      );
       expect(dealsRepository.create).toHaveBeenCalledWith({
-        buyerConfirmed: true,
-        newForSupplier: true,
-        buyerId: 'user1',
         description: 'This is a new deal',
         investmentAmount: 100,
         name: 'New Deal',
-        proposalBuyerEmail: 'buyer@example.com',
-        proposalSupplierEmail: 'supplier@mail.com',
+        buyers: [{ email: 'buyer@example.com', new: true }],
+        suppliers: [{ email: 'supplier@mail.com', new: true }],
         status: DealStatus.Proposal,
       });
       expect(
         notificationsService.sendNewProposalNotification,
       ).toHaveBeenCalledWith(
-        dealsService.selectDealEmailBasedOnUser(user, createdDeal),
+        dealsService.selectParticipantsEmailsBasedOnUser(user, createdDeal),
         createdDeal,
       );
       expect(result).toEqual(createdDeal);
@@ -113,18 +123,18 @@ describe('DealsService', () => {
         name: 'New Deal',
         description: 'This is a new deal',
         investmentAmount: 100,
-        proposalBuyerEmail: 'buyer@example.com',
+        buyers: [{ email: 'buyer@example.com' }],
+        suppliers: [{ email: 'supplier@example.com' }],
       };
 
       const createdDeal: Deal = {
         name: 'New Deal',
-        proposalBuyerEmail: user.email,
-        proposalSupplierEmail: user.email,
+        buyers: [{ email: user.email }],
+        suppliers: [{ email: 'supplier@example.com' }],
         description: 'This is a new deal',
         investmentAmount: 100,
       } as Deal;
 
-      jest.spyOn(usersService, 'findByEmail').mockResolvedValue(null);
       jest
         .spyOn(notificationsService, 'sendInviteToSignupNotification')
         .mockResolvedValue(undefined);
@@ -137,24 +147,18 @@ describe('DealsService', () => {
 
       const result = await dealsService.createDeal(user, dealPayload);
 
-      expect(usersService.findByEmail).toHaveBeenCalledWith(
-        dealPayload.proposalBuyerEmail,
-      );
       expect(dealsRepository.create).toHaveBeenCalledWith({
-        supplierConfirmed: true,
-        supplierId: 'user1',
         description: 'This is a new deal',
         investmentAmount: 100,
         name: 'New Deal',
-        newForBuyer: true,
-        proposalBuyerEmail: 'buyer@example.com',
-        proposalSupplierEmail: 'supplier@example.com',
+        buyers: [{ email: 'buyer@example.com', new: true }],
+        suppliers: [{ email: 'supplier@example.com', new: true }],
         status: DealStatus.Proposal,
       });
       expect(
         notificationsService.sendNewProposalNotification,
       ).toHaveBeenCalledWith(
-        dealsService.selectDealEmailBasedOnUser(user, createdDeal),
+        dealsService.selectParticipantsEmailsBasedOnUser(user, createdDeal),
         createdDeal,
       );
       expect(result).toEqual(createdDeal);
@@ -171,22 +175,18 @@ describe('DealsService', () => {
         name: 'New Deal',
         description: 'This is a new deal',
         investmentAmount: 100,
-        proposalSupplierEmail: 'supplier@mail.com',
+        suppliers: [{ email: 'supplier@mail.com' }],
+        buyers: [{ email: user.email }],
       };
 
       const createdDeal: Deal = {
         name: 'New Deal',
-        proposalBuyerEmail: user.email,
-        proposalSupplierEmail: user.email,
+        buyers: [{ email: user.email }],
+        suppliers: [{ email: 'supplier@mail.com', new: true }],
         description: 'This is a new deal',
         investmentAmount: 100,
       } as Deal;
 
-      jest.spyOn(usersService, 'findByEmail').mockResolvedValue({
-        id: 'user2',
-        accountType: AccountType.Supplier,
-        email: 'supplier@example.com',
-      } as User);
       jest
         .spyOn(notificationsService, 'sendInviteToSignupNotification')
         .mockResolvedValue(undefined);
@@ -199,25 +199,18 @@ describe('DealsService', () => {
 
       const result = await dealsService.createDeal(user, dealPayload);
 
-      expect(usersService.findByEmail).toHaveBeenCalledWith(
-        dealPayload.proposalSupplierEmail,
-      );
       expect(dealsRepository.create).toHaveBeenCalledWith({
-        buyerConfirmed: true,
-        newForSupplier: true,
-        buyerId: 'user1',
-        supplierId: 'user2',
         description: 'This is a new deal',
         investmentAmount: 100,
         name: 'New Deal',
-        proposalBuyerEmail: 'buyer@example.com',
-        proposalSupplierEmail: 'supplier@mail.com',
         status: DealStatus.Proposal,
+        buyers: [{ email: user.email, new: true }],
+        suppliers: [{ email: 'supplier@mail.com', new: true }],
       });
       expect(
         notificationsService.sendNewProposalNotification,
       ).toHaveBeenCalledWith(
-        dealsService.selectDealEmailBasedOnUser(user, createdDeal),
+        dealsService.selectParticipantsEmailsBasedOnUser(user, createdDeal),
         createdDeal,
       );
       expect(result).toEqual(createdDeal);
@@ -234,22 +227,18 @@ describe('DealsService', () => {
         name: 'New Deal',
         description: 'This is a new deal',
         investmentAmount: 100,
-        proposalBuyerEmail: 'buyer@example.com',
+        buyers: [{ email: 'buyer@example.com' }],
+        suppliers: [{ email: 'supplier@example.com' }],
       };
 
       const createdDeal: Deal = {
         name: 'New Deal',
-        proposalBuyerEmail: user.email,
-        proposalSupplierEmail: user.email,
+        buyers: [{ email: user.email, new: true }],
+        suppliers: [{ email: user.email, new: true }],
         description: 'This is a new deal',
         investmentAmount: 100,
       } as Deal;
 
-      jest.spyOn(usersService, 'findByEmail').mockResolvedValue({
-        id: 'user2',
-        accountType: AccountType.Buyer,
-        email: 'buyer@example.com',
-      } as User);
       jest
         .spyOn(notificationsService, 'sendInviteToSignupNotification')
         .mockResolvedValue(undefined);
@@ -262,77 +251,21 @@ describe('DealsService', () => {
 
       const result = await dealsService.createDeal(user, dealPayload);
 
-      expect(usersService.findByEmail).toHaveBeenCalledWith(
-        dealPayload.proposalBuyerEmail,
-      );
       expect(dealsRepository.create).toHaveBeenCalledWith({
-        supplierConfirmed: true,
-        buyerId: 'user2',
-        supplierId: 'user1',
         description: 'This is a new deal',
         investmentAmount: 100,
         name: 'New Deal',
-        proposalBuyerEmail: 'buyer@example.com',
-        proposalSupplierEmail: 'supplier@example.com',
-        newForBuyer: true,
+        buyers: [{ email: 'buyer@example.com', new: true }],
+        suppliers: [{ email: 'supplier@example.com', new: true }],
         status: DealStatus.Proposal,
       });
       expect(
         notificationsService.sendNewProposalNotification,
       ).toHaveBeenCalledWith(
-        dealsService.selectDealEmailBasedOnUser(user, createdDeal),
+        dealsService.selectParticipantsEmailsBasedOnUser(user, createdDeal),
         createdDeal,
       );
       expect(result).toEqual(createdDeal);
-    });
-
-    it('should throw an error if user is neither a buyer nor a supplier', async () => {
-      const user: User = {
-        id: 'user1',
-        accountType: AccountType.Investor,
-        email: 'admin@example.com',
-      } as User;
-      const dealPayload: Partial<Deal> = {
-        name: 'New Deal',
-        description: 'This is a new deal',
-        investmentAmount: 100,
-        proposalSupplierEmail: 'supplier@mail.com',
-      };
-      await expect(dealsService.createDeal(user, dealPayload)).rejects.toThrow(
-        'User must be a buyer or a supplier',
-      );
-    });
-
-    it('should throw an error if proposalSupplierEmail is not sent', async () => {
-      const user: User = {
-        id: 'user1',
-        accountType: AccountType.Buyer,
-        email: 'buyer@example.com',
-      } as User;
-      const dealPayload: Partial<Deal> = {
-        name: 'New Deal',
-        description: 'This is a new deal',
-        investmentAmount: 100,
-      };
-      await expect(dealsService.createDeal(user, dealPayload)).rejects.toThrow(
-        'proposalSupplierEmail is required',
-      );
-    });
-
-    it('should throw an error if proposalBuyerEmail is not sent', async () => {
-      const user: User = {
-        id: 'user1',
-        accountType: AccountType.Supplier,
-        email: 'supplier@example.com',
-      } as User;
-      const dealPayload: Partial<Deal> = {
-        name: 'New Deal',
-        description: 'This is a new deal',
-        investmentAmount: 100,
-      };
-      await expect(dealsService.createDeal(user, dealPayload)).rejects.toThrow(
-        'proposalBuyerEmail is required',
-      );
     });
   });
 
@@ -408,6 +341,8 @@ describe('DealsService', () => {
         buyerId: user.id,
         nftID: 'nft1',
         milestones: ['Milestone 1', 'Milestone 2'],
+        buyers: [{ id: user.id, email: user.email }],
+        suppliers: [{ id: 'user-2', email: 'supplier@example.com' }],
         currentMilestone: 0,
       };
 
@@ -446,6 +381,8 @@ describe('DealsService', () => {
         buyerId: 'otherUser',
         nftID: 'nft1',
         milestones: ['Milestone 1', 'Milestone 2'],
+        buyers: [{ id: 'user-2', email: 'buyer@example.com' }],
+        suppliers: [{ id: user.id, email: user.email }],
         currentMilestone: 0,
       };
 
@@ -478,8 +415,10 @@ describe('DealsService', () => {
       const deal: any = {
         id: dealId,
         buyerId: user.id,
-        nftID: 'nft1',
+        nftID: '1',
         milestones: ['Milestone 1', 'Milestone 2'],
+        buyers: [{ id: user.id, email: user.email }],
+        suppliers: [{ id: 'user-2', email: 'supplier@example.com' }],
         currentMilestone: 0,
       };
 
@@ -506,7 +445,7 @@ describe('DealsService', () => {
       expect(
         notificationsService.sendMilestoneApprovedNotification,
       ).toHaveBeenCalledWith(
-        dealsService.selectDealEmailBasedOnUser(user, deal),
+        dealsService.selectParticipantsEmailsBasedOnUser(user, deal),
         deal,
         deal.milestones[currentMilestone],
       );
@@ -564,6 +503,8 @@ describe('DealsService', () => {
         buyerId: user.id,
         nftID: 'nft1',
         milestones: ['Milestone 1', 'Milestone 2'],
+        buyers: [{ id: user.id, email: user.email }],
+        suppliers: [{ id: 'user-2', email: 'supplier@example.com' }],
         currentMilestone: 0,
       };
 

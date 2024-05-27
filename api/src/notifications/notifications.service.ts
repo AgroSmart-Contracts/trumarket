@@ -5,101 +5,101 @@ import { logger } from '@/logger';
 
 @Injectable()
 export class NotificationsService {
-  async _sendNotification(recipient: string, message: string) {
-    logger.debug(`Sending notification to ${recipient}: ${message}`);
+  async _sendNotification(recipients: string[], message: string) {
+    logger.debug(`Sending notification to ${recipients}: ${message}`);
   }
 
-  async sendInviteToSignupNotification(recipient: string): Promise<void> {
-    await this._sendNotification(recipient, 'Invite to signup notification');
+  async sendInviteToSignupNotification(recipients: string[]): Promise<void> {
+    await this._sendNotification(recipients, 'Invite to signup notification');
   }
 
   async sendNewProposalNotification(
-    recipient: string,
+    recipients: string[],
     deal: Deal,
   ): Promise<void> {
     await this._sendNotification(
-      recipient,
+      recipients,
       `New proposal notification ${deal}`,
     );
   }
 
   async sendChangesInProposalNotification(
-    recipient: string,
+    recipients: string[],
     deal: Deal,
   ): Promise<void> {
     await this._sendNotification(
-      recipient,
+      recipients,
       `Changes in proposal notification ${deal}`,
     );
   }
 
   async sendNewDocumentUploadedNotification(
-    recipient: string,
+    recipients: string[],
     deal: Deal,
   ): Promise<void> {
     await this._sendNotification(
-      recipient,
+      recipients,
       `New document uploaded notification ${deal}`,
     );
   }
 
   async sendNewMilestoneDocumentUploadedNotification(
-    recipient: string,
+    recipients: string[],
     deal: Deal,
   ): Promise<void> {
     await this._sendNotification(
-      recipient,
+      recipients,
       `New document uploaded notification ${deal} `,
     );
   }
 
   async sendMilestoneApprovedNotification(
-    recipient: string,
+    recipients: string[],
     deal: Deal,
     milestone: Milestone,
   ): Promise<void> {
     await this._sendNotification(
-      recipient,
+      recipients,
       `Milestone approved notification ${deal} ${milestone}`,
     );
   }
 
   async sendDealConfirmedNotification(
-    recipient: string,
+    recipients: string[],
     deal: Deal,
   ): Promise<void> {
     await this._sendNotification(
-      recipient,
+      recipients,
       `Deal confirmed notification ${deal}`,
     );
   }
 
   async sendMilestoneClosedNotification(
-    recipient: string,
+    recipients: string[],
     deal: Deal,
   ): Promise<void> {
     await this._sendNotification(
-      recipient,
+      recipients,
       `Milestone closed notification ${deal}`,
     );
   }
 
   async sendDealCompletedNotification(
-    recipient: string,
+    recipients: string[],
     deal: Deal,
   ): Promise<void> {
     await this._sendNotification(
-      recipient,
+      recipients,
       `Deal completed notification ${deal}`,
     );
   }
 
   async sendProposalCancelledNotification(
-    recipient: string,
+    recipients: string[],
     deal: Deal,
   ): Promise<void> {
     await this._sendNotification(
-      recipient,
+      recipients,
       `Proposal cancelled notification ${deal}`,
     );
   }

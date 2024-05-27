@@ -3,8 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 async function main() {
-  const [deployerAccount, financialAccount, dealsManagerAccount] =
-    await hre.viem.getWalletClients();
+  const [dealsManagerAccount] = await hre.viem.getWalletClients();
 
   const erc20 = await hre.viem.deployContract('ERC20Mock');
 

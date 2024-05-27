@@ -6,10 +6,37 @@ import { DocumentFile } from './../deals.entities';
 
 export class MilestoneDTO {
   @Expose()
+  id?: string;
+
+  @Expose()
   description: string;
 
   @Expose()
   fundsDistribution: number;
+}
+
+export class ParticipantDTO {
+  @ApiProperty()
+  @Expose()
+  id?: string;
+
+  @ApiProperty()
+  @Expose()
+  email: string;
+}
+
+export class CompanyDTO {
+  @ApiProperty()
+  @Expose()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  country: string;
+
+  @ApiProperty()
+  @Expose()
+  taxId: string;
 }
 
 export class DealDtoResponse {
@@ -148,29 +175,53 @@ export class DealDtoResponse {
   @Expose()
   totalValue: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: [ParticipantDTO],
+  })
   @Expose()
-  proposalBuyerEmail: string;
+  buyers: ParticipantDTO[];
 
-  @ApiProperty()
+  @ApiProperty({
+    type: [ParticipantDTO],
+  })
   @Expose()
-  proposalSupplierEmail: string;
+  suppliers: ParticipantDTO[];
 
-  @ApiProperty()
+  @ApiProperty({
+    type: CompanyDTO,
+  })
   @Expose()
-  buyerId: string;
+  buyerCompany: CompanyDTO;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: CompanyDTO,
+  })
   @Expose()
-  supplierId: string;
+  supplierCompany: CompanyDTO;
 
-  @ApiProperty()
-  @Expose()
-  buyerConfirmed: boolean;
+  // @ApiProperty()
+  // @Expose()
+  // proposalBuyerEmail: string;
 
-  @ApiProperty()
-  @Expose()
-  supplierConfirmed: boolean;
+  // @ApiProperty()
+  // @Expose()
+  // proposalSupplierEmail: string;
+
+  // @ApiProperty()
+  // @Expose()
+  // buyerId: string;
+
+  // @ApiProperty()
+  // @Expose()
+  // supplierId: string;
+
+  // @ApiProperty()
+  // @Expose()
+  // buyerConfirmed: boolean;
+
+  // @ApiProperty()
+  // @Expose()
+  // supplierConfirmed: boolean;
 
   @ApiProperty()
   @Expose()

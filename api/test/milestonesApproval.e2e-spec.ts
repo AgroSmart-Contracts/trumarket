@@ -17,7 +17,7 @@ describe('Milestone approval flows (e2e)', () => {
   it('supplier submit review request, buyer deny it, supplier submit review request again, buyer approves it', async () => {
     // setup deal
     const { deal, buyerToken, supplierToken } = await app.setupDeal(
-      {},
+      { nftID: 1 },
       null,
       null,
     );
@@ -97,8 +97,10 @@ describe('Milestone approval flows (e2e)', () => {
       .request()
       .put(`/deals/${deal.id}/milestones/${milestone.id}`)
       .set('Authorization', `Bearer ${buyerToken}`)
-      .send({ approve: true })
-      .expect(200);
+      .send({ approve: true });
+
+    expect(buyerApproveRequestReviewReq.body).toHaveProperty('id');
+    expect(buyerApproveRequestReviewReq.status).toEqual(200);
 
     expect(buyerApproveRequestReviewReq.body).toMatchObject({
       approvalStatus: MilestoneApprovalStatus.Approved,
@@ -118,7 +120,7 @@ describe('Milestone approval flows (e2e)', () => {
   it('should approve all milestones', async () => {
     // setup deal
     const { deal, buyerToken, supplierToken } = await app.setupDeal(
-      {},
+      { nftID: 1 },
       null,
       null,
     );

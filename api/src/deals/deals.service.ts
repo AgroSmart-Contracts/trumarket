@@ -3,20 +3,15 @@ import * as fs from 'fs';
 
 import { s3Service } from '@/aws/s3.service';
 import { BlockchainService } from '@/blockchain/blockchain.service';
-import {
-  BadRequestError,
-  ForbiddenError,
-  InternalServerError,
-  UnauthorizedError,
-} from '@/errors';
-import { logger } from '@/logger';
+import { BadRequestError, ForbiddenError, UnauthorizedError } from '@/errors';
 import { NotificationsService } from '@/notifications/notifications.service';
-import { AccountType, User } from '@/users/users.model';
+import { User } from '@/users/users.model';
 import { UsersService } from '@/users/users.service';
 
 import {
   Deal,
   DealLog,
+  DealParticipant,
   DealStatus,
   DocumentFile,
   Milestone,
@@ -55,14 +50,18 @@ export class DealsService {
     return uploadedUrl;
   }
 
-  selectDealEmailBasedOnUser(user: User, deal: Deal): string {
-    if (user.accountType === 'buyer') {
-      return deal.proposalBuyerEmail;
-    } else if (user.accountType === 'supplier') {
-      return deal.proposalSupplierEmail;
-    } else {
-      throw new InternalServerError('Invalid account type');
-    }
+  selectParticipantsEmailsBasedOnUser(
+    user: User,
+    deal: Partial<Deal>,
+  ): string[] {
+    return deal.buyers
+      .concat(deal.suppliers)
+      .map((participant) => {
+        if (participant.email !== user.email) {
+          return participant.email;
+        }
+      })
+      .filter((v) => v);
   }
 
   async findDealsByUser(
@@ -75,62 +74,42 @@ export class DealsService {
   async createDeal(user: User, dealPayload: Partial<Deal>): Promise<Deal> {
     dealPayload.status = DealStatus.Proposal;
 
-    if (user.accountType === AccountType.Buyer) {
-      dealPayload.buyerId = user.id;
-      dealPayload.buyerConfirmed = true;
-      dealPayload.proposalBuyerEmail = user.email;
-      dealPayload.newForSupplier = true;
-
-      if (!dealPayload.proposalSupplierEmail) {
-        throw new BadRequestError('proposalSupplierEmail is required');
-      }
-
-      const supplier = await this.usersService.findByEmail(
-        dealPayload.proposalSupplierEmail,
+    if (dealPayload.buyers && dealPayload.suppliers) {
+      // invite users not registered in the platform
+      await this.notifications.sendInviteToSignupNotification(
+        this.selectParticipantsEmailsBasedOnUser(user, dealPayload),
       );
-
-      if (supplier && supplier.accountType !== AccountType.Supplier) {
-        throw new BadRequestError('User must be a supplier');
-      } else if (supplier) {
-        dealPayload.supplierId = supplier.id;
-      } else {
-        await this.notifications.sendInviteToSignupNotification(
-          dealPayload.proposalSupplierEmail,
-        );
-      }
-    } else if (user.accountType === AccountType.Supplier) {
-      dealPayload.supplierId = user.id;
-      dealPayload.supplierConfirmed = true;
-      dealPayload.proposalSupplierEmail = user.email;
-      dealPayload.newForBuyer = true;
-
-      if (!dealPayload.proposalBuyerEmail) {
-        throw new BadRequestError('proposalBuyerEmail is required');
-      }
-
-      const buyer = await this.usersService.findByEmail(
-        dealPayload.proposalBuyerEmail,
-      );
-
-      if (buyer && buyer.accountType !== AccountType.Buyer) {
-        throw new BadRequestError('User must be a buyer');
-      } else if (buyer) {
-        dealPayload.buyerId = buyer.id;
-      } else {
-        await this.notifications.sendInviteToSignupNotification(
-          dealPayload.proposalBuyerEmail,
-        );
-      }
-    } else {
-      throw new UnauthorizedError('User must be a buyer or a supplier');
     }
+
+    dealPayload.buyers = dealPayload.buyers?.map((buyer) => {
+      if (buyer.id === user.id) {
+        return {
+          ...buyer,
+          approved: true,
+        };
+      }
+      return { ...buyer, new: true };
+    });
+    dealPayload.suppliers = dealPayload.suppliers?.map((supplier) => {
+      if (supplier.id === user.id) {
+        return {
+          ...supplier,
+          approved: true,
+        };
+      }
+      return {
+        ...supplier,
+        new: true,
+      };
+    });
 
     const deal = await this.dealsRepository.create(dealPayload);
 
     await this.notifications.sendNewProposalNotification(
-      this.selectDealEmailBasedOnUser(user, deal),
+      this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
     );
+
     return deal;
   }
 
@@ -151,13 +130,16 @@ export class DealsService {
 
     await this.checkDealAccess(deal, user);
 
-    if (user.accountType === AccountType.Buyer && deal.newForBuyer) {
-      deal.new = true;
-    } else if (
-      user.accountType === AccountType.Supplier &&
-      deal.newForSupplier
-    ) {
-      deal.new = true;
+    const participant = deal.buyers.find((b) => b.id === user.id);
+    if (participant) {
+      if (participant.new) {
+        deal.new = true;
+      }
+    } else {
+      const participant = deal.suppliers.find((s) => s.id === user.id);
+      if (participant.new) {
+        deal.new = true;
+      }
     }
 
     return deal;
@@ -170,40 +152,46 @@ export class DealsService {
       throw new BadRequestError('Deal is not in proposal status');
     }
 
+    await this.checkAuthorizedToUpdateDeal(deal, user);
+
     const dealUpdate: Partial<Deal> = {};
 
-    if (user.accountType === 'buyer') {
-      if (deal.buyerId !== user.id) {
-        logger.debug(
-          `User ${user.id} is confirming deal ${dealId}, but buyer is ${deal.supplierId}`,
-        );
-        throw new BadRequestError(
-          'You are not authorized to confirm this deal',
-        );
+    dealUpdate.buyers = deal.buyers.map((buyer) => {
+      if (buyer.id === user.id) {
+        return {
+          ...buyer,
+          approved: true,
+        };
       }
-      dealUpdate.buyerConfirmed = true;
-      if (deal.supplierConfirmed) {
-        dealUpdate.status = DealStatus.Confirmed;
+
+      return {
+        ...buyer,
+      };
+    });
+
+    dealUpdate.suppliers = deal.suppliers.map((supplier) => {
+      if (supplier.id === user.id) {
+        return {
+          ...supplier,
+          approved: true,
+        };
       }
-    } else if (user.accountType === 'supplier') {
-      logger.debug(
-        `User ${user.id} is confirming deal ${dealId}, but supplier is ${deal.supplierId}`,
-      );
-      if (deal.supplierId !== user.id) {
-        throw new BadRequestError(
-          'You are not authorized to confirm this deal',
-        );
-      }
-      dealUpdate.supplierConfirmed = true;
-      if (deal.buyerConfirmed) {
-        dealUpdate.status = DealStatus.Confirmed;
-      }
-    } else {
-      throw new InternalServerError('Invalid account type');
+
+      return {
+        ...supplier,
+      };
+    });
+
+    if (
+      dealUpdate.buyers
+        .concat(dealUpdate.suppliers)
+        .every((participant) => participant.approved)
+    ) {
+      dealUpdate.status = DealStatus.Confirmed;
     }
 
     await this.notifications.sendDealConfirmedNotification(
-      this.selectDealEmailBasedOnUser(user, deal),
+      this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
     );
 
@@ -211,9 +199,17 @@ export class DealsService {
   }
 
   checkAuthorizedToUpdateDeal(deal: Deal, user: User): void {
-    if (deal.buyerId !== user.id && deal.supplierId !== user.id) {
-      throw new UnauthorizedError('You are not allowed to update this deal');
+    if (
+      deal.buyers.concat(deal.suppliers).some((participant) => {
+        if (participant.id === user.id) {
+          return true;
+        }
+      })
+    ) {
+      return;
     }
+
+    throw new UnauthorizedError('You are not allowed to update this deal');
   }
 
   async cancelDeal(dealId: string, user: User): Promise<Deal> {
@@ -229,7 +225,7 @@ export class DealsService {
     };
 
     await this.notifications.sendProposalCancelledNotification(
-      this.selectDealEmailBasedOnUser(user, deal),
+      this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
     );
 
@@ -243,11 +239,31 @@ export class DealsService {
 
     const update: Partial<Deal> = {};
 
-    if (user.accountType === AccountType.Buyer) {
-      update.newForBuyer = false;
-    } else if (user.accountType === AccountType.Supplier) {
-      update.newForSupplier = false;
-    }
+    update.buyers = deal.buyers.map((buyer) => {
+      if (buyer.id === user.id) {
+        return {
+          ...buyer,
+          new: false,
+        };
+      }
+
+      return {
+        ...buyer,
+      };
+    });
+
+    update.suppliers = deal.suppliers.map((supplier) => {
+      if (supplier.id === user.id) {
+        return {
+          ...supplier,
+          new: false,
+        };
+      }
+
+      return {
+        ...supplier,
+      };
+    });
 
     const dealUpdated = await this.dealsRepository.updateById(dealId, update);
 
@@ -279,24 +295,44 @@ export class DealsService {
 
     const deal = await this.findById(dealId);
 
-    await this.checkAuthorizedToUpdateDeal(deal, user);
+    this.checkAuthorizedToUpdateDeal(deal, user);
 
     if (deal.status !== DealStatus.Proposal) {
       throw new BadRequestError('Deal cannot be updated');
     }
 
-    if (user.accountType === AccountType.Buyer) {
-      dealPayload.supplierConfirmed = false;
-      dealPayload.buyerConfirmed = true;
-    } else if (user.accountType === AccountType.Supplier) {
-      dealPayload.buyerConfirmed = false;
-      dealPayload.supplierConfirmed = true;
-    }
-
     await this.notifications.sendChangesInProposalNotification(
-      this.selectDealEmailBasedOnUser(user, deal),
+      this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
     );
+
+    dealPayload.buyers = deal.buyers.map((buyer) => {
+      if (buyer.id === user.id) {
+        return {
+          ...buyer,
+          approved: true,
+        };
+      }
+
+      return {
+        ...buyer,
+        approved: false,
+      };
+    });
+
+    dealPayload.suppliers = deal.suppliers.map((supplier) => {
+      if (supplier.id === user.id) {
+        return {
+          ...supplier,
+          approved: true,
+        };
+      }
+
+      return {
+        ...supplier,
+        approved: false,
+      };
+    });
 
     return this.dealsRepository.updateById(dealId, dealPayload);
   }
@@ -317,16 +353,16 @@ export class DealsService {
   ): Promise<DocumentFile> {
     const deal = await this.findById(dealId);
 
-    if (deal.supplierId !== user.id) {
-      throw new UnauthorizedError(
-        'You are not allowed to upload documents for this deal',
-      );
-    }
+    this.checkDealSupplier(
+      deal,
+      user,
+      'You are not allowed to upload documents for this deal',
+    );
 
     const uploadedUrl = await this.uploadFile(file, dealId);
 
     await this.notifications.sendNewDocumentUploadedNotification(
-      this.selectDealEmailBasedOnUser(user, deal),
+      this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
     );
 
@@ -343,11 +379,11 @@ export class DealsService {
   ): Promise<Deal> {
     const deal = await this.findById(dealId);
 
-    if (deal.supplierId !== user.id && deal.buyerId !== user.id) {
-      throw new UnauthorizedError(
-        'You are not allowed to upload the cover image for this deal',
-      );
-    }
+    this.checkDealAccess(
+      deal,
+      user,
+      'You are not allowed to upload the cover image for this deal',
+    );
 
     const uploadedUrl = await this.uploadFile(file, dealId);
 
@@ -363,11 +399,11 @@ export class DealsService {
   ): Promise<void> {
     const deal = await this.findById(dealId);
 
-    if (deal.supplierId !== user.id) {
-      throw new UnauthorizedError(
-        'You are not allowed to delete documents from this deal',
-      );
-    }
+    this.checkDealSupplier(
+      deal,
+      user,
+      'You are not allowed to delete documents',
+    );
 
     await this.dealsRepository.pullDocument(dealId, documentId);
   }
@@ -380,11 +416,12 @@ export class DealsService {
     user: User,
   ): Promise<DocumentFile> {
     const deal = await this.findById(dealId);
-    if (deal.supplierId !== user.id) {
-      throw new UnauthorizedError(
-        'You are not allowed to upload documents for this deal',
-      );
-    }
+
+    this.checkDealSupplier(
+      deal,
+      user,
+      'You are not allowed to upload documents for this deal',
+    );
 
     if (deal.milestones[deal.currentMilestone].id !== milestoneId) {
       throw new ForbiddenError(
@@ -408,7 +445,7 @@ export class DealsService {
     );
 
     await this.notifications.sendNewDocumentUploadedNotification(
-      this.selectDealEmailBasedOnUser(user, deal),
+      this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
     );
 
@@ -423,11 +460,12 @@ export class DealsService {
     user: User,
   ): Promise<DocumentFile> {
     const deal = await this.findById(dealId);
-    if (deal.supplierId !== user.id) {
-      throw new UnauthorizedError(
-        'You are not allowed to update documents in this deal',
-      );
-    }
+
+    this.checkDealSupplier(
+      deal,
+      user,
+      'You are not allowed to update documents in this deal',
+    );
 
     if (deal.milestones[deal.currentMilestone].id !== milestoneId) {
       throw new ForbiddenError(
@@ -447,8 +485,6 @@ export class DealsService {
       description,
     );
 
-    console.log(document);
-
     return document;
   }
 
@@ -459,11 +495,13 @@ export class DealsService {
     user: User,
   ): Promise<void> {
     const deal = await this.findById(dealId);
-    if (deal.supplierId !== user.id) {
-      throw new UnauthorizedError(
-        'You are not allowed to remove documents from this deal',
-      );
-    }
+
+    this.checkDealSupplier(
+      deal,
+      user,
+      'You are not allowed to remove documents from this deal',
+    );
+
     const milestone = deal.milestones.find((m) => m.id === milestoneId);
     if (!milestone) {
       throw new BadRequestError('Milestone not found');
@@ -484,26 +522,62 @@ export class DealsService {
     return this.dealsRepository.updateById(dealId, { nftID, mintTxHash });
   }
 
-  checkDealAccess(deal: Deal, user: User): void {
-    if (deal.buyerId !== user.id && deal.supplierId !== user.id) {
-      throw new UnauthorizedError(
-        'You are not allowed to access this deal information',
-      );
+  checkDealAccess(deal: Deal, user: User, errorMessage?: string): void {
+    if (
+      deal.buyers.concat(deal.suppliers).some((participant) => {
+        if (participant.id === user.id) {
+          return true;
+        }
+      })
+    ) {
+      return;
     }
+
+    throw new UnauthorizedError(
+      errorMessage || 'You are not allowed to access this deal information',
+    );
+  }
+
+  checkDealBuyer(deal: Deal, user: User, errorMessage?: string): void {
+    if (
+      deal.buyers.some((participant) => {
+        if (participant.id === user.id) {
+          return true;
+        }
+      })
+    ) {
+      return;
+    }
+
+    throw new UnauthorizedError(
+      errorMessage || 'Only a deal buyer can do this operation on this deal',
+    );
+  }
+
+  checkDealSupplier(deal: Deal, user: User, errorMessage?: string): void {
+    if (
+      deal.suppliers.some((participant) => {
+        if (participant.id === user.id) {
+          return true;
+        }
+      })
+    ) {
+      return;
+    }
+
+    throw new UnauthorizedError(
+      errorMessage || 'Only a deal supplier can do this operation on this deal',
+    );
   }
 
   async findDealsLogs(dealId: string, user: User): Promise<DealLog[]> {
     const deal = await this.findById(dealId);
     await this.checkDealAccess(deal, user);
-    return this.dealsRepository.findDealsLogs(dealId);
+    return this.dealsRepository.findDealsLogs(deal.nftID);
   }
 
   async assignUserToDeals(user: User): Promise<void> {
-    return this.dealsRepository.assignUserToDeals(
-      user.id,
-      user.email,
-      user.accountType as AccountType,
-    );
+    return this.dealsRepository.assignUserToDeals(user.id, user.email);
   }
 
   async updateCurrentMilestone(
@@ -513,16 +587,16 @@ export class DealsService {
     user: User,
   ): Promise<Deal> {
     const deal = await this.findById(dealId);
-    if (deal.buyerId !== user.id) {
-      throw new UnauthorizedError(
-        'User not authorized to update the current milestone for this deal',
-      );
-    }
 
-    // TODO: uncomment this after implementing NFT minting
-    // if (deal.nftID === undefined) {
-    //   throw new BadRequestError('Deal NFT must be minted first');
-    // }
+    this.checkDealBuyer(
+      deal,
+      user,
+      'User not authorized to update the current milestone for this deal',
+    );
+
+    if (deal.nftID === undefined) {
+      throw new BadRequestError('Deal NFT must be minted first');
+    }
 
     if (
       currentMilestone < 0 ||
@@ -544,10 +618,13 @@ export class DealsService {
       throw new ForbiddenError('Invalid signature');
     }
 
-    // TODO: update in smart contract before updating in database
+    await this.blockchain.changeMilestoneStatus(
+      deal.nftID as number,
+      currentMilestone,
+    );
 
     await this.notifications.sendMilestoneApprovedNotification(
-      this.selectDealEmailBasedOnUser(user, deal),
+      this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
       deal.milestones[currentMilestone],
     );
@@ -564,11 +641,11 @@ export class DealsService {
   ): Promise<Milestone> {
     const deal = await this.findById(dealId);
 
-    if (user.id !== deal.supplierId) {
-      throw new UnauthorizedError(
-        'Only supplier can submit milestone review request',
-      );
-    }
+    this.checkDealSupplier(
+      deal,
+      user,
+      'Only supplier can submit milestone review request',
+    );
 
     const milestoneIndex = deal.milestones.findIndex(
       (m) => m.id === milestoneId,
@@ -600,9 +677,11 @@ export class DealsService {
   ): Promise<Milestone> {
     const deal = await this.findById(dealId);
 
-    if (user.id !== deal.buyerId) {
-      throw new UnauthorizedError('Only buyer can approve milestone');
+    if (deal.nftID === undefined) {
+      throw new BadRequestError('Deal NFT must be minted first');
     }
+
+    this.checkDealBuyer(deal, user, 'Only buyer can approve milestone');
 
     const milestoneIndex = deal.milestones.findIndex(
       (m) => m.id === milestoneId,
@@ -618,14 +697,24 @@ export class DealsService {
       throw new BadRequestError('Milestone review was not submitted');
     }
 
-    // TODO: call smart contract to approve milestone
-    // check updateCurrentMilestone method for reference
+    await this.blockchain.changeMilestoneStatus(
+      deal.nftID as number,
+      milestoneIndex + 1,
+    );
 
-    return this.dealsRepository.upadteMilestoneStatus(
+    const milestone = this.dealsRepository.upadteMilestoneStatus(
       dealId,
       milestoneId,
       MilestoneApprovalStatus.Approved,
     );
+
+    await this.notifications.sendMilestoneApprovedNotification(
+      this.selectParticipantsEmailsBasedOnUser(user, deal),
+      deal,
+      deal.milestones[milestoneIndex],
+    );
+
+    return milestone;
   }
 
   async denyMilestone(
@@ -635,9 +724,7 @@ export class DealsService {
   ): Promise<Milestone> {
     const deal = await this.findById(dealId);
 
-    if (user.id !== deal.buyerId) {
-      throw new UnauthorizedError('Only buyer can deny milestone');
-    }
+    this.checkDealBuyer(deal, user, 'Only buyer can deny milestone');
 
     const milestoneIndex = deal.milestones.findIndex(
       (m) => m.id === milestoneId,
@@ -658,5 +745,24 @@ export class DealsService {
       milestoneId,
       MilestoneApprovalStatus.Denied,
     );
+  }
+
+  async getDealsParticipantsByEmails(
+    usersEmails: string[],
+  ): Promise<DealParticipant[]> {
+    const users = await this.usersService.findByEmails(usersEmails);
+
+    return usersEmails.map((email) => {
+      const user = users.find((u) => u.email === email);
+
+      if (user) {
+        return {
+          id: user.id,
+          email: user.email,
+        };
+      }
+
+      return { email };
+    });
   }
 }
