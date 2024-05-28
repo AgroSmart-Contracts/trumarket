@@ -3,6 +3,7 @@ import * as fs from 'fs';
 
 import { s3Service } from '@/aws/s3.service';
 import { BlockchainService } from '@/blockchain/blockchain.service';
+import { config } from '@/config';
 import { BadRequestError, ForbiddenError, UnauthorizedError } from '@/errors';
 import { NotificationsService } from '@/notifications/notifications.service';
 import { User } from '@/users/users.model';
@@ -188,6 +189,15 @@ export class DealsService {
         .every((participant) => participant.approved)
     ) {
       dealUpdate.status = DealStatus.Confirmed;
+
+      if (config.automaticDealsAcceptance) {
+        const txHash = await this.blockchain.mintNFT(
+          deal.milestones.map((m) => m.fundsDistribution),
+        );
+        const nftID = await this.blockchain.getNftID(txHash);
+        dealUpdate.nftID = nftID;
+        dealUpdate.mintTxHash = txHash;
+      }
     }
 
     await this.notifications.sendDealConfirmedNotification(

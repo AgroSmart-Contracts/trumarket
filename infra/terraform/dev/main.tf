@@ -147,6 +147,10 @@ module "ecs_service_api" {
           value = data.aws_ssm_parameter.deals_manager_address.value
         },
         {
+          name  = "AUTOMATIC_DEALS_ACCEPTANCE",
+          value = "true"
+        },
+        {
           name  = "PORT",
           value = local.api_container_port
         },
