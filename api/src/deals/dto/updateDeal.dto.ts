@@ -6,12 +6,14 @@ import {
   IsArray,
   IsBoolean,
   IsDate,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
 
+import { CompanyDTO } from './createDeal.dto';
 import { MilestoneDto } from './milestone.dto';
 
 export class UpdateDealDto {
@@ -175,6 +177,18 @@ export class UpdateDealDto {
   @IsOptional()
   @Expose()
   roi?: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @Type(() => CompanyDTO)
+  @Expose()
+  buyerCompany: CompanyDTO;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @Type(() => CompanyDTO)
+  @Expose()
+  supplierCompany: CompanyDTO;
 
   // actions
 
