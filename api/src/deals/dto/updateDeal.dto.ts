@@ -177,13 +177,13 @@ export class UpdateDealDto {
   @Expose()
   roi?: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   @Type(() => CompanyDTO)
   @Expose()
   buyerCompany?: CompanyDTO;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   @Type(() => CompanyDTO)
   @Expose()
