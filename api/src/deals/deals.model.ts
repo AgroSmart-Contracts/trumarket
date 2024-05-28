@@ -212,14 +212,6 @@ const dealSchema = new Schema({
     enum: ['proposal', 'confirmed', 'finished'],
     default: 'proposal',
   },
-  buyerConfirmed: {
-    type: Boolean,
-    default: false,
-  },
-  supplierConfirmed: {
-    type: Boolean,
-    default: false,
-  },
 
   // financial properties
   investmentAmount: {

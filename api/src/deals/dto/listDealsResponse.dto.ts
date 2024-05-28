@@ -84,14 +84,6 @@ export class ListDealDtoResponse {
   @Expose()
   status: DealStatus;
 
-  @ApiProperty()
-  @Expose()
-  buyerConfirmed: boolean;
-
-  @ApiProperty()
-  @Expose()
-  supplierConfirmed: boolean;
-
   // financial properties
 
   @ApiProperty()
