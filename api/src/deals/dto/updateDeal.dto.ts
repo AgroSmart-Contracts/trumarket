@@ -179,16 +179,16 @@ export class UpdateDealDto {
   roi?: number;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @Type(() => CompanyDTO)
   @Expose()
-  buyerCompany: CompanyDTO;
+  buyerCompany?: CompanyDTO;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @Type(() => CompanyDTO)
   @Expose()
-  supplierCompany: CompanyDTO;
+  supplierCompany?: CompanyDTO;
 
   // actions
 
