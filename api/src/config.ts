@@ -15,4 +15,7 @@ export const config = {
   blockchainPrivateKey: process.env.BLOCKCHAIN_PRIVATE_KEY || '',
   dealsManagerContractAddress: process.env.DEALS_MANAGER_CONTRACT_ADDRESS || '',
   automaticDealsAcceptance: process.env.AUTOMATIC_DEALS_ACCEPTANCE === 'true',
+  emailHost: process.env.EMAIL_HOST || '',
+  emailUsername: process.env.EMAIL_USERNAME || '',
+  emailPassword: process.env.EMAIL_PASSWORD || '',
 };

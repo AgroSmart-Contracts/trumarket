@@ -1,16 +1,30 @@
 import { Injectable } from '@nestjs/common';
+import { MailerService } from '@nestjs-modules/mailer';
 
 import { Deal, Milestone } from '@/deals/deals.entities';
-import { logger } from '@/logger';
 
 @Injectable()
 export class NotificationsService {
-  async _sendNotification(recipients: string[], message: string) {
-    logger.debug(`Sending notification to ${recipients}: ${message}`);
+  constructor(private readonly mailerService: MailerService) {}
+
+  async _sendNotification(
+    recipients: string[],
+    subject: string,
+    message: string,
+  ) {
+    this.mailerService.sendMail({
+      to: recipients,
+      subject,
+      text: message,
+    });
   }
 
   async sendInviteToSignupNotification(recipients: string[]): Promise<void> {
-    await this._sendNotification(recipients, 'Invite to signup notification');
+    await this._sendNotification(
+      recipients,
+      'Signup Invitation',
+      'Invite to signup notification',
+    );
   }
 
   async sendNewProposalNotification(
@@ -19,7 +33,8 @@ export class NotificationsService {
   ): Promise<void> {
     await this._sendNotification(
       recipients,
-      `New proposal notification ${deal}`,
+      'New Proposal',
+      `New proposal notification ${JSON.stringify(deal)}`,
     );
   }
 
@@ -29,7 +44,8 @@ export class NotificationsService {
   ): Promise<void> {
     await this._sendNotification(
       recipients,
-      `Changes in proposal notification ${deal}`,
+      'Changes in Proposal',
+      `Changes in proposal notification ${JSON.stringify(deal)}`,
     );
   }
 
@@ -39,7 +55,8 @@ export class NotificationsService {
   ): Promise<void> {
     await this._sendNotification(
       recipients,
-      `New document uploaded notification ${deal}`,
+      'Document Uploaded',
+      `New document uploaded notification ${JSON.stringify(deal)}`,
     );
   }
 
@@ -49,7 +66,8 @@ export class NotificationsService {
   ): Promise<void> {
     await this._sendNotification(
       recipients,
-      `New document uploaded notification ${deal} `,
+      'Milestone Document Uploaded',
+      `New document uploaded notification ${JSON.stringify(deal)}`,
     );
   }
 
@@ -60,7 +78,8 @@ export class NotificationsService {
   ): Promise<void> {
     await this._sendNotification(
       recipients,
-      `Milestone approved notification ${deal} ${milestone}`,
+      'Milestone Approved',
+      `Milestone approved notification ${JSON.stringify(deal)} ${JSON.stringify(milestone)}`,
     );
   }
 
@@ -70,17 +89,8 @@ export class NotificationsService {
   ): Promise<void> {
     await this._sendNotification(
       recipients,
-      `Deal confirmed notification ${deal}`,
-    );
-  }
-
-  async sendMilestoneClosedNotification(
-    recipients: string[],
-    deal: Deal,
-  ): Promise<void> {
-    await this._sendNotification(
-      recipients,
-      `Milestone closed notification ${deal}`,
+      'Deal Confirmed',
+      `Deal confirmed notification ${JSON.stringify(deal)}`,
     );
   }
 
@@ -90,7 +100,8 @@ export class NotificationsService {
   ): Promise<void> {
     await this._sendNotification(
       recipients,
-      `Deal completed notification ${deal}`,
+      'Deal completed',
+      `Deal completed notification ${JSON.stringify(deal)}`,
     );
   }
 
@@ -100,7 +111,8 @@ export class NotificationsService {
   ): Promise<void> {
     await this._sendNotification(
       recipients,
-      `Proposal cancelled notification ${deal}`,
+      'Deal cancelled',
+      `Proposal cancelled notification ${JSON.stringify(deal)}`,
     );
   }
 }

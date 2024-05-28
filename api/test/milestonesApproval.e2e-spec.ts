@@ -1,4 +1,4 @@
-import { MilestoneApprovalStatus } from '@/deals/deals.entities';
+import { DealStatus, MilestoneApprovalStatus } from '@/deals/deals.entities';
 
 import { TestApp } from './utils';
 
@@ -139,12 +139,14 @@ describe('Milestone approval flows (e2e)', () => {
         .send({ submitToReview: true })
         .expect(200);
 
-      await app
+      const approvalReq = await app
         .request()
         .put(`/deals/${deal.id}/milestones/${milestone.id}`)
         .set('Authorization', `Bearer ${buyerToken}`)
-        .send({ approve: true })
-        .expect(200);
+        .send({ approve: true });
+
+      expect(approvalReq.body).toHaveProperty('id');
+      expect(approvalReq.status).toEqual(200);
     }
 
     const dealReq = await app
@@ -155,6 +157,7 @@ describe('Milestone approval flows (e2e)', () => {
 
     expect(dealReq.body).toMatchObject({
       currentMilestone: 7,
+      status: DealStatus.Finished,
     });
   });
 });

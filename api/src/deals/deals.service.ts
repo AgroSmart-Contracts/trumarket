@@ -495,6 +495,11 @@ export class DealsService {
       description,
     );
 
+    this.notifications.sendNewDocumentUploadedNotification(
+      this.selectParticipantsEmailsBasedOnUser(user, deal),
+      deal,
+    );
+
     return document;
   }
 
@@ -723,6 +728,17 @@ export class DealsService {
       deal,
       deal.milestones[milestoneIndex],
     );
+
+    if (milestoneIndex == 6) {
+      await this.dealsRepository.updateById(dealId, {
+        status: DealStatus.Finished,
+      });
+
+      await this.notifications.sendDealCompletedNotification(
+        this.selectParticipantsEmailsBasedOnUser(user, deal),
+        deal,
+      );
+    }
 
     return milestone;
   }

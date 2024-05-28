@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
+import { MailerService } from '@nestjs-modules/mailer';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as request from 'supertest';
 import TestAgent from 'supertest/lib/agent';
@@ -110,6 +111,10 @@ export const setupApp = async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   })
+    .overrideProvider(MailerService)
+    .useValue({
+      sendMail: jest.fn(),
+    })
     .overrideProvider(BlockchainService)
     .useValue({
       getNftID: jest.fn(),
