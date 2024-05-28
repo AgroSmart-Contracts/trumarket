@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MailerService } from '@nestjs-modules/mailer';
 
 import { BlockchainService } from '@/blockchain/blockchain.service';
 import { NotificationsService } from '@/notifications/notifications.service';
@@ -24,6 +25,12 @@ describe('DealsService', () => {
         UsersService,
         NotificationsService,
         BlockchainService,
+        {
+          provide: MailerService,
+          useValue: {
+            sendMail: jest.fn(),
+          },
+        },
         {
           provide: 'DealsManager',
           useValue: {
