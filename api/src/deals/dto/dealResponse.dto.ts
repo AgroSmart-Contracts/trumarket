@@ -26,7 +26,7 @@ export class ParticipantDTO {
 
   @ApiProperty()
   @Expose()
-  approved: boolean;
+  approved?: boolean;
 }
 
 export class CompanyDTO {
