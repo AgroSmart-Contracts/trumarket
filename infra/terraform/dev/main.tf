@@ -24,6 +24,9 @@ locals {
 # SSM parameters
 ################################################################################
 
+
+data "aws_caller_identity" "current" {}
+
 data "aws_ssm_parameter" "api_database" {
   name = "/${var.name}/api-database"
 }
@@ -105,7 +108,8 @@ module "ecs_service_api" {
   container_definitions = {
     (local.api_name) = {
       essential = true
-      image     = data.aws_ecr_image.api.image_uri
+      # image     = data.aws_ecr_image.api.image_uri
+      image = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/trumarket-api:latest-${var.environment}"
 
       health_check = {
         # command = ["CMD-SHELL", "curl -f http://localhost:${local.api_container_port}/ || exit 1"]

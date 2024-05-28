@@ -15,7 +15,7 @@ import {
 
 import { MilestoneDto } from './milestone.dto';
 
-class CompanyDTO {
+export class CompanyDTO {
   @ApiProperty()
   @IsString()
   @Expose()
