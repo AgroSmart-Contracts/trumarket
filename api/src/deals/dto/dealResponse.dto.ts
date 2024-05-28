@@ -203,30 +203,6 @@ export class DealDtoResponse {
   @Expose()
   supplierCompany: CompanyDTO;
 
-  // @ApiProperty()
-  // @Expose()
-  // proposalBuyerEmail: string;
-
-  // @ApiProperty()
-  // @Expose()
-  // proposalSupplierEmail: string;
-
-  // @ApiProperty()
-  // @Expose()
-  // buyerId: string;
-
-  // @ApiProperty()
-  // @Expose()
-  // supplierId: string;
-
-  // @ApiProperty()
-  // @Expose()
-  // buyerConfirmed: boolean;
-
-  // @ApiProperty()
-  // @Expose()
-  // supplierConfirmed: boolean;
-
   @ApiProperty()
   @Expose()
   new: boolean;
