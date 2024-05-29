@@ -13,6 +13,7 @@ export const config = {
   blockchainRpcUrl:
     process.env.BLOCKCHAIN_RPC_URL || 'http://host.docker.internal:8545/',
   blockchainPrivateKey: process.env.BLOCKCHAIN_PRIVATE_KEY || '',
+  blockchainChainId: process.env.BLOCKCHAIN_CHAIN_ID || '',
   dealsManagerContractAddress: process.env.DEALS_MANAGER_CONTRACT_ADDRESS || '',
   automaticDealsAcceptance: process.env.AUTOMATIC_DEALS_ACCEPTANCE === 'true',
   emailHost: process.env.EMAIL_HOST || '',
