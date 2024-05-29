@@ -133,13 +133,11 @@ export class DealsService {
 
     const participant = deal.buyers.find((b) => b.id === user.id);
     if (participant) {
-      if (participant.new) {
-        deal.new = true;
-      }
+      deal.new = participant.new || false;
     } else {
       const participant = deal.suppliers.find((s) => s.id === user.id);
-      if (participant.new) {
-        deal.new = true;
+      if (participant) {
+        deal.new = participant.new || false;
       }
     }
 
@@ -162,6 +160,7 @@ export class DealsService {
         return {
           ...buyer,
           approved: true,
+          new: false,
         };
       }
 
@@ -175,6 +174,7 @@ export class DealsService {
         return {
           ...supplier,
           approved: true,
+          new: false,
         };
       }
 
@@ -190,9 +190,12 @@ export class DealsService {
     ) {
       dealUpdate.status = DealStatus.Confirmed;
 
-      if (config.automaticDealsAcceptance) {
+      if (config.automaticDealsAcceptance && deal.buyers.length > 0) {
+        const buyer = await this.usersService.findByEmail(deal.buyers[0].email);
+
         const txHash = await this.blockchain.mintNFT(
           deal.milestones.map((m) => m.fundsDistribution),
+          buyer.walletAddress,
         );
         const nftID = await this.blockchain.getNftID(txHash);
         dealUpdate.nftID = nftID;

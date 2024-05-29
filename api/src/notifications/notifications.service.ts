@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 
 import { Deal, Milestone } from '@/deals/deals.entities';
+import { logger } from '@/logger';
 
 @Injectable()
 export class NotificationsService {
@@ -12,11 +13,15 @@ export class NotificationsService {
     subject: string,
     message: string,
   ) {
-    this.mailerService.sendMail({
-      to: recipients,
-      subject,
-      text: message,
-    });
+    try {
+      this.mailerService.sendMail({
+        to: recipients,
+        subject,
+        text: message,
+      });
+    } catch (e) {
+      logger.error(e, 'Error sending email', e);
+    }
   }
 
   async sendInviteToSignupNotification(recipients: string[]): Promise<void> {

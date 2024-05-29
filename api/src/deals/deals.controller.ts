@@ -20,6 +20,7 @@ import {
 
 import { AuthenticatedRestricted } from '@/decorators/authenticatedRestricted';
 import { InternalServerError } from '@/errors';
+import { UsersService } from '@/users/users.service';
 
 import { BlockchainService } from '../blockchain/blockchain.service';
 import { AdminAccessRestricted } from '../decorators/adminRestricted';
@@ -49,6 +50,7 @@ export class DealsController {
   constructor(
     private readonly dealsService: DealsService,
     private readonly blockchainService: BlockchainService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Get()
@@ -438,8 +440,11 @@ export class DealsController {
       throw new InternalServerError('Deal already has a NFT');
     }
 
+    const buyer = await this.usersService.findByEmail(deal.buyers[0].email);
+
     const txHash = await this.blockchainService.mintNFT(
       deal.milestones.map((m) => m.fundsDistribution),
+      buyer.walletAddress,
     );
 
     const nftID = await this.blockchainService.getNftID(txHash);

@@ -177,12 +177,18 @@ export class CreateDealDto {
 
   @ApiProperty()
   @IsEmail({}, { each: true })
+  @ArrayMinSize(1, {
+    message: 'buyersEmails must have at least one element',
+  })
   @IsArray()
   @Expose()
   buyersEmails: string[];
 
   @ApiProperty()
   @IsEmail({}, { each: true })
+  @ArrayMinSize(1, {
+    message: 'suppliersEmails must have at least one element',
+  })
   @IsArray()
   @Expose()
   suppliersEmails: string[];

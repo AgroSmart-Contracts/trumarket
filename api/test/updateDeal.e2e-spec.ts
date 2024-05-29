@@ -26,7 +26,7 @@ describe('Update Deal (e2e)', () => {
       const supplierToken = await app.login(supplier);
       const buyerToken = await app.login(buyer);
 
-      const { deal } = await app.setupDeal({}, buyer, supplier);
+      const { deal } = await app.setupProposalDeal({}, buyer, supplier);
 
       const getDealReq = await app
         .request()

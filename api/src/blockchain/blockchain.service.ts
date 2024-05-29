@@ -36,10 +36,11 @@ export class BlockchainService {
     return Number(logs[0].args.dealId);
   }
 
-  async mintNFT(distributions: number[]): Promise<string> {
+  async mintNFT(distributions: number[], borrower: string): Promise<string> {
     const tx = await this.dealsManager.write.mint([
       distributions,
       parseEther('0'),
+      borrower,
     ]);
 
     return tx;
