@@ -314,4 +314,49 @@ export class TestApp {
       supplierToken,
     };
   }
+
+  async setupProposalDeal(
+    dealDto: Partial<Deal> = {},
+    buyer?: User,
+    supplier?: User,
+  ) {
+    // create buyer and supplier users
+    if (!buyer) {
+      buyer = await this.createUser({
+        accountType: AccountType.Buyer,
+      } as User);
+    }
+
+    if (!supplier) {
+      supplier = await this.createUser({
+        accountType: AccountType.Supplier,
+        walletAddress: randomEvmAddress(),
+      } as User);
+    }
+
+    // authenticate buyer and supplier
+    const buyerToken = await this.login(buyer);
+    const supplierToken = await this.login(supplier);
+
+    // create deal
+    const createDealDto = generateDealDto({
+      ...dealDto,
+      buyersEmails: [buyer.email],
+      suppliersEmails: [supplier.email],
+    });
+
+    const createDealReq = await this.request()
+      .post('/deals')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .send(createDealDto);
+
+    expect(createDealReq.body).toHaveProperty('id');
+    expect(createDealReq.status).toBe(201);
+
+    return {
+      deal: createDealReq.body as Deal,
+      buyerToken,
+      supplierToken,
+    };
+  }
 }

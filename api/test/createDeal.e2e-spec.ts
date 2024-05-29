@@ -76,6 +76,8 @@ describe('Create Deal (e2e)', () => {
 
     expect(invalidNumberOfMilestonesReq.body.message).toEqual([
       'Milestones array must have at least 7 elements',
+      'buyersEmails must have at least one element',
+      'suppliersEmails must have at least one element',
     ]);
 
     const invalidMilestonesFundsDistributionReq = await app
@@ -140,8 +142,8 @@ describe('Create Deal (e2e)', () => {
           country: 'Peru',
           taxId: '654321',
         },
-        buyersEmails: [],
-        suppliersEmails: [],
+        buyersEmails: ['buyer@mail.com'],
+        suppliersEmails: ['supplier@mail.com'],
       } as CreateDealDto)
       .expect(409);
 
