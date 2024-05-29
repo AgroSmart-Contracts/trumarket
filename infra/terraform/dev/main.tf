@@ -158,6 +158,10 @@ module "ecs_service_api" {
           value = data.aws_ssm_parameter.private_key.value
         },
         {
+          name  = "BLOCKCHAIN_CHAIN_ID",
+          value = 80002
+        },
+        {
           name  = "DEALS_MANAGER_CONTRACT_ADDRESS",
           value = data.aws_ssm_parameter.deals_manager_address.value
         },

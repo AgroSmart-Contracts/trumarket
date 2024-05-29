@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import {
   createPublicClient,
   createWalletClient,
+  defineChain,
   getContract,
   http,
   PublicClient,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { hardhat } from 'viem/chains';
 
 import { config } from '../config';
 import { BlockchainService } from './blockchain.service';
@@ -24,10 +24,25 @@ import { DEALS_MANAGER_ABI } from './dealsManager.abi';
           config.blockchainPrivateKey as `0x${string}`,
         );
 
+        const chain = defineChain({
+          id: +config.blockchainChainId,
+          name: 'testnet',
+          nativeCurrency: {
+            decimals: 18,
+            name: 'Ether',
+            symbol: 'ETH',
+          },
+          rpcUrls: {
+            default: {
+              http: [config.blockchainRpcUrl],
+            },
+          },
+        });
+
         const client = await createWalletClient({
           account,
           transport: http(config.blockchainRpcUrl),
-          chain: hardhat,
+          chain,
         });
         return getContract({
           abi: DEALS_MANAGER_ABI.abi,

@@ -49,7 +49,7 @@ import { UsersModule } from './users/users.module';
     }),
     JwtModule.register({
       secret: config.jwtSecret,
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '1d' },
       global: true,
     }),
     AuthModule,
