@@ -19,7 +19,7 @@ export class BlockchainService {
   ) {}
 
   async getNftID(txHash: string): Promise<number> {
-    const receipt = await this.publicClient.getTransactionReceipt({
+    const receipt = await this.publicClient.waitForTransactionReceipt({
       hash: txHash as `0x${string}`,
     });
 
@@ -42,6 +42,8 @@ export class BlockchainService {
       parseEther('0'),
       borrower,
     ]);
+
+    await tx.wait();
 
     return tx;
   }
