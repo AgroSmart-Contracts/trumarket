@@ -43,8 +43,6 @@ export class BlockchainService {
       borrower,
     ]);
 
-    await tx.wait();
-
     return tx;
   }
 
