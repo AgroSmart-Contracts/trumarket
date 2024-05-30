@@ -19,11 +19,7 @@ import {
 } from '@nestjs/swagger';
 
 import { AuthenticatedRestricted } from '@/decorators/authenticatedRestricted';
-import { InternalServerError } from '@/errors';
-import { UsersService } from '@/users/users.service';
 
-import { BlockchainService } from '../blockchain/blockchain.service';
-import { AdminAccessRestricted } from '../decorators/adminRestricted';
 // import { WhitelistAccessRestricted } from '../decorators/whitelistRestricted';
 import fileInterceptor from '../file.interceptor';
 import { filePipeValidator } from '../multer.options';
@@ -47,11 +43,7 @@ import { UploadDocumentDTO } from './dto/uploadDocument.dto';
 @ApiTags('deals')
 @Controller('deals')
 export class DealsController {
-  constructor(
-    private readonly dealsService: DealsService,
-    private readonly blockchainService: BlockchainService,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly dealsService: DealsService) {}
 
   @Get()
   @AuthenticatedRestricted()
@@ -413,45 +405,6 @@ export class DealsController {
     );
   }
 
-  // ADMIN ROUTES
-
-  @Delete(':dealId')
-  @AdminAccessRestricted()
-  @ApiOperation({ summary: 'Delete a deal' })
-  @ApiResponse({
-    status: 200,
-    description: 'The deal has been successfully deleted',
-  })
-  async delete(@Param('dealId') id: string): Promise<void> {
-    this.dealsService.deleteDeal(id);
-  }
-
-  @Post(':dealId/nft/mint')
-  @AdminAccessRestricted()
-  @ApiOperation({ summary: 'Mint a NFT representing the deal' })
-  @ApiResponse({
-    status: 200,
-    description: 'The deal nft has been successfully minted',
-  })
-  async mintDealNFT(@Param('dealId') id: string): Promise<void> {
-    const deal = await this.dealsService.findById(id);
-
-    if (typeof deal.nftID === 'number') {
-      throw new InternalServerError('Deal already has a NFT');
-    }
-
-    const buyer = await this.usersService.findByEmail(deal.buyers[0].email);
-
-    const txHash = await this.blockchainService.mintNFT(
-      deal.milestones.map((m) => m.fundsDistribution),
-      buyer.walletAddress,
-    );
-
-    const nftID = await this.blockchainService.getNftID(txHash);
-
-    await this.dealsService.assignNftIdToDeal(id, nftID, txHash);
-  }
-
   // DEPRECATED: tx to assign nft to deal is now done in the blockchain service
   // @Post(':dealId/nft')
   // @AdminAccessRestricted()
@@ -464,7 +417,7 @@ export class DealsController {
   //   @Param('dealId') id: string,
   //   @Body() dto: AssignNFTDto,
   // ): Promise<void> {
-  //   const nftID = await this.blockchainService.getNftID(dto.txHash);
+  //   const nftID = await this..getNftID(dto.txHash);
 
   //   await this.dealsService.assignNftIdToDeal(id, nftID, dto.txHash);
   // }

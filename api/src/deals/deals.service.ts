@@ -6,6 +6,7 @@ import { BlockchainService } from '@/blockchain/blockchain.service';
 import { config } from '@/config';
 import { BadRequestError, ForbiddenError, UnauthorizedError } from '@/errors';
 import { NotificationsService } from '@/notifications/notifications.service';
+import { Page } from '@/types';
 import { User } from '@/users/users.model';
 import { UsersService } from '@/users/users.service';
 
@@ -28,7 +29,7 @@ export interface ListDealsQuery {
 export class DealsService {
   constructor(
     private readonly dealsRepository: DealsRepository,
-    private readonly usersService: UsersService,
+    private readonly users: UsersService,
     private readonly notifications: NotificationsService,
     private readonly blockchain: BlockchainService,
   ) {}
@@ -191,7 +192,7 @@ export class DealsService {
       dealUpdate.status = DealStatus.Confirmed;
 
       if (config.automaticDealsAcceptance && deal.buyers.length > 0) {
-        const buyer = await this.usersService.findByEmail(deal.buyers[0].email);
+        const buyer = await this.users.findByEmail(deal.buyers[0].email);
 
         const txHash = await this.blockchain.mintNFT(
           deal.milestones.map((m) => m.fundsDistribution),
@@ -779,7 +780,7 @@ export class DealsService {
   async getDealsParticipantsByEmails(
     usersEmails: string[],
   ): Promise<DealParticipant[]> {
-    const users = await this.usersService.findByEmails(usersEmails);
+    const users = await this.users.findByEmails(usersEmails);
 
     return usersEmails.map((email) => {
       const user = users.find((u) => u.email === email);
@@ -793,5 +794,26 @@ export class DealsService {
 
       return { email };
     });
+  }
+
+  async paginate(
+    offset: number,
+    status: DealStatus,
+    emailsSearch: string,
+  ): Promise<Page<Deal>> {
+    const query = {} as any;
+
+    if (status) {
+      query.status = status;
+    }
+
+    if (emailsSearch) {
+      query.$or = [
+        { 'buyers.email': { $regex: new RegExp(emailsSearch, 'i') } },
+        { 'suppliers.email': { $regex: new RegExp(emailsSearch, 'i') } },
+      ];
+    }
+
+    return this.dealsRepository.paginate(query, offset);
   }
 }

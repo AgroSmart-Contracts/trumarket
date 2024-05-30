@@ -256,14 +256,6 @@ const dealSchema = new Schema({
   },
 
   // ui helper properties
-  newForBuyer: {
-    type: Boolean,
-    default: false,
-  },
-  newForSupplier: {
-    type: Boolean,
-    default: false,
-  },
   newDocuments: {
     type: Boolean,
     default: false,

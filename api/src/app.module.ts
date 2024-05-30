@@ -4,6 +4,7 @@ import { Connection } from 'mongoose';
 import { LoggerModule } from 'nestjs-pino';
 import pino from 'pino';
 
+import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { config } from './config';
@@ -52,6 +53,7 @@ import { UsersModule } from './users/users.module';
       signOptions: { expiresIn: '1d' },
       global: true,
     }),
+    AdminModule,
     AuthModule,
     UsersModule,
     DealsModule,
