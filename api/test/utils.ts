@@ -312,6 +312,8 @@ export class TestApp {
       deal: confirmDealReq.body as Deal,
       buyerToken,
       supplierToken,
+      buyer,
+      supplier,
     };
   }
 

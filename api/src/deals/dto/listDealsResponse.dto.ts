@@ -29,7 +29,7 @@ export class ListDealDtoResponse {
 
   @ApiProperty()
   @Expose()
-  contractId: string;
+  contractId: number;
 
   @ApiProperty()
   @Expose()
@@ -53,7 +53,7 @@ export class ListDealDtoResponse {
 
   @ApiProperty()
   @Expose()
-  transport: Date;
+  transport: string;
 
   @ApiProperty()
   @Expose()
@@ -69,12 +69,12 @@ export class ListDealDtoResponse {
 
   @ApiProperty()
   @Expose()
-  duration: number;
+  duration: string;
 
   // state properties
   @ApiProperty()
   @Expose()
-  currentMilestone: string;
+  currentMilestone: number;
 
   @ApiProperty({ type: Milestone, isArray: true })
   @Expose()
@@ -129,10 +129,6 @@ export class ListDealDtoResponse {
   supplierCompany: CompanyDTO;
 
   // ui helper properties
-  @ApiProperty()
-  @Expose()
-  newForBuyer: boolean;
-
   @ApiProperty()
   @Expose()
   new: boolean;
