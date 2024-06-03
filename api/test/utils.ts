@@ -6,6 +6,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailerService } from '@nestjs-modules/mailer';
+import { create } from 'domain';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as request from 'supertest';
 import TestAgent from 'supertest/lib/agent';
@@ -318,7 +319,7 @@ export class TestApp {
   }
 
   async setupProposalDeal(
-    dealDto: Partial<Deal> = {},
+    dealDto: Partial<CreateDealDto> = {},
     buyer?: User,
     supplier?: User,
   ) {
@@ -342,10 +343,12 @@ export class TestApp {
 
     // create deal
     const createDealDto = generateDealDto({
-      ...dealDto,
       buyersEmails: [buyer.email],
       suppliersEmails: [supplier.email],
+      ...dealDto,
     });
+
+    console.log(createDealDto);
 
     const createDealReq = await this.request()
       .post('/deals')

@@ -82,6 +82,107 @@ describe('Update Deal (e2e)', () => {
       expect(getDealsListUpdatedReq.body).toHaveLength(1);
       expect(getDealsListUpdatedReq.body[0].new).toBeFalsy();
     });
+
+    it('should set deal as new for multiple participants', async () => {
+      const buyer1 = await app.createUser({
+        accountType: AccountType.Buyer,
+      } as User);
+      const buyer2 = await app.createUser({
+        accountType: AccountType.Buyer,
+      } as User);
+      const supplier1 = await app.createUser({
+        accountType: AccountType.Supplier,
+      } as User);
+      const supplier2 = await app.createUser({
+        accountType: AccountType.Supplier,
+      } as User);
+
+      const buyer1Token = await app.login(buyer1);
+      const buyer2Token = await app.login(buyer2);
+      const supplier1Token = await app.login(supplier1);
+      const supplier2Token = await app.login(supplier2);
+
+      const { deal } = await app.setupProposalDeal(
+        {
+          buyersEmails: [buyer1.email, buyer2.email],
+          suppliersEmails: [supplier1.email, supplier2.email],
+        },
+        buyer1,
+        supplier2,
+      );
+
+      const buyer1DealReq = await app
+        .request()
+        .get(`/deals/${deal.id}`)
+        .set('Authorization', `Bearer ${buyer1Token}`)
+        .expect(200);
+
+      expect(buyer1DealReq.body).toHaveProperty('id');
+      expect(buyer1DealReq.body.new).toBeFalsy();
+
+      const buyer1ListDealsReq = await app
+        .request()
+        .get(`/deals`)
+        .set('Authorization', `Bearer ${buyer1Token}`)
+        .expect(200);
+
+      expect(buyer1ListDealsReq.body[0]).toHaveProperty('id');
+      expect(buyer1ListDealsReq.body[0].new).toBeFalsy();
+
+      const buyer2ListDealsReq = await app
+        .request()
+        .get(`/deals`)
+        .set('Authorization', `Bearer ${buyer2Token}`)
+        .expect(200);
+
+      expect(buyer2ListDealsReq.body[0]).toHaveProperty('id');
+      expect(buyer2ListDealsReq.body[0].new).toBeTruthy();
+
+      const buyer2DealReq = await app
+        .request()
+        .get(`/deals/${deal.id}`)
+        .set('Authorization', `Bearer ${buyer2Token}`)
+        .expect(200);
+
+      expect(buyer2DealReq.body).toHaveProperty('id');
+      expect(buyer2DealReq.body.new).toBeTruthy();
+
+      const supplier1ListDealsReq = await app
+        .request()
+        .get(`/deals`)
+        .set('Authorization', `Bearer ${supplier1Token}`)
+        .expect(200);
+
+      expect(supplier1ListDealsReq.body[0]).toHaveProperty('id');
+      expect(supplier1ListDealsReq.body[0].new).toBeTruthy();
+
+      const supplier1DealReq = await app
+        .request()
+        .get(`/deals/${deal.id}`)
+        .set('Authorization', `Bearer ${supplier1Token}`)
+        .expect(200);
+
+      expect(supplier1DealReq.body).toHaveProperty('id');
+      expect(supplier1DealReq.body.new).toBeTruthy();
+
+      const supplier2ListDealsReq = await app
+        .request()
+        .get(`/deals`)
+        .set('Authorization', `Bearer ${supplier2Token}`)
+        .expect(200);
+
+      expect(supplier2ListDealsReq.body[0]).toHaveProperty('id');
+      expect(supplier2ListDealsReq.body[0].new).toBeTruthy();
+
+      const supplier2DealReq = await app
+        .request()
+        .get(`/deals/${deal.id}`)
+        .set('Authorization', `Bearer ${supplier2Token}`)
+        .expect(200);
+
+      expect(supplier2DealReq.body).toHaveProperty('id');
+      expect(supplier2DealReq.body.new).toBeTruthy();
+    });
   });
 
   describe('updateCoverImage', () => {
