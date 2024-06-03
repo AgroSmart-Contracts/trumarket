@@ -22,12 +22,12 @@ export const fileFilter = (req, file, cb): void => {
 };
 
 export const limits = {
-  fileSize: 5 * 1024 * 1024,
+  fileSize: 30 * 1024 * 1024,
 };
 
 export const filePipeValidator = new ParseFilePipe({
   validators: [
-    new FileTypeValidator({ fileType: '.(jpg|jpeg|png|gif|webp|pdf)' }),
+    new FileTypeValidator({ fileType: '.(jpg|jpeg|png|gif|webp|pdf|mp4)' }),
   ],
   fileIsRequired: true,
 });
