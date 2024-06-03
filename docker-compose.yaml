@@ -26,7 +26,6 @@ services:
       - ETHEREUM_RPC_URL=http://host.docker.internal:8545/
       - NODE_ENV=development
       - LOG_LEVEL=debug
-      - BLOCKCHAIN_RPC_URL=http://protocol:8545
       - AUTOMATIC_DEALS_ACCEPTANCE=true
     depends_on:
       - mongo
