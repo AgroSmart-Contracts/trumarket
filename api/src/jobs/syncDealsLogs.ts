@@ -23,6 +23,7 @@ export const syncDealsLogs = async () => {
   await Promise.all(
     jobs.map(async (job) => {
       try {
+        logger.debug({ contract: job.contract }, 'Syncing deals logs');
         const client = createPublicClient({
           transport: http(config.blockchainRpcUrl as string),
         });
@@ -31,6 +32,8 @@ export const syncDealsLogs = async () => {
           ? BigInt(job.lastBlock + 1)
           : BigInt('0');
         const toBlock = await client.getBlockNumber();
+
+        logger.debug({ fromBlock, toBlock }, 'got block number');
 
         if (fromBlock > toBlock) {
           return;
