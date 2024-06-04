@@ -115,6 +115,7 @@ describe('DealsService', () => {
       ).toHaveBeenCalledWith(
         dealsService.selectParticipantsEmailsBasedOnUser(user, createdDeal),
         createdDeal,
+        user.email,
       );
       expect(result).toEqual(createdDeal);
     });
@@ -167,6 +168,7 @@ describe('DealsService', () => {
       ).toHaveBeenCalledWith(
         dealsService.selectParticipantsEmailsBasedOnUser(user, createdDeal),
         createdDeal,
+        user.email,
       );
       expect(result).toEqual(createdDeal);
     });
@@ -219,6 +221,7 @@ describe('DealsService', () => {
       ).toHaveBeenCalledWith(
         dealsService.selectParticipantsEmailsBasedOnUser(user, createdDeal),
         createdDeal,
+        user.email,
       );
       expect(result).toEqual(createdDeal);
     });
@@ -271,6 +274,7 @@ describe('DealsService', () => {
       ).toHaveBeenCalledWith(
         dealsService.selectParticipantsEmailsBasedOnUser(user, createdDeal),
         createdDeal,
+        user.email,
       );
       expect(result).toEqual(createdDeal);
     });
@@ -455,6 +459,7 @@ describe('DealsService', () => {
         dealsService.selectParticipantsEmailsBasedOnUser(user, deal),
         deal,
         deal.milestones[currentMilestone],
+        user.email,
       );
       expect(dealsRepository.updateById).toHaveBeenCalledWith(dealId, {
         currentMilestone: deal.currentMilestone + 1,

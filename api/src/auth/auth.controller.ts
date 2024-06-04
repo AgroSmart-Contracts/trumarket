@@ -3,6 +3,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { DealsService } from '@/deals/deals.service';
 import { logger } from '@/logger';
+import { NotificationsService } from '@/notifications/notifications.service';
 import { UsersService } from '@/users/users.service';
 
 import { InternalServerError } from '../errors';
@@ -19,6 +20,7 @@ export class AuthController {
     private authService: AuthService,
     private userService: UsersService,
     private dealsService: DealsService,
+    private notificationsService: NotificationsService,
   ) {}
 
   @Post('login')
@@ -71,6 +73,8 @@ export class AuthController {
       });
 
       await this.dealsService.assignUserToDeals(user);
+
+      await this.notificationsService.sendAccountCreatedNotification(email);
 
       return new SignupResponseDto({
         token: await this.authService.login(web3authToken),
