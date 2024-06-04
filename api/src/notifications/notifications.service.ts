@@ -58,7 +58,7 @@ export class NotificationsService {
       actionTitle: 'Agreement assigned to you',
       descriptionText: `${email} assigned you to the '${deal.name}' shipment agreement.`,
       buttonText: 'Review the agreement',
-      buttonHref: `${config.appDomain}/agreement-details/${deal.id}`,
+      buttonHref: `${config.appDomain}/dashboard/agreement-details/${deal.id}`,
     });
   }
 
@@ -72,7 +72,7 @@ export class NotificationsService {
       actionTitle: 'Changes requested',
       descriptionText: `${email} requested changes in the '${deal.name}' shipment agreement.`,
       buttonText: 'Review the agreement',
-      buttonHref: `${config.appDomain}/agreement-details/${deal.id}`,
+      buttonHref: `${config.appDomain}/dashboard/agreement-details/${deal.id}`,
     });
   }
 
@@ -86,7 +86,7 @@ export class NotificationsService {
       agreementId: deal.id,
       actionTitle: 'Milestone approval requested',
       descriptionText: `${email} requested your approval of the '${milestone.description}' milestone of the '${deal.name}' shipment.`,
-      buttonHref: `${config.appDomain}/shipment-details/${deal.id}`,
+      buttonHref: `${config.appDomain}/dashboard/shipment-details/${deal.id}`,
       buttonText: 'Go to the milestone',
     });
   }
@@ -102,7 +102,7 @@ export class NotificationsService {
       actionTitle: 'New document',
       descriptionText: `${email} added new document to '${milestone.description}' milestone of the '${deal.name}' shipment.`,
       buttonText: 'Go to the milestone',
-      buttonHref: `${config.appDomain}/shipment-details/${deal.id}`,
+      buttonHref: `${config.appDomain}/dashboard/shipment-details/${deal.id}`,
     });
   }
 
@@ -116,7 +116,7 @@ export class NotificationsService {
       agreementId: deal.id,
       actionTitle: 'Document deleted',
       descriptionText: `${email} deleted a document in the '${milestone.description}' milestone of the '${deal.name}' shipment.`,
-      buttonHref: `${config.appDomain}/shipment-details/${deal.id}`,
+      buttonHref: `${config.appDomain}/dashboard/shipment-details/${deal.id}`,
       buttonText: 'Go to the milestone',
     });
   }
@@ -132,7 +132,7 @@ export class NotificationsService {
       actionTitle: 'Milestone approved',
       descriptionText: `The '${milestone.description}' milestone of the '${deal.name}' shipment has been approved by ${email}.`,
       buttonText: 'Go to the milestone',
-      buttonHref: `${config.appDomain}/shipment-details/${deal.id}`,
+      buttonHref: `${config.appDomain}/dashboard/shipment-details/${deal.id}`,
     });
   }
 
@@ -147,7 +147,7 @@ export class NotificationsService {
       actionTitle: 'Milestone denied',
       descriptionText: `The '${milestone.description}' milestone of the '${deal.name}' shipment has been denied by ${email}. Contact him directly for the details.`,
       buttonText: 'Go to the milestone',
-      buttonHref: `${config.appDomain}/shipment-details/${deal.id}`,
+      buttonHref: `${config.appDomain}/dashboard/shipment-details/${deal.id}`,
     });
   }
 
@@ -160,7 +160,7 @@ export class NotificationsService {
       actionTitle: 'Agreement accepted',
       descriptionText: `All parties accepted the '${deal.name}' shipment agreement. The shipment is ready to get started!`,
       buttonText: 'Go to shipment',
-      buttonHref: `${config.appDomain}/shipment-details/${deal.id}`,
+      buttonHref: `${config.appDomain}/dashboard/shipment-details/${deal.id}`,
     });
   }
 
@@ -173,7 +173,7 @@ export class NotificationsService {
       actionTitle: 'Agreement accepted',
       descriptionText: `The '${deal.name}' shipment arrived to the destination. The agreement is completed!`,
       buttonText: 'Go to shipment',
-      buttonHref: `${config.appDomain}/shipment-details/${deal.id}`,
+      buttonHref: `${config.appDomain}/dashboard/shipment-details/${deal.id}`,
     });
   }
 
