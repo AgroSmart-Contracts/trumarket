@@ -76,13 +76,6 @@ export class DealsService {
   async createDeal(user: User, dealPayload: Partial<Deal>): Promise<Deal> {
     dealPayload.status = DealStatus.Proposal;
 
-    if (dealPayload.buyers && dealPayload.suppliers) {
-      // invite users not registered in the platform
-      await this.notifications.sendInviteToSignupNotification(
-        this.selectParticipantsEmailsBasedOnUser(user, dealPayload),
-      );
-    }
-
     dealPayload.buyers = dealPayload.buyers?.map((buyer) => {
       if (buyer.id === user.id) {
         return {
@@ -107,9 +100,25 @@ export class DealsService {
 
     const deal = await this.dealsRepository.create(dealPayload);
 
+    if (deal.buyers && deal.suppliers) {
+      // invite users not registered in the platform
+      const participantsNotRegistered = deal.buyers
+        .concat(deal.suppliers)
+        .filter((participant) => !participant.id);
+
+      if (participantsNotRegistered.length > 0) {
+        await this.notifications.sendInviteToSignupNotification(
+          participantsNotRegistered.map((p) => p.email),
+          deal,
+          user.email,
+        );
+      }
+    }
+
     await this.notifications.sendNewProposalNotification(
       this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
+      user.email,
     );
 
     return deal;
@@ -241,6 +250,7 @@ export class DealsService {
     await this.notifications.sendProposalCancelledNotification(
       this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
+      user.email,
     );
 
     return this.dealsRepository.updateById(dealId, dealUpdate);
@@ -318,6 +328,7 @@ export class DealsService {
     await this.notifications.sendChangesInProposalNotification(
       this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
+      user.email,
     );
 
     dealPayload.buyers = deal.buyers.map((buyer) => {
@@ -374,11 +385,6 @@ export class DealsService {
     );
 
     const uploadedUrl = await this.uploadFile(file, dealId);
-
-    await this.notifications.sendNewDocumentUploadedNotification(
-      this.selectParticipantsEmailsBasedOnUser(user, deal),
-      deal,
-    );
 
     return this.dealsRepository.pushDocument(dealId, {
       url: uploadedUrl,
@@ -458,9 +464,11 @@ export class DealsService {
       },
     );
 
-    await this.notifications.sendNewDocumentUploadedNotification(
+    await this.notifications.sendNewMilestoneDocumentUploadedNotification(
       this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
+      milestone,
+      user.email,
     );
 
     return document;
@@ -499,9 +507,11 @@ export class DealsService {
       description,
     );
 
-    this.notifications.sendNewDocumentUploadedNotification(
+    this.notifications.sendNewMilestoneDocumentUploadedNotification(
       this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
+      milestone,
+      user.email,
     );
 
     return document;
@@ -646,6 +656,7 @@ export class DealsService {
       this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
       deal.milestones[currentMilestone],
+      user.email,
     );
 
     return this.dealsRepository.updateById(dealId, {
@@ -682,11 +693,20 @@ export class DealsService {
       throw new BadRequestError('Milestone is not pending or denied');
     }
 
-    return this.dealsRepository.upadteMilestoneStatus(
+    const milestone = await this.dealsRepository.upadteMilestoneStatus(
       dealId,
       milestoneId,
       MilestoneApprovalStatus.Submitted,
     );
+
+    this.notifications.sendMilestoneApprovalRequestNotification(
+      deal.buyers.map((b) => b.email),
+      deal,
+      milestone,
+      user.email,
+    );
+
+    return milestone;
   }
 
   async approveMilestone(
@@ -731,6 +751,7 @@ export class DealsService {
       this.selectParticipantsEmailsBasedOnUser(user, deal),
       deal,
       deal.milestones[milestoneIndex],
+      user.email,
     );
 
     if (milestoneIndex == 6) {
@@ -770,11 +791,20 @@ export class DealsService {
       throw new BadRequestError('Milestone review was not submitted');
     }
 
-    return this.dealsRepository.upadteMilestoneStatus(
+    const milestone = await this.dealsRepository.upadteMilestoneStatus(
       dealId,
       milestoneId,
       MilestoneApprovalStatus.Denied,
     );
+
+    await this.notifications.sendMilestoneDeniedNotification(
+      this.selectParticipantsEmailsBasedOnUser(user, deal),
+      deal,
+      milestone,
+      user.email,
+    );
+
+    return milestone;
   }
 
   async getDealsParticipantsByEmails(

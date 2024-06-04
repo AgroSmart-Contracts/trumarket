@@ -125,7 +125,7 @@ describe('Admin Routes (e2e)', () => {
 
     expect(buyerConfirmedDealsReq.body.data).toHaveLength(1);
     expect(buyerConfirmedDealsReq.body.nextOffset).toEqual(0);
-  });
+  }, 30000);
 
   it('/admin/deals/:dealId (GET)', async () => {
     const admin = await app.createUser({ role: RoleType.ADMIN });

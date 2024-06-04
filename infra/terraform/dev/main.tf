@@ -145,6 +145,10 @@ module "ecs_service_api" {
 
       environment : [
         {
+          name  = "APP_DOMAIN",
+          value = "https://trumarket-demo.vercel.app"
+        },
+        {
           name = "DATABASE_URL",
           # value = "mongodb://${local.mongo_name}/"
           value = data.aws_ssm_parameter.api_database.value
