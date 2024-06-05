@@ -3,10 +3,13 @@ import { MailerModule } from '@nestjs-modules/mailer';
 
 import { config } from '@/config';
 
+import { NotificationsController } from './notifications.controller';
+import { NotificationsRepository } from './notifications.repository';
 import { NotificationsService } from './notifications.service';
+import { SubscriptionsService } from './subscriptions.service';
 
 @Module({
-  controllers: [],
+  controllers: [NotificationsController],
   imports: [
     MailerModule.forRoot({
       transport: {
@@ -17,11 +20,15 @@ import { NotificationsService } from './notifications.service';
         },
       },
       defaults: {
-        from: '"TruMarket" <Alessandro.cordano@trumarket.tech>',
+        from: `"TruMarket" <${config.mailTo}>`,
       },
     }),
   ],
-  providers: [NotificationsService],
+  providers: [
+    NotificationsService,
+    NotificationsRepository,
+    SubscriptionsService,
+  ],
   exports: [NotificationsService],
 })
 export class NotificationsModule {}

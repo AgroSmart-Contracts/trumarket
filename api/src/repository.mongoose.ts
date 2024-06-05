@@ -4,6 +4,7 @@ import {
   type Model,
   type ProjectionType,
   type QueryOptions,
+  UpdateQuery,
 } from 'mongoose';
 
 import { ConflictError } from './errors';
@@ -18,6 +19,20 @@ export class MongooseRepository<T> {
     try {
       const inserted = await this.model.create(data);
       return inserted.toJSON();
+    } catch (err) {
+      switch (err.name) {
+        case Error.ValidationError.name:
+          throw new ConflictError(err.message);
+        default:
+          throw err;
+      }
+    }
+  }
+
+  async createMany(data: Partial<T>[]): Promise<T[]> {
+    try {
+      const inserted = await this.model.insertMany(data);
+      return inserted ? inserted.map((u) => (u as any).toJSON()) : [];
     } catch (err) {
       switch (err.name) {
         case Error.ValidationError.name:
@@ -48,6 +63,14 @@ export class MongooseRepository<T> {
     const docs = await this.model.find(filter, projection, options);
     const jsonDocs = docs ? docs.map((u) => (u as any).toJSON()) : [];
     return jsonDocs;
+  }
+
+  async update(
+    filter: FilterQuery<T>,
+    update: UpdateQuery<T>,
+  ): Promise<number> {
+    const docs = await this.model.updateMany(filter, update);
+    return docs.modifiedCount;
   }
 
   async findOne(

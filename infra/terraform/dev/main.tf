@@ -57,6 +57,13 @@ data "aws_ssm_parameter" "email_password" {
   name = "/${var.name}/email-password"
 }
 
+data "aws_ssm_parameter" "vapid_public_key" {
+  name = "/${var.name}/vapid-public-key"
+}
+
+data "aws_ssm_parameter" "vapid_private_key" {
+  name = "/${var.name}/vapid-private-key"
+}
 
 data "aws_ssm_parameter" "ecs_optimized_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended"
@@ -184,6 +191,18 @@ module "ecs_service_api" {
         {
           name  = "EMAIL_PASSWORD",
           value = data.aws_ssm_parameter.email_password.value
+        },
+        {
+          name  = "MAIL_TO",
+          value = "Alessandro.cordano@trumarket.tech"
+        },
+        {
+          name  = "VAPID_PUBLIC_KEY",
+          value = data.aws_ssm_parameter.vapid_public_key.value
+        },
+        {
+          name  = "VAPID_PRIVATE_KEY",
+          value = data.aws_ssm_parameter.vapid_private_key.value
         },
         {
           name  = "PORT",

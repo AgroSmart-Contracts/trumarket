@@ -2,7 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MailerService } from '@nestjs-modules/mailer';
 
 import { BlockchainService } from '@/blockchain/blockchain.service';
+import { NotificationsRepository } from '@/notifications/notifications.repository';
 import { NotificationsService } from '@/notifications/notifications.service';
+import { SubscriptionsService } from '@/notifications/subscriptions.service';
 import { AccountType, User } from '@/users/users.model';
 import { UsersRepository } from '@/users/users.repository';
 import { UsersService } from '@/users/users.service';
@@ -23,7 +25,17 @@ describe('DealsService', () => {
         DealsService,
         DealsRepository,
         UsersService,
+        {
+          provide: NotificationsService,
+          useValue: {
+            sendInviteToSignupNotification: jest.fn(),
+            sendNewProposalNotification: jest.fn(),
+            sendMilestoneApprovedNotification: jest.fn(),
+          },
+        },
         NotificationsService,
+        NotificationsRepository,
+        SubscriptionsService,
         BlockchainService,
         {
           provide: MailerService,

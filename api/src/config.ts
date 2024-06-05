@@ -20,4 +20,7 @@ export const config = {
   emailUsername: process.env.EMAIL_USERNAME || '',
   emailPassword: process.env.EMAIL_PASSWORD || '',
   appDomain: process.env.APP_DOMAIN || 'http://localhost:3000',
+  mailTo: process.env.MAIL_TO,
+  vapidPublicKey: process.env.VAPID_PUBLIC_KEY,
+  vapidPrivateKey: process.env.VAPID_PRIVATE_KEY,
 };
