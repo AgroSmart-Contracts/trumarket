@@ -2,7 +2,7 @@ import { AccountType, User } from '@/users/users.model';
 
 import { TestApp } from './utils';
 
-describe('Update Deal (e2e)', () => {
+describe('Notifications (e2e)', () => {
   let app: TestApp;
 
   beforeEach(async () => {
