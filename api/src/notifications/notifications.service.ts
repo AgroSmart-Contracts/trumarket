@@ -5,15 +5,36 @@ import { render } from '@react-email/components';
 import { config } from '@/config';
 import { Deal, Milestone } from '@/deals/deals.entities';
 import { logger } from '@/logger';
+import { Page } from '@/types';
 
 import { Email, EmailProps } from './email-template';
+import { Notification } from './notifications.entities';
+import { NotificationsRepository } from './notifications.repository';
+import { SubscriptionsService } from './subscriptions.service';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly repo: NotificationsRepository,
+    private readonly subscriptionsService: SubscriptionsService,
+  ) {}
 
   async _sendNotification(recipients: string[], email: EmailProps) {
     try {
+      const notifications = await this.repo.bulkCreateByRecipent(recipients, {
+        message: email.descriptionText,
+        subject: email.actionTitle,
+        redirectUrl: email.buttonHref,
+        dealId: email.agreementId,
+      });
+
+      await Promise.all(
+        notifications.map((notification) =>
+          this.subscriptionsService.send(notification.userId, notification),
+        ),
+      );
+
       this.mailerService.sendMail({
         to: recipients,
         subject: email.actionTitle,
@@ -189,5 +210,22 @@ export class NotificationsService {
       buttonText: 'Go to agreement',
       buttonHref: `${config.appDomain}/dashboard`,
     });
+  }
+
+  async findNotificationsByEmail(
+    email: string,
+    offset: number,
+  ): Promise<Page<Notification>> {
+    return this.repo.paginate({ userId: email }, offset, null, {
+      sort: { createdAt: -1 },
+    });
+  }
+
+  async markAsRead(email: string, notificationId: string): Promise<void> {
+    await this.repo.markAsRead(email, notificationId);
+  }
+
+  async markAsReadByDealId(email: string, dealId: string): Promise<void> {
+    await this.repo.markAsReadByDealId(email, dealId);
   }
 }

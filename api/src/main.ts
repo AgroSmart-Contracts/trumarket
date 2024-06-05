@@ -3,10 +3,18 @@ import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import * as schedule from 'node-schedule';
+import * as webpush from 'web-push';
 
 import { AppModule } from './app.module';
+import { config } from './config';
 import { ErrorsFilter } from './errors.filter';
 import { syncDealsLogs } from './jobs/syncDealsLogs';
+
+webpush.setVapidDetails(
+  'mailto:' + config.mailTo,
+  config.vapidPublicKey,
+  config.vapidPrivateKey,
+);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
