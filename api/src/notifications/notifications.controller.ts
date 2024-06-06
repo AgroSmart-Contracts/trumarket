@@ -89,6 +89,10 @@ export class NotificationsController {
   async subscribe(@Request() req, @Body() payload: any) {
     const user: User = req.user;
 
-    return this.subscriptionsService.register(user.email, payload);
+    if (!payload.subscription) {
+      throw new BadRequestError('Subscription object is required');
+    }
+
+    return this.subscriptionsService.register(user.email, payload.subscription);
   }
 }
