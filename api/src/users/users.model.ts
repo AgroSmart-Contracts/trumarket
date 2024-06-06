@@ -23,6 +23,7 @@ export interface User {
   walletType: string;
   role: number;
   createdAt: Date;
+  kycVerified: boolean;
 }
 
 const UserSchema: Schema = new Schema({
@@ -49,6 +50,10 @@ const UserSchema: Schema = new Schema({
     type: Number,
     enum: RoleType,
     default: 0,
+  },
+  kycVerified: {
+    type: Boolean,
+    default: false,
   },
   createdAt: { type: Date, default: Date.now },
 });
