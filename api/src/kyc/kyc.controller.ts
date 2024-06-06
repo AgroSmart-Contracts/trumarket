@@ -13,8 +13,8 @@ import { AuthGuard } from '@/guards/auth.guard';
 import { logger } from '@/logger';
 import { User } from '@/users/users.model';
 
-import { CreateVerificationDTO } from './dto/createVerification.dto';
-import { KYCVerification } from './kyc.entities';
+import { KYCVerification } from './dto/kycVerificationResponse.dto';
+import { SDKResponseDto } from './dto/sdkTokenResponse.dto';
 import { KYCService } from './kyc.service';
 
 @ApiTags('Kyc')
@@ -29,28 +29,11 @@ export class KYCController {
     description: 'KYC verification created',
     type: KYCVerification,
   })
-  async create(
-    @Body() payload: CreateVerificationDTO,
-    @Request() req,
-  ): Promise<any> {
+  async create(@Request() req): Promise<any> {
     const user: User = req.user;
 
-    const { firstName, lastName, line1, state, postcode, country, town } =
-      payload;
-    const data = {
-      firstName,
-      lastName,
-      address: {
-        line1,
-        state,
-        country,
-        town,
-        postcode,
-      },
-    };
-
     try {
-      const kycVerification = await this.kycService.createApplicant(user, data);
+      const kycVerification = await this.kycService.createApplicant(user);
       return kycVerification;
     } catch (err) {
       if (err.message === 'KYC applicant already exists') {
@@ -66,9 +49,10 @@ export class KYCController {
   @ApiOperation({ description: 'Used to create a Onfido SDK Token.' })
   @ApiOkResponse({
     description: 'SDK token created',
+    type: SDKResponseDto,
   })
   @UseGuards(AuthGuard)
-  async sdkToken(@Body() payload: any, @Request() req) {
+  async sdkToken(@Request() req) {
     const user: User = req.user;
 
     const userId = user.id;
@@ -83,10 +67,10 @@ export class KYCController {
     try {
       const sdkToken =
         await this.kycService.createOnfidoSDKToken(kycVerification);
-      return {
+      return new SDKResponseDto({
         sdkToken,
         workflowRunId: kycVerification.workflowRunId,
-      };
+      });
     } catch (err) {
       logger.error('Error Creating SDK Token', err);
       throw new InternalServerErrorException('KYC provider exception');
