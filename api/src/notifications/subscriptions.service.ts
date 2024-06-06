@@ -20,9 +20,16 @@ export class SubscriptionsService {
       return;
     }
 
+    logger.debug(
+      { subscription: this.subscriptions[email] },
+      `Sending notification to ${email}`,
+    );
+
     webpush
       .sendNotification(this.subscriptions[email], JSON.stringify(notification))
+      .then()
       .catch((err) => {
+        logger.error(err, `Error sending notification to ${email}`);
         if (err.statusCode === 410) delete this.subscriptions[email];
       });
   }

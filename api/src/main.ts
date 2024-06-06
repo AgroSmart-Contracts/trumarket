@@ -60,6 +60,6 @@ async function bootstrap() {
 
   schedule.scheduleJob('*/10 * * * *', syncDealsLogs);
 
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(process.env.PORT || 4000);
 }
 bootstrap();
