@@ -11,6 +11,7 @@ import { config } from './config';
 import { providers } from './constants';
 import { connectDB } from './database';
 import { DealsModule } from './deals/deals.module';
+import { KYCModule } from './kyc/kyc.module';
 import { loggerOptions } from './logger';
 import { UsersModule } from './users/users.module';
 
@@ -57,6 +58,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     UsersModule,
     DealsModule,
+    KYCModule,
   ],
   controllers: [AppController],
   providers: [
