@@ -1,4 +1,4 @@
-import { KYCVerification } from '@/kyc/kyc.entities';
+import { KYCVerification } from '@/kyc/dto/kycVerificationResponse.dto';
 import { KYCVerificationRepository } from '@/kyc/kyc.repository';
 import { User } from '@/users/users.model';
 import { UsersRepository } from '@/users/users.repository';

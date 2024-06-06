@@ -1,38 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { CountryCodes, DefaultApi, WebhookEventVerifier } from '@onfido/api';
+import { DefaultApi, WebhookEventVerifier } from '@onfido/api';
 
 import { NotFoundError } from '@/errors';
 import { User } from '@/users/users.model';
 import { UsersRepository } from '@/users/users.repository';
 
-import {
-  KYCVerification,
-  KYCVerificationResult,
-  KYCVerificationStatus,
-} from './kyc.entities';
+import { KYCVerification } from './dto/kycVerificationResponse.dto';
+import { KYCVerificationResult, KYCVerificationStatus } from './kyc.entities';
 import { KYCVerificationRepository } from './kyc.repository';
-
-interface Address {
-  flatNumber?: string;
-  buildingNumber?: string;
-  buildingName?: string;
-  street?: string;
-  subStreet?: string;
-  town?: string;
-  state?: string;
-  postcode: string;
-  country: CountryCodes;
-  line1?: string;
-  line2?: string;
-  line3?: string;
-}
-
-interface CreateVerificationParams {
-  firstName: string;
-  lastName: string;
-  dob?: string;
-  address: Address;
-}
 
 @Injectable()
 export class KYCService {
@@ -42,10 +17,7 @@ export class KYCService {
     private readonly usersRepository: UsersRepository,
   ) {}
 
-  async createApplicant(
-    user: User,
-    { firstName, lastName, address }: CreateVerificationParams,
-  ) {
+  async createApplicant(user: User) {
     const userId = user.id;
 
     const existing =
@@ -56,16 +28,9 @@ export class KYCService {
     }
 
     const applicant = await this.onfido.createApplicant({
-      first_name: firstName,
-      last_name: lastName,
+      first_name: 'Confidential',
+      last_name: 'Confidential',
       email: user.email,
-      address: {
-        building_number: address.buildingNumber,
-        street: address.street,
-        town: address.town,
-        postcode: address.postcode,
-        country: address.country,
-      },
     });
 
     const applicantId = applicant.data.id;

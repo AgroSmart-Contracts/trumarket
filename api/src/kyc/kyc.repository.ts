@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { MongooseRepository } from '@/repository.mongoose';
 
-import { KYCVerification } from './kyc.entities';
+import { KYCVerification } from './dto/kycVerificationResponse.dto';
 import KYCVerificationModel from './kyc.model';
 
 @Injectable()
