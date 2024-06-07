@@ -364,8 +364,8 @@ export class DealsService {
 
   async deleteDeal(dealId: string): Promise<void> {
     const deal = await this.findById(dealId);
-    if (deal.status !== DealStatus.Proposal) {
-      throw new BadRequestError('Deal cannot be deleted');
+    if (!deal) {
+      throw new BadRequestError('Deal not found');
     }
     await this.dealsRepository.delete(dealId);
   }
