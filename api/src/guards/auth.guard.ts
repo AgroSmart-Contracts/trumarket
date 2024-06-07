@@ -6,6 +6,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { type Request } from 'express';
 
+import { logger } from '@/logger';
+
 import { config } from '../config';
 import { UnauthorizedError } from '../errors';
 
@@ -29,6 +31,7 @@ export class AuthGuard implements CanActivate {
       // so that we can access it in our route handlers
       request.user = payload;
     } catch (err) {
+      logger.warn(err, 'Error verifying JWT token');
       throw new UnauthorizedError();
     }
     return true;

@@ -16,6 +16,7 @@ import {
 
 import { BlockchainService } from '@/blockchain/blockchain.service';
 import { DealsService } from '@/deals/deals.service';
+import { DealLogsDtoResponse } from '@/deals/dto/dealLogsResponse.dto';
 import { ListDealDtoResponse } from '@/deals/dto/listDealsResponse.dto';
 import { AdminAccessRestricted } from '@/decorators/adminRestricted';
 import { InternalServerError } from '@/errors';
@@ -74,6 +75,21 @@ export class AdminController {
   })
   async delete(@Param('dealId') id: string): Promise<void> {
     this.dealsService.deleteDeal(id);
+  }
+
+  @Get('/:dealId/logs')
+  @AdminAccessRestricted()
+  @ApiOperation({ summary: 'Get nft logs' })
+  @ApiResponse({
+    status: 200,
+    type: [DealLogsDtoResponse],
+    description: 'The nft logs were successfully got',
+  })
+  async getDealLogs(
+    @Param('dealId') id: string,
+  ): Promise<DealLogsDtoResponse[]> {
+    const logs = await this.dealsService.findDealsLogs(id);
+    return logs.map((doc) => new DealLogsDtoResponse(doc));
   }
 
   @Post('deals/:dealId/nft/mint')

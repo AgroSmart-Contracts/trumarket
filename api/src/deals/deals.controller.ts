@@ -277,7 +277,8 @@ export class DealsController {
     @Request() req,
   ): Promise<DealLogsDtoResponse[]> {
     const user: User = req.user;
-    const logs = await this.dealsService.findDealsLogs(id, user);
+    await this.dealsService.findUserDealById(id, user);
+    const logs = await this.dealsService.findDealsLogs(id);
     return logs.map((doc) => new DealLogsDtoResponse(doc));
   }
 

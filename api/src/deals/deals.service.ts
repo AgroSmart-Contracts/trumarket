@@ -599,9 +599,8 @@ export class DealsService {
     );
   }
 
-  async findDealsLogs(dealId: string, user: User): Promise<DealLog[]> {
+  async findDealsLogs(dealId: string): Promise<DealLog[]> {
     const deal = await this.findById(dealId);
-    await this.checkDealAccess(deal, user);
     return this.dealsRepository.findDealsLogs(deal.nftID);
   }
 
