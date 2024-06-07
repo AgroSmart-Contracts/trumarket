@@ -74,7 +74,7 @@ export class AdminController {
     description: 'The deal has been successfully deleted',
   })
   async delete(@Param('dealId') id: string): Promise<void> {
-    this.dealsService.deleteDeal(id);
+    await this.dealsService.deleteDeal(id);
   }
 
   @Get('/:dealId/logs')
