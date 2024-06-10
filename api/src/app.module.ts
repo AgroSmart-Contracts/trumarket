@@ -58,7 +58,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     UsersModule,
     DealsModule,
-    KYCModule,
+    // KYCModule,
   ],
   controllers: [AppController],
   providers: [
