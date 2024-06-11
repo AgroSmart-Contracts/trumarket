@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { logger } from '../logger';
-import { User, WalletType } from './users.model';
+import { NotificationsSettings, User, WalletType } from './users.model';
 import { UsersRepository } from './users.repository';
 
 @Injectable()
@@ -28,5 +28,16 @@ export class UsersService {
     }
 
     return this.users.create(createUserDto);
+  }
+
+  async updateNotificationsSettings(
+    userId: string,
+    desktopNotifications: NotificationsSettings,
+    emailNotifications: NotificationsSettings,
+  ): Promise<User | undefined> {
+    return this.users.updateById(userId, {
+      desktopNotifications,
+      emailNotifications,
+    });
   }
 }

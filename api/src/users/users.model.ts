@@ -15,7 +15,23 @@ export enum RoleType {
   ADMIN = 1,
 }
 
-export interface User {
+export class NotificationsSettings {
+  assignedDeal: boolean;
+  submittedDealChanges: boolean;
+  confirmedDeal: boolean;
+  cancelledDeal: boolean;
+  completedDeal: boolean;
+  // buyer
+  buyerApprovedMilestone: boolean;
+  buyerDeniedMilestone: boolean;
+  // supplier
+  supplierUploadedDocument: boolean;
+  supplierDeletedDocument: boolean;
+  supplierRequestedMilestoneApproval: boolean;
+  supplierCancelledMilestoneApproval: boolean;
+}
+
+export class User {
   id: string;
   email: string;
   accountType: string;
@@ -24,7 +40,26 @@ export interface User {
   role: number;
   createdAt: Date;
   kycVerified: boolean;
+  desktopNotifications?: NotificationsSettings;
+  emailNotifications?: NotificationsSettings;
 }
+
+const NotificationsSettingsSchema: Schema = new Schema(
+  {
+    assignedDeal: { type: Boolean, default: true },
+    submittedDealChanges: { type: Boolean, default: true },
+    confirmedDeal: { type: Boolean, default: true },
+    cancelledDeal: { type: Boolean, default: true },
+    completedDeal: { type: Boolean, default: true },
+    buyerApprovedMilestone: { type: Boolean, default: true },
+    buyerDeniedMilestone: { type: Boolean, default: true },
+    supplierUploadedDocument: { type: Boolean, default: true },
+    supplierDeletedDocument: { type: Boolean, default: true },
+    supplierRequestedMilestoneApproval: { type: Boolean, default: true },
+    supplierCancelledMilestoneApproval: { type: Boolean, default: true },
+  },
+  { _id: false },
+);
 
 const UserSchema: Schema = new Schema({
   email: { type: String, unique: true, sparse: true },
@@ -56,6 +91,12 @@ const UserSchema: Schema = new Schema({
     default: false,
   },
   createdAt: { type: Date, default: Date.now },
+  desktopNotifications: {
+    type: NotificationsSettingsSchema,
+  },
+  emailNotifications: {
+    type: NotificationsSettingsSchema,
+  },
 });
 
 UserSchema.set('toJSON', {

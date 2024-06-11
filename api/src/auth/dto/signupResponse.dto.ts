@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsNotEmpty, IsString } from 'class-validator';
 
 export class SignupResponseDto {
   constructor(res: SignupResponseDto) {
@@ -8,8 +7,6 @@ export class SignupResponseDto {
   }
 
   @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
   @Expose()
   token: string;
 }
