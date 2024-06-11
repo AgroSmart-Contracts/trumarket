@@ -12,6 +12,10 @@ const documentSchema = new Schema({
     type: String,
     required: true,
   },
+  seenByUsers: {
+    type: [String],
+    default: [],
+  },
 });
 
 documentSchema.set('toJSON', {

@@ -19,12 +19,13 @@ import {
 } from '@nestjs/swagger';
 
 import { AuthenticatedRestricted } from '@/decorators/authenticatedRestricted';
+import { BadRequestError } from '@/errors';
 
 // import { WhitelistAccessRestricted } from '../decorators/whitelistRestricted';
 import fileInterceptor from '../file.interceptor';
 import { filePipeValidator } from '../multer.options';
 import { User } from '../users/users.model';
-import { Deal } from './deals.entities';
+import { Deal, DocumentFile } from './deals.entities';
 import { DealsService } from './deals.service';
 // import { AssignNFTDto } from './dto/assignNFTID.dto';
 import { CreateDealDto } from './dto/createDeal.dto';
@@ -357,12 +358,11 @@ export class DealsController {
 
   @Put(':dealId/milestones/:milestoneId/docs/:docId')
   @AuthenticatedRestricted()
-  @ApiOperation({ summary: 'Update document description' })
+  @ApiOperation({ summary: 'Update document' })
   @ApiResponse({
     status: 200,
     type: documentResponseDTO,
-    description:
-      'The deal milestone document description was successfully updated',
+    description: 'The deal milestone was successfully updated',
   })
   async updateMilestoneDocument(
     @Param('dealId') id: string,
@@ -373,13 +373,26 @@ export class DealsController {
   ): Promise<documentResponseDTO> {
     const user: User = req.user;
 
-    const doc = await this.dealsService.updateMilestoneDocument(
-      id,
-      milestoneId,
-      docId,
-      payload.description,
-      user,
-    );
+    let doc: DocumentFile;
+
+    if (payload.description) {
+      doc = await this.dealsService.updateMilestoneDocument(
+        id,
+        milestoneId,
+        docId,
+        payload.description,
+        user,
+      );
+    } else if (payload.view) {
+      doc = await this.dealsService.setMilestoneDocumentAsViewed(
+        id,
+        milestoneId,
+        docId,
+        user,
+      );
+    } else {
+      throw new BadRequestError('empty payload');
+    }
 
     return new documentResponseDTO(doc);
   }

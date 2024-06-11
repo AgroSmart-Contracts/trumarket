@@ -5,6 +5,8 @@ export interface DocumentFile {
   id: string;
   description: string;
   url: string;
+  seenByUsers: string[];
+  seen: boolean;
 }
 
 export interface Wallet {
