@@ -5,12 +5,15 @@ import { IsNumber } from 'class-validator';
 import { DocumentFile } from './../deals.entities';
 
 export class MilestoneDTO {
+  @ApiProperty()
   @Expose()
   id?: string;
 
+  @ApiProperty()
   @Expose()
   description: string;
 
+  @ApiProperty()
   @Expose()
   fundsDistribution: number;
 }

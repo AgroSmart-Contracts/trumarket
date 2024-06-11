@@ -151,6 +151,19 @@ export class DealsService {
       }
     }
 
+    deal.milestones = deal.milestones.map((m) => {
+      return {
+        ...m,
+        docs: m.docs.map((d) => {
+          d.seen = d.seenByUsers ? d.seenByUsers.includes(user.id) : false;
+          delete d.seenByUsers;
+          return {
+            ...d,
+          };
+        }),
+      };
+    });
+
     return deal;
   }
 
@@ -389,6 +402,7 @@ export class DealsService {
     return this.dealsRepository.pushDocument(dealId, {
       url: uploadedUrl,
       description,
+      seenByUsers: [user.id],
     });
   }
 
@@ -461,6 +475,7 @@ export class DealsService {
       {
         url: uploadedUrl,
         description,
+        seenByUsers: [user.id],
       },
     );
 
@@ -512,6 +527,38 @@ export class DealsService {
       deal,
       milestone,
       user.email,
+    );
+
+    return document;
+  }
+
+  async setMilestoneDocumentAsViewed(
+    dealId: string,
+    milestoneId: string,
+    docId: string,
+    user: User,
+  ): Promise<DocumentFile> {
+    const deal = await this.findById(dealId);
+
+    const milestone = deal.milestones.find((m) => m.id === milestoneId);
+    if (!milestone) {
+      throw new BadRequestError('Milestone not found');
+    }
+
+    const doc = milestone.docs.find((d) => d.id === docId);
+    if (!doc) {
+      throw new BadRequestError('Document not found');
+    }
+
+    if (doc.seenByUsers && doc.seenByUsers.includes(user.id)) {
+      throw new BadRequestError('Document already seen');
+    }
+
+    const document = await this.dealsRepository.setMilestoneDocumentAsViewed(
+      dealId,
+      milestoneId,
+      docId,
+      user.id,
     );
 
     return document;
@@ -829,11 +876,16 @@ export class DealsService {
     offset: number,
     status: DealStatus,
     emailsSearch: string,
+    search: string,
   ): Promise<Page<Deal>> {
     const query = {} as any;
 
     if (status) {
       query.status = status;
+    }
+
+    if (search) {
+      query.name = { $regex: new RegExp(search, 'i') };
     }
 
     if (emailsSearch) {

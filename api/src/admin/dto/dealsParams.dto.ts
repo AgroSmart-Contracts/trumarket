@@ -22,4 +22,10 @@ export class DealsParamsDto {
   @IsOptional()
   @Expose()
   emailSearch?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  @Expose()
+  search?: string;
 }

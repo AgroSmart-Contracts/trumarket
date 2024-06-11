@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-import { Deal, DealStatus, Milestone } from '../deals.entities';
+import { Deal, DealStatus } from '../deals.entities';
 import { CompanyDTO, ParticipantDTO } from './dealResponse.dto';
+import { MilestoneResponseDto } from './milestoneResponse.dto';
 
 export class ListDealDtoResponse {
   constructor(res: Partial<Deal>) {
@@ -76,9 +77,9 @@ export class ListDealDtoResponse {
   @Expose()
   currentMilestone: number;
 
-  @ApiProperty({ type: Milestone, isArray: true })
+  @ApiProperty({ type: MilestoneResponseDto, isArray: true })
   @Expose()
-  milestones: Milestone[];
+  milestones: MilestoneResponseDto[];
 
   @ApiProperty({ enum: DealStatus })
   @Expose()

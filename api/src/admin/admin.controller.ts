@@ -49,6 +49,7 @@ export class AdminController {
       params.offset,
       params.status,
       params.emailSearch,
+      params.search,
     );
 
     return deals;

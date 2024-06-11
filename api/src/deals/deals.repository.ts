@@ -31,6 +31,19 @@ export class DealsRepository extends MongooseRepository<Deal> {
         ...query,
       })
     ).map((deal) => {
+      deal.milestones = deal.milestones.map((m) => {
+        return {
+          ...m,
+          docs: m.docs.map((d) => {
+            d.seen = d.seenByUsers ? d.seenByUsers.includes(userId) : false;
+            delete d.seenByUsers;
+            return {
+              ...d,
+            };
+          }),
+        };
+      });
+
       const participant = deal.buyers.find((b) => b.id === userId);
       if (participant) {
         if (participant.new) {
@@ -53,7 +66,7 @@ export class DealsRepository extends MongooseRepository<Deal> {
 
   async pushDocument(
     dealId: string,
-    document: { url: string; description: string },
+    document: { url: string; description: string; seenByUsers: string[] },
   ): Promise<DocumentFile> {
     const deal = await DealModel.findByIdAndUpdate(
       dealId,
@@ -81,7 +94,7 @@ export class DealsRepository extends MongooseRepository<Deal> {
   async pushMilestoneDocument(
     dealId: string,
     milestoneId: string,
-    document: { url: string; description: string },
+    document: { url: string; description: string; seenByUsers: string[] },
   ): Promise<DocumentFile> {
     const deal = await DealModel.findOneAndUpdate(
       { _id: dealId, 'milestones._id': milestoneId },
@@ -148,6 +161,33 @@ export class DealsRepository extends MongooseRepository<Deal> {
       },
       {
         $set: { 'milestones.$.docs.$[doc].description': description },
+      },
+      { new: true, arrayFilters: [{ 'doc._id': docId }] },
+    );
+
+    const dealJson = deal.toJSON();
+
+    const milestone = dealJson.milestones.find((m) => m.id === milestoneId);
+
+    const doc = milestone.docs.find((d) => d.id === docId);
+
+    return doc;
+  }
+
+  async setMilestoneDocumentAsViewed(
+    dealId: string,
+    milestoneId: string,
+    docId: string,
+    userId: string,
+  ): Promise<DocumentFile> {
+    console.log('seen by user', userId);
+    const deal = await DealModel.findOneAndUpdate(
+      {
+        _id: dealId,
+        'milestones.docs._id': docId,
+      },
+      {
+        $addToSet: { 'milestones.$.docs.$[doc].seenByUsers': userId },
       },
       { new: true, arrayFilters: [{ 'doc._id': docId }] },
     );
