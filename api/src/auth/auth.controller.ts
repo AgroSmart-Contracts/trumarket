@@ -1,9 +1,11 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Request } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { DealsService } from '@/deals/deals.service';
+import { AuthenticatedRestricted } from '@/decorators/authenticatedRestricted';
 import { logger } from '@/logger';
 import { NotificationsService } from '@/notifications/notifications.service';
+import { User } from '@/users/users.model';
 import { UsersService } from '@/users/users.service';
 
 import { InternalServerError } from '../errors';
@@ -12,6 +14,8 @@ import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/loginResponse.dto';
 import { SignupResponseDto } from './dto/signupResponse.dto';
 import { SignupDto } from './dto/singup.dto';
+import { UpdateNotificationsSettingsDto } from './dto/updateNotificationsSettings.dto';
+import { UserDetailsResponseDto } from './dto/userDetailsResponse.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -22,6 +26,43 @@ export class AuthController {
     private dealsService: DealsService,
     private notificationsService: NotificationsService,
   ) {}
+
+  @Get('')
+  @AuthenticatedRestricted()
+  @ApiResponse({
+    status: 200,
+    type: UserDetailsResponseDto,
+    description: 'Authenticated user details',
+  })
+  async getUserDetails(@Request() req): Promise<UserDetailsResponseDto> {
+    const user: User = req.user;
+
+    const dbUser = await this.userService.findByEmail(user.email);
+
+    return new UserDetailsResponseDto(dbUser);
+  }
+
+  @Put('/notifications-settings')
+  @AuthenticatedRestricted()
+  @ApiResponse({
+    status: 200,
+    type: UserDetailsResponseDto,
+    description: 'Update Notifications Settings',
+  })
+  async updateNotificationsSettings(
+    @Request() req,
+    @Body() notificationsSettings: UpdateNotificationsSettingsDto,
+  ): Promise<UserDetailsResponseDto> {
+    const user: User = req.user;
+
+    const dbUser = await this.userService.updateNotificationsSettings(
+      user.id,
+      notificationsSettings.desktopNotifications,
+      notificationsSettings.emailNotifications,
+    );
+
+    return new UserDetailsResponseDto(dbUser);
+  }
 
   @Post('login')
   @ApiResponse({

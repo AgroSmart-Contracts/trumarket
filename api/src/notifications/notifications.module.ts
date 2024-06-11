@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 
 import { config } from '@/config';
+import { UsersModule } from '@/users/users.module';
 
 import { NotificationsController } from './notifications.controller';
 import { NotificationsRepository } from './notifications.repository';
@@ -11,6 +12,7 @@ import { SubscriptionsService } from './subscriptions.service';
 @Module({
   controllers: [NotificationsController],
   imports: [
+    UsersModule,
     MailerModule.forRoot({
       transport: {
         host: config.emailHost,
