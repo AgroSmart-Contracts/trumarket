@@ -2,11 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MailerService } from '@nestjs-modules/mailer';
 
 import { BlockchainService } from '@/blockchain/blockchain.service';
-import { NotificationsRepository } from '@/notifications/notifications.repository';
+import { providers } from '@/constants';
 import { NotificationsService } from '@/notifications/notifications.service';
 import { SubscriptionsService } from '@/notifications/subscriptions.service';
-import { AccountType, User } from '@/users/users.model';
-import { UsersRepository } from '@/users/users.repository';
+import { AccountType, User } from '@/users/users.entities';
 import { UsersService } from '@/users/users.service';
 
 import { Deal, DealStatus } from './deals.entities';
@@ -23,8 +22,29 @@ describe('DealsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DealsService,
-        DealsRepository,
         UsersService,
+        {
+          provide: providers.NotificationsRepository,
+          useValue: {
+            bulkCreateByRecipent: jest.fn(),
+          },
+        },
+        {
+          provide: providers.DealsRepository,
+          useValue: {
+            create: jest.fn(),
+            findByUser: jest.fn(),
+            findById: jest.fn(),
+            updateById: jest.fn(),
+          },
+        },
+        {
+          provide: providers.UsersRepository,
+          useValue: {
+            findById: jest.fn(),
+            updateById: jest.fn(),
+          },
+        },
         {
           provide: NotificationsService,
           useValue: {
@@ -34,7 +54,6 @@ describe('DealsService', () => {
           },
         },
         NotificationsService,
-        NotificationsRepository,
         SubscriptionsService,
         BlockchainService,
         {
@@ -57,12 +76,11 @@ describe('DealsService', () => {
             getTransactionReceipt: jest.fn(),
           },
         },
-        UsersRepository,
       ],
     }).compile();
 
+    dealsRepository = module.get<DealsRepository>(providers.DealsRepository);
     dealsService = module.get<DealsService>(DealsService);
-    dealsRepository = module.get<DealsRepository>(DealsRepository);
     blockchainService = module.get<BlockchainService>(BlockchainService);
     notificationsService =
       module.get<NotificationsService>(NotificationsService);

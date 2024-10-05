@@ -1,13 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 
 import { s3Service } from '@/aws/s3.service';
 import { BlockchainService } from '@/blockchain/blockchain.service';
 import { config } from '@/config';
+import { providers } from '@/constants';
 import { BadRequestError, ForbiddenError, UnauthorizedError } from '@/errors';
 import { NotificationsService } from '@/notifications/notifications.service';
 import { Page } from '@/types';
-import { User } from '@/users/users.model';
+import { User } from '@/users/users.entities';
 import { UsersService } from '@/users/users.service';
 
 import {
@@ -28,6 +29,7 @@ export interface ListDealsQuery {
 @Injectable()
 export class DealsService {
   constructor(
+    @Inject(providers.DealsRepository)
     private readonly dealsRepository: DealsRepository,
     private readonly users: UsersService,
     private readonly notifications: NotificationsService,
@@ -64,6 +66,10 @@ export class DealsService {
         }
       })
       .filter((v) => v);
+  }
+
+  async findDealById(id: string): Promise<Deal> {
+    return this.dealsRepository.findById(id);
   }
 
   async findDealsByUser(

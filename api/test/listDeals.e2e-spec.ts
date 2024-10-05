@@ -1,5 +1,5 @@
 import { MilestoneStatus } from '@/deals/deals.entities';
-import { AccountType } from '@/users/users.model';
+import { AccountType } from '@/users/users.entities';
 
 import { TestApp } from './utils';
 
@@ -105,8 +105,6 @@ describe('List deals (e2e)', () => {
 
     const deal = await app.createUserDeal(buyer);
     const dealConfirmed = await app.createUserConfirmedDeal(buyer);
-
-    console.log(deal);
 
     const dealsReq = await app
       .request()

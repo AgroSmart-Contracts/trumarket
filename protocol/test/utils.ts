@@ -6,14 +6,12 @@ export function decodeDealManagerEvents(receipt: TransactionReceipt, abi: any) {
   const parsedEvents: { eventName: string; args: any }[] = [];
 
   receipt.logs.forEach((log, index) => {
-    console.log(index);
     try {
       const data: any = decodeEventLog({
         abi: abi,
         data: log.data,
         topics: log.topics,
       });
-      console.log(data);
       parsedEvents.push(data);
     } catch (e) {
       console.log(e);

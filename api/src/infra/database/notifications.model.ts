@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
-import { Notification } from './notifications.entities';
+import { Notification } from '../../notifications/notifications.entities';
 
 const NotificationSchema: Schema = new Schema({
   message: { type: String, required: true },

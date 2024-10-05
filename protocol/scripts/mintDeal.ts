@@ -34,13 +34,9 @@ async function main() {
     logs: receipt.logs,
   });
 
-  console.log({ logs });
-
   // await dealsManager.write.proceed([1, 1]);
 
   const status = await dealsManager.read.status([0]);
-
-  console.log({ status });
 }
 
 main()

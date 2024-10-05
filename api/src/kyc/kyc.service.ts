@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DefaultApi, WebhookEventVerifier } from '@onfido/api';
 
+import { providers } from '@/constants';
 import { NotFoundError } from '@/errors';
-import { User } from '@/users/users.model';
-import { UsersRepository } from '@/users/users.repository';
+import { User } from '@/users/users.entities';
+import { UsersService } from '@/users/users.service';
 
 import { KYCVerification } from './dto/kycVerificationResponse.dto';
 import { KYCVerificationResult, KYCVerificationStatus } from './kyc.entities';
@@ -12,9 +13,10 @@ import { KYCVerificationRepository } from './kyc.repository';
 @Injectable()
 export class KYCService {
   constructor(
+    @Inject(providers.KYCRepository)
     private readonly verificationRepository: KYCVerificationRepository,
     private readonly onfido: DefaultApi,
-    private readonly usersRepository: UsersRepository,
+    private readonly usersService: UsersService,
   ) {}
 
   async createApplicant(user: User) {
@@ -116,7 +118,7 @@ export class KYCService {
       });
 
       if (result === KYCVerificationResult.Pass) {
-        await this.usersRepository.updateById(kycVerification.userId, {
+        await this.usersService.updateById(kycVerification.userId, {
           kycVerified: true,
         });
       }

@@ -1,6 +1,7 @@
 import { Deal, DealStatus } from '@/deals/deals.entities';
 import { CreateDealDto } from '@/deals/dto/createDeal.dto';
-import UserModel, { AccountType, User } from '@/users/users.model';
+import UserModel from '@/infra/database/users.model';
+import { AccountType, User } from '@/users/users.entities';
 
 import { randomEvmAddress, TestApp } from './utils';
 

@@ -1,6 +1,7 @@
+import { providers } from '@/constants';
 import { KYCVerification } from '@/kyc/dto/kycVerificationResponse.dto';
 import { KYCVerificationRepository } from '@/kyc/kyc.repository';
-import { User } from '@/users/users.model';
+import { User } from '@/users/users.entities';
 import { UsersRepository } from '@/users/users.repository';
 
 import { TestApp } from './utils';
@@ -55,9 +56,9 @@ describe('Create new KYC Verification (e2e)', () => {
     await app.setup();
 
     verificationRepository = app.app.get<KYCVerificationRepository>(
-      KYCVerificationRepository,
+      providers.KYCRepository,
     );
-    usersRepository = app.app.get<UsersRepository>(UsersRepository);
+    usersRepository = app.app.get<UsersRepository>(providers.UsersRepository);
   });
 
   afterEach(async () => {

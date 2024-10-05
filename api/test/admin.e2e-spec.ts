@@ -1,5 +1,5 @@
 import { DealStatus } from '@/deals/deals.entities';
-import { RoleType } from '@/users/users.model';
+import { RoleType } from '@/users/users.entities';
 
 import { TestApp } from './utils';
 

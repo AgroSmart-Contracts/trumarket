@@ -116,7 +116,7 @@ export class Deal {
   roi: number;
 
   // ownership properties
-  // whitelist: Wallet[];
+  whitelist: Wallet[];
   buyers: DealParticipant[];
   suppliers: DealParticipant[];
   buyerCompany: DealCompany;

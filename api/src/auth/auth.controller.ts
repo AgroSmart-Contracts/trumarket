@@ -5,7 +5,7 @@ import { DealsService } from '@/deals/deals.service';
 import { AuthenticatedRestricted } from '@/decorators/authenticatedRestricted';
 import { logger } from '@/logger';
 import { NotificationsService } from '@/notifications/notifications.service';
-import { User } from '@/users/users.model';
+import { User } from '@/users/users.entities';
 import { UsersService } from '@/users/users.service';
 
 import { InternalServerError } from '../errors';

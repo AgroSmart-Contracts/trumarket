@@ -14,9 +14,10 @@ import { AppModule } from '@/app.module';
 import { BlockchainService } from '@/blockchain/blockchain.service';
 import { config } from '@/config';
 import { Deal } from '@/deals/deals.entities';
-import DealModel from '@/deals/deals.model';
 import { CreateDealDto } from '@/deals/dto/createDeal.dto';
-import UserModel, { AccountType, User } from '@/users/users.model';
+import DealModel from '@/infra/database/deals.model';
+import UserModel from '@/infra/database/users.model';
+import { AccountType, User } from '@/users/users.entities';
 
 export const randomEmail = (): string => {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -346,8 +347,6 @@ export class TestApp {
       suppliersEmails: [supplier.email],
       ...dealDto,
     });
-
-    console.log(createDealDto);
 
     const createDealReq = await this.request()
       .post('/deals')
