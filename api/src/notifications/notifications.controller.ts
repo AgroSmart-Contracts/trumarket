@@ -11,7 +11,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthenticatedRestricted } from '@/decorators/authenticatedRestricted';
 import { BadRequestError } from '@/errors';
-import { User } from '@/users/users.model';
+import { User } from '@/users/users.entities';
 
 import { ListNotificationsDto } from './dto/listNotifications.dto';
 import { ListNotificationsResponseDto } from './dto/listNotificationsResponse.dto';

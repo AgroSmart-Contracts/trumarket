@@ -1,23 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Repository } from '@/repository';
 
-import { MongooseRepository } from '../repository.mongoose';
-import UserModel, { User } from './users.model';
+import { User } from './users.entities';
 
-@Injectable()
-export class UsersRepository extends MongooseRepository<User> {
-  constructor() {
-    super(UserModel);
-  }
-
-  findByWalletAddress(walletAddress: string): Promise<User | undefined> {
-    return this.findOne({ walletAddress });
-  }
-
-  findByEmail(email: string): Promise<User | undefined> {
-    return this.findOne({ email });
-  }
-
-  findByEmails(emails: string[]): Promise<User[] | undefined> {
-    return this.find({ email: { $in: emails } });
-  }
+export interface UsersRepository extends Repository<User> {
+  findByWalletAddress(walletAddress: string): Promise<User | undefined>;
+  findByEmail(email: string): Promise<User | undefined>;
+  findByEmails(emails: string[]): Promise<User[] | undefined>;
 }

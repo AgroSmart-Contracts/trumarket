@@ -7,14 +7,10 @@ async function main() {
 
   const erc20 = await hre.viem.deployContract('ERC20Mock');
 
-  console.log(`ERC20 deployed to ${erc20.address}`);
-
   const dealsManager = await hre.viem.deployContract('DealsManager', [
     dealsManagerAccount.account.address,
     erc20.address,
   ]);
-
-  console.log(`Deals Manager deployed to ${dealsManager.address}`);
 
   fs.writeFileSync(
     path.join(__dirname, './addresses/deployed.json'),

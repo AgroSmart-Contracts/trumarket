@@ -11,7 +11,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BadRequestError, NotFoundError } from '@/errors';
 import { AuthGuard } from '@/guards/auth.guard';
 import { logger } from '@/logger';
-import { User } from '@/users/users.model';
+import { User } from '@/users/users.entities';
 
 import { KYCVerification } from './dto/kycVerificationResponse.dto';
 import { SDKResponseDto } from './dto/sdkTokenResponse.dto';

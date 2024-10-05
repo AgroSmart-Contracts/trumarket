@@ -1,25 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Repository } from '@/repository';
 
-import { MongooseRepository } from '@/repository.mongoose';
+import { KYCVerification } from './kyc.entities';
 
-import { KYCVerification } from './dto/kycVerificationResponse.dto';
-import KYCVerificationModel from './kyc.model';
-
-@Injectable()
-export class KYCVerificationRepository extends MongooseRepository<KYCVerification> {
-  constructor() {
-    super(KYCVerificationModel);
-  }
-
-  async createApplicant(data: any): Promise<KYCVerification> {
-    return this.create(data);
-  }
-
-  async getApplicantById(applicantId: string): Promise<KYCVerification> {
-    return this.findOne({ applicantId });
-  }
-
-  async getApplicantByUserId(userId: string): Promise<KYCVerification> {
-    return this.findOne({ userId });
-  }
+export interface KYCVerificationRepository extends Repository<KYCVerification> {
+  createApplicant(data: any): Promise<KYCVerification>;
+  getApplicantById(applicantId: string): Promise<KYCVerification>;
+  getApplicantByUserId(userId: string): Promise<KYCVerification>;
 }

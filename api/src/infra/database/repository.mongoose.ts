@@ -7,8 +7,8 @@ import {
   UpdateQuery,
 } from 'mongoose';
 
-import { ConflictError } from './errors';
-import { Page, PageLimit } from './repository';
+import { ConflictError } from '../../errors';
+import { Page, PageLimit } from '../../repository';
 
 export class MongooseRepository<T> {
   constructor(private readonly model: Model<T>) {

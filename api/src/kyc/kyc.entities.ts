@@ -9,3 +9,15 @@ export enum KYCVerificationResult {
   Fail = 'fail',
   ManualReview = 'manualReview',
 }
+
+export type KYCVerification = {
+  id: string;
+  attempts: number;
+  applicantId: string;
+  workflowRunId: string;
+  status: KYCVerificationStatus;
+  result?: KYCVerificationResult;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+};

@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { render } from '@react-email/components';
 
 import { config } from '@/config';
+import { providers } from '@/constants';
 import { Deal, Milestone } from '@/deals/deals.entities';
 import { logger } from '@/logger';
 import { Page } from '@/types';
-import { NotificationsSettings, User } from '@/users/users.model';
+import { NotificationsSettings, User } from '@/users/users.entities';
 import { UsersService } from '@/users/users.service';
 
 import { Email, EmailProps } from './email-template';
@@ -18,6 +19,7 @@ import { SubscriptionsService } from './subscriptions.service';
 export class NotificationsService {
   constructor(
     private readonly mailerService: MailerService,
+    @Inject(providers.NotificationsRepository)
     private readonly repo: NotificationsRepository,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly userService: UsersService,

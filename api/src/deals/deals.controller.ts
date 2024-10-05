@@ -20,11 +20,11 @@ import {
 
 import { AuthenticatedRestricted } from '@/decorators/authenticatedRestricted';
 import { BadRequestError } from '@/errors';
+import { User } from '@/users/users.entities';
 
 // import { WhitelistAccessRestricted } from '../decorators/whitelistRestricted';
 import fileInterceptor from '../file.interceptor';
 import { filePipeValidator } from '../multer.options';
-import { User } from '../users/users.model';
 import { Deal, DocumentFile } from './deals.entities';
 import { DealsService } from './deals.service';
 // import { AssignNFTDto } from './dto/assignNFTID.dto';

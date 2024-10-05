@@ -32,7 +32,11 @@ async function bootstrap() {
     },
   });
 
-  app.useLogger(app.get(Logger));
+  if (process.env.E2E_TEST) {
+    app.useLogger(false);
+  } else {
+    app.useLogger(app.get(Logger));
+  }
 
   app.enableCors();
 

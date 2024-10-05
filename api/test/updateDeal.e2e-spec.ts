@@ -1,4 +1,4 @@
-import { AccountType, User } from '@/users/users.model';
+import { AccountType, User } from '@/users/users.entities';
 
 import { TestApp } from './utils';
 

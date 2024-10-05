@@ -9,14 +9,29 @@ import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { config } from './config';
 import { providers } from './constants';
-import { connectDB } from './database';
+import { DatabaseModule } from './database/database.module';
 import { DealsModule } from './deals/deals.module';
-// import { KYCModule } from './kyc/kyc.module';
+import { connectDB } from './infra/database/connectDB';
+import { KYCModule } from './kyc/kyc.module';
 import { loggerOptions } from './logger';
 import { UsersModule } from './users/users.module';
 
-@Module({
-  imports: [
+const modules = [
+  JwtModule.register({
+    secret: config.jwtSecret,
+    signOptions: { expiresIn: '1d' },
+    global: true,
+  }),
+  DatabaseModule,
+  AdminModule,
+  AuthModule,
+  UsersModule,
+  DealsModule,
+  KYCModule,
+];
+
+if (!process.env.E2E_TEST) {
+  modules.unshift(
     LoggerModule.forRoot({
       pinoHttp:
         config.env === 'development' || config.prettyLogs
@@ -49,17 +64,11 @@ import { UsersModule } from './users/users.module';
           : loggerOptions,
       forRoutes: ['*'],
     }),
-    JwtModule.register({
-      secret: config.jwtSecret,
-      signOptions: { expiresIn: '1d' },
-      global: true,
-    }),
-    AdminModule,
-    AuthModule,
-    UsersModule,
-    DealsModule,
-    // KYCModule,
-  ],
+  );
+}
+
+@Module({
+  imports: modules,
   controllers: [AppController],
   providers: [
     {

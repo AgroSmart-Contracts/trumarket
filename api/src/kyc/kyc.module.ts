@@ -1,18 +1,16 @@
 import { Module } from '@nestjs/common';
 import { Configuration, DefaultApi, Region } from '@onfido/api';
 
+import { DatabaseModule } from '@/database/database.module';
 import { UsersModule } from '@/users/users.module';
-import { UsersRepository } from '@/users/users.repository';
 
 import { KYCController } from './kyc.controller';
-import { KYCVerificationRepository } from './kyc.repository';
 import { KYCService } from './kyc.service';
 
 @Module({
   controllers: [KYCController],
   providers: [
     KYCService,
-    KYCVerificationRepository,
     {
       provide: DefaultApi,
       useFactory: () => {
@@ -31,9 +29,8 @@ import { KYCService } from './kyc.service';
         );
       },
     },
-    UsersRepository,
   ],
-  imports: [UsersModule],
+  imports: [UsersModule, DatabaseModule],
   exports: [KYCService],
 })
 export class KYCModule {}

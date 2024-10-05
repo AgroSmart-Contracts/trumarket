@@ -1,12 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { providers } from '@/constants';
 
 import { logger } from '../logger';
-import { NotificationsSettings, User, WalletType } from './users.model';
+import { NotificationsSettings, User, WalletType } from './users.entities';
 import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly users: UsersRepository) {}
+  constructor(
+    @Inject(providers.UsersRepository)
+    private readonly users: UsersRepository,
+  ) {}
 
   async findByWalletAddress(walletAddress: string): Promise<User | undefined> {
     return this.users.findByWalletAddress(walletAddress);
@@ -28,6 +33,13 @@ export class UsersService {
     }
 
     return this.users.create(createUserDto);
+  }
+
+  async updateById(
+    userId: string,
+    update: Partial<User>,
+  ): Promise<User | undefined> {
+    return this.users.updateById(userId, update);
   }
 
   async updateNotificationsSettings(

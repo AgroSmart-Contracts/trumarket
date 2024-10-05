@@ -1,8 +1,10 @@
 import mongoose, { Schema } from 'mongoose';
 
+import {
+  MilestoneApprovalStatus,
+  MilestoneStatus,
+} from '@/deals/deals.entities';
 import { ConflictError } from '@/errors';
-
-import { MilestoneApprovalStatus, MilestoneStatus } from './deals.entities';
 
 const documentSchema = new Schema({
   description: {
@@ -236,10 +238,10 @@ const dealSchema = new Schema({
   },
 
   // ownership properties
-  // whitelist: {
-  //   type: [walletSchema],
-  //   default: [],
-  // },
+  whitelist: {
+    type: [walletSchema],
+    default: [],
+  },
   buyers: {
     type: [participantSchema],
     default: [],

@@ -3,10 +3,10 @@ import { JwtService } from '@nestjs/jwt';
 import * as jose from 'jose';
 
 import { logger } from '@/logger';
+import { User } from '@/users/users.entities';
 import { UsersService } from '@/users/users.service';
 
 import { config } from '../config';
-import { User } from '../users/users.model';
 
 export interface Auth0Info {
   payload: {

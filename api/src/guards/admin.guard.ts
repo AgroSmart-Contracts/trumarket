@@ -1,11 +1,22 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
+
+import { providers } from '@/constants';
+import { RoleType, User } from '@/users/users.entities';
+import { UsersRepository } from '@/users/users.repository';
 
 import { ForbiddenError, UnauthorizedError } from '../errors';
-import UserModel, { RoleType, User } from '../users/users.model';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
-  constructor() {}
+  constructor(
+    @Inject(providers.UsersRepository)
+    private readonly usersRepository: UsersRepository,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -14,9 +25,10 @@ export class AdminGuard implements CanActivate {
       throw new UnauthorizedError();
     }
 
-    const { address } = request.user as any;
+    const { walletAddress } = request.user as any;
 
-    const user: User = await UserModel.findOne({ address });
+    const user: User =
+      await this.usersRepository.findByWalletAddress(walletAddress);
 
     if (user && user.role === RoleType.ADMIN) {
       return true;
