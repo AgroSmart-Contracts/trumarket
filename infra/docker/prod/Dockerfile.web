@@ -7,8 +7,6 @@ COPY ./web/package*.json .
 
 RUN npm ci
 
-ENV NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID=BJC8VN_eHEJUdcXUbLini6alCG8avlQGgbQRVqF1F9Il6pCMfn7FJPd5Bi91OouSaih0mY65Qnus1cCKEQRtSZA
-
 COPY ./web .
 
 RUN npm run build
