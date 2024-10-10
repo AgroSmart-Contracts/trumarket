@@ -1,16 +1,15 @@
 # Stage 1: Build stage
-FROM node:20.11-alpine as builder
+FROM node:20.11-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY ./web/package*.json ./web/
+COPY ./web/package*.json .
 
 RUN npm ci
 
-COPY ./web ./web
+COPY ./web .
 
-RUN npm run build -w web
+RUN npm run build
 
 # Stage 2: Production-ready stage
 FROM node:20.11-alpine
@@ -22,12 +21,11 @@ WORKDIR /app
 
 # Copy only the necessary files from the build stage
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/web/package*.json ./web/
 
-COPY --from=builder /app/web/.next ./web/.next
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
 
-RUN npm ci --only=production
 
 EXPOSE 3000
 
-CMD [ "npm", "run", "start","-w", "web"]
+CMD [ "npm", "run", "start" ]

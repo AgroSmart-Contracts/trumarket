@@ -19,6 +19,10 @@ webpush.setVapidDetails(
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  if (process.env.NODE_ENV === 'production') {
+    app.setGlobalPrefix('api');
+  }
+
   const swaggerConfig = new DocumentBuilder()
     .setTitle('TruMarket Shipment API')
     .setVersion('1.1')
