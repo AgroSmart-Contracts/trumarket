@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body,
+html {
+  background-color: #2d3e570d;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.vi-character {
+  height: 100%;
+  flex-grow: 1;
+  flex-basis: 0;
+  text-align: center;
+  font-size: 30px;
+  font-weight: bold;
+  line-height: 35px;
+  color: #495057;
+  background-color: white;
+  border: 1px solid #00000033;
+  cursor: default;
+  width: 1px;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.vi-container > #field-0 {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-right: 0;
+}
+
+.vi-container > #field-1,
+#field-2,
+#field-3,
+#field-4 {
+  border-right: 0;
+}
+
+.vi-character-selected {
+  outline: 1.5px solid #00000033;
+  border-right: 1.5px solid #00000033 !important;
+}
+
+.vi-container > #field-5 {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.vi-container {
+  height: 38px !important;
+  width: 240px !important;
+  gap: 0;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.rectangle:after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-top: 22px solid transparent;
+  border-bottom: 22px solid transparent;
+  /* border-left: 23px solid #f00; */
+  top: 0px;
+  right: -20px;
+}
+
+.multine-ellipsis {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+/* uppy */
+
+.uppy-Dashboard-inner {
+  height: 400px !important;
+}
+
+.disabled-select-arrow {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  text-indent: 1px;
+  text-overflow: "";
+}
+
+.Toastify__progress-bar--success {
+  background: #000000cc;
+}
+
+.clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

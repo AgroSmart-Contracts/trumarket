@@ -1,0 +1,49 @@
+interface IPasswordLess {}
+
+export enum IUserRole {
+  REGULAR,
+  ADMIN,
+}
+
+export enum Notification {
+  DESKTOP = "desktop",
+  EMAIL = "email",
+}
+
+export interface UserProfileInfo {
+  id: string;
+  email: string;
+  accountType: string;
+  walletAddress: string;
+  kycVerified: boolean;
+  desktopNotifications: DesktopNotifications;
+  emailNotifications: EmailNotifications;
+}
+
+export interface DesktopNotifications {
+  assignedDeal: boolean;
+  submittedDealChanges: boolean;
+  confirmedDeal: boolean;
+  completedDeal: boolean;
+  cancelledDeal: boolean;
+  buyerApprovedMilestone: boolean;
+  buyerDeniedMilestone: boolean;
+  supplierUploadedDocument: boolean;
+  supplierDeletedDocument: boolean;
+  supplierRequestedMilestoneApproval: boolean;
+  supplierCancelledMilestoneApproval: boolean;
+}
+
+export interface EmailNotifications {
+  assignedDeal: boolean;
+  submittedDealChanges: boolean;
+  confirmedDeal: boolean;
+  completedDeal: boolean;
+  cancelledDeal: boolean;
+  buyerApprovedMilestone: boolean;
+  buyerDeniedMilestone: boolean;
+  supplierUploadedDocument: boolean;
+  supplierDeletedDocument: boolean;
+  supplierRequestedMilestoneApproval: boolean;
+  supplierCancelledMilestoneApproval: boolean;
+}

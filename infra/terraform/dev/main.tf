@@ -6,7 +6,7 @@ data "aws_availability_zones" "available" {}
 
 locals {
   vpc_cidr = "10.0.0.0/16"
-  azs      = slice(data.aws_availability_zones.available.names, 0, 2)
+  azs      = slice(data.aws_availability_zones.available.names, 0, 1)
 
   api_name           = "api"
   api_container_port = 3000
@@ -424,7 +424,7 @@ module "autoscaling" {
   }
 
   min_size         = 1
-  max_size         = 2
+  max_size         = 1
   desired_capacity = 1
 
   # Required for  managed_termination_protection = "ENABLED"
