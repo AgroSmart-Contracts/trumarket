@@ -19,8 +19,11 @@ webpush.setVapidDetails(
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  let docsPrefix = 'docs';
+
   if (process.env.NODE_ENV === 'production') {
     app.setGlobalPrefix('api');
+    docsPrefix = 'api/docs';
   }
 
   const swaggerConfig = new DocumentBuilder()
@@ -30,7 +33,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, document, {
+  SwaggerModule.setup(docsPrefix, app, document, {
     swaggerOptions: {
       persistAuthorization: true,
     },
