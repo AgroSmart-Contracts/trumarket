@@ -1,5 +1,21 @@
 version: '3'
 services:
+  web:
+    build:
+      context: .
+      dockerfile: ./infra/docker/dev/Dockerfile.web
+    networks:
+      - trumarket-network
+    ports:
+      - 3000:3000
+    volumes:
+      - /app/node_modules
+      - ./web/src:/app/web/src
+      - ./logs/web:/app/logs
+    env_file:
+      - .env.web
+    depends_on:
+      - api
   api:
     build:
       context: .

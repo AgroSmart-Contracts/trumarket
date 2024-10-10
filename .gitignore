@@ -11,3 +11,4 @@ terraform.tfstate*
 
 .env
 *.ignore.*
+.env.web
