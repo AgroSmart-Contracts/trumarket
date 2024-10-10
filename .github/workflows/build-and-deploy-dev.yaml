@@ -9,6 +9,7 @@ on:
 env:
   ENV: dev
   COMMIT_HASH: ${{ github.sha }}
+  NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID }}
 
 jobs:
   build-and-deploy-docker-image:
