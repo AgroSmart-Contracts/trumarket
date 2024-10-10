@@ -6,7 +6,7 @@ data "aws_availability_zones" "available" {}
 
 locals {
   vpc_cidr = "10.0.0.0/16"
-  azs      = slice(data.aws_availability_zones.available.names, 0, 1)
+  azs      = slice(data.aws_availability_zones.available.names, 0, 2)
 
   api_name           = "api"
   api_container_port = 3000
@@ -100,6 +100,143 @@ module "ecs_cluster" {
       }
     }
 
+  }
+
+  tags = local.tags
+}
+
+module "ecs_service_web" {
+  source = "terraform-aws-modules/ecs/aws//modules/service"
+
+  # Service
+  name        = "${var.name}-web"
+  cluster_arn = module.ecs_cluster.arn
+
+  cpu    = 256
+  memory = 512
+
+  # Task Definition
+  requires_compatibilities = ["EC2"]
+  capacity_provider_strategy = {
+    (local.as_group) = {
+      capacity_provider = module.ecs_cluster.autoscaling_capacity_providers[local.as_group].name
+      weight            = 1
+      base              = 1
+    }
+  }
+
+  # Container definition(s)
+  container_definitions = {
+    web = {
+      essential = true
+      image     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/trumarket-web:latest-${var.environment}"
+
+      port_mappings = [
+        {
+          containerPort = 3000
+          hostPort      = 3000
+          protocol      = "tcp"
+        }
+      ]
+
+      environment = [
+        {
+          name  = "NODE_ENV"
+          value = "production"
+        },
+        {
+          name  = "NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID"
+          value = "BJC8VN_eHEJUdcXUbLini6alCG8avlQGgbQRVqF1F9Il6pCMfn7FJPd5Bi91OouSaih0mY65Qnus1cCKEQRtSZA"
+        },
+        {
+          name  = "NEXTAUTH_URL"
+          value = "https://dev-app.trumarket.tech"
+        },
+        {
+          name  = "NEXT_PUBLIC_PROJECT_ID"
+          value = "5049a45fd6aa5e2cc92299c319e36930"
+        },
+        {
+          name  = "GOOGLE_CLIENT_ID"
+          value = "937217066164-gnv307qqm997hqlod91icebc2r8bp0lf.apps.googleusercontent.com"
+        },
+        {
+          name  = "GOOGLE_CLIENT_SECRET"
+          value = "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"
+        },
+        {
+          name  = "NEXT_PUBLIC_SECRET"
+          value = "tru-122998#@"
+        },
+        {
+          name  = "NEXT_PUBLIC_AUTH0_API_URL"
+          value = "https://trumarket-dev.eu.auth0.com"
+        },
+        {
+          name  = "NEXT_PUBLIC_AUTH0_CLIENT_ID"
+          value = "8tr6fW5OoaMvXhNfQAHZsabCtaZRe3V2"
+        },
+        {
+          name  = "NEXT_PUBLIC_AUTH0_CLIENT_ID_SOCIAL"
+          value = "NXwPpOzPq8yIjrPaLLw7VDpaKeAhv0tM"
+        },
+        {
+          name  = "NEXT_PUBLIC_AUTH0_CLIENT_SECRET"
+          value = "jRW1sgud02H2QGwgwsPr-0Kvgtrf3r2313Wu0d1x1zilpcewCVhmW4ANhvFZ5hhX"
+        },
+        {
+          name  = "NEXT_PUBLIC_AUTH0_BASE_URL"
+          value = "trumarket-dev.eu.auth0.com"
+        },
+        {
+          name  = "NEXT_PUBLIC_APP_URL"
+          value = "https://dev-app.trumarket.tech"
+        },
+        {
+          name  = "NEXT_PUBLIC_API_URL"
+          value = "https://dev-app.trumarket.tech/api"
+        }
+      ]
+    }
+  }
+
+  load_balancer = {
+    service = {
+      target_group_arn = module.alb.target_groups["trumarket_dev_web"].arn
+      container_name   = "web"
+      container_port   = 3000
+    }
+  }
+
+  tasks_iam_role_name        = "${var.name}-web-tasks"
+  tasks_iam_role_description = "Web tasks IAM role for ${var.name}"
+  tasks_iam_role_policies = {
+    ReadOnlyAccess = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+  }
+  tasks_iam_role_statements = [
+    {
+      actions   = ["s3:GetObject"]
+      resources = ["arn:aws:s3:::*"]
+    }
+  ]
+
+  subnet_ids = module.vpc.private_subnets
+  security_group_rules = {
+    alb_ingress = {
+      type                     = "ingress"
+      from_port                = 3000
+      to_port                  = 3000
+      protocol                 = "tcp"
+      description              = "Service port"
+      source_security_group_id = module.alb.security_group_id
+    }
+    egress_all = {
+      type        = "egress"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
   }
 
   tags = local.tags
@@ -223,13 +360,25 @@ module "ecs_service_api" {
         {
           name  = "LOG_LEVEL",
           value = "debug"
-        }
+        },
+        {
+          name  = "ONFIDO_API_TOKEN",
+          value = "api_sandbox.FrM1qGnz2G3.o2686o7U8tFsybHPdjvCVIpjmh-LYRtF"
+        },
+        {
+          name  = "ONFIDO_WORKFLOW_ID",
+          value = "364f673b-1c28-4f48-bb6f-cb3d7152cd91"
+        },
+        {
+          name  = "ONFIDO_WEBHOOK_TOKEN",
+          value = "GjbcDcUp93zIMSGDxP284XF4qe86vm59"
+        },
       ]
     }
   }
   load_balancer = {
     service = {
-      target_group_arn = module.alb.target_groups["trumarket_dev_ecs"].arn
+      target_group_arn = module.alb.target_groups["trumarket_dev_api"].arn
       container_name   = local.api_name
       container_port   = local.api_container_port
     }
@@ -321,21 +470,13 @@ module "alb" {
         status_code = "HTTP_301"
       }
     }
-    https = {
-      port            = 443
-      protocol        = "HTTPS"
-      certificate_arn = "arn:aws:acm:eu-west-1:590183941756:certificate/a1e6fac0-2030-411a-92a7-76ee2e786a34"
-
-      forward = {
-        target_group_key = "trumarket_dev_ecs"
-      }
-    }
   }
 
+
   target_groups = {
-    trumarket_dev_ecs = {
+    trumarket_dev_web = {
       backend_protocol                  = "HTTP"
-      backend_port                      = local.api_container_port
+      backend_port                      = 3000
       target_type                       = "ip"
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
@@ -352,14 +493,81 @@ module "alb" {
         unhealthy_threshold = 2
       }
 
-      # Theres nothing to attach here in this definition. Instead,
       # ECS will attach the IPs of the tasks to this target group
       create_attachment = false
     }
 
+    trumarket_dev_api = {
+      backend_protocol                  = "HTTP"
+      backend_port                      = local.api_container_port
+      target_type                       = "ip"
+      deregistration_delay              = 5
+      load_balancing_cross_zone_enabled = true
+
+      health_check = {
+        enabled             = true
+        healthy_threshold   = 5
+        interval            = 30
+        matcher             = "200"
+        path                = "/api"
+        port                = "traffic-port"
+        protocol            = "HTTP"
+        timeout             = 5
+        unhealthy_threshold = 2
+      }
+
+      # Theres nothing to attach here in this definition. Instead,
+      # ECS will attach the IPs of the tasks to this target group
+      create_attachment = false
+    }
   }
 
+
+
   tags = local.tags
+}
+
+resource "aws_lb_listener" "https-forward" {
+  load_balancer_arn = module.alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  certificate_arn   = "arn:aws:acm:eu-west-1:590183941756:certificate/a1e6fac0-2030-411a-92a7-76ee2e786a34"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = module.alb.target_groups["trumarket_dev_web"].arn
+  }
+}
+
+resource "aws_lb_listener_rule" "web" {
+  listener_arn = aws_lb_listener.https-forward.arn
+
+  action {
+    type             = "forward"
+    target_group_arn = module.alb.target_groups["trumarket_dev_web"].arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/"]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "api" {
+  listener_arn = aws_lb_listener.https-forward.arn
+
+  action {
+    type             = "forward"
+    target_group_arn = module.alb.target_groups["trumarket_dev_api"].arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api*"]
+    }
+
+  }
 }
 
 ################################################################################
