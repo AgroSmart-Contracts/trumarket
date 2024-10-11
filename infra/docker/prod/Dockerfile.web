@@ -12,22 +12,22 @@ COPY ./web .
 RUN npm run build
 
 # Stage 2: Production-ready stage
-FROM node:20.11-alpine
+# FROM node:20.11-alpine
 
-ARG COMMIT_HASH
-ENV COMMIT_HASH=$COMMIT_HASH
+# ARG COMMIT_HASH
+# ENV COMMIT_HASH=$COMMIT_HASH
 
-WORKDIR /app
+# WORKDIR /app
 
-# Copy only the necessary files from the build stage
-COPY --from=builder /app/package*.json ./
+# # Copy only the necessary files from the build stage
+# COPY --from=builder /app/package*.json ./
 
-RUN npm ci
+# RUN npm ci
 
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+# COPY --from=builder /app/.next ./.next
+# COPY --from=builder /app/public ./public
 
-COPY --from=builder /app/node_modules ./node_modules
+# COPY --from=builder /app/node_modules ./node_modules
 
 
 EXPOSE 3000
