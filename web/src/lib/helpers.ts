@@ -55,7 +55,7 @@ export const truncateContractAddress = (address?: string) => {
 
 export const handleOTP = async (email: string, action: any) => {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/next-api/request-otp`, {
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/api/request-otp`, {
       params: {
         email: email.trim(),
       },
@@ -74,7 +74,7 @@ export const handleRequestAuth0JWT = async (
   action: (authOJWT: string) => Promise<void>,
 ) => {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/next-api/verify`, {
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/api/verify`, {
       params: {
         email,
         otp,
