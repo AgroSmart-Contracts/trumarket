@@ -22,8 +22,8 @@ async function bootstrap() {
   let docsPrefix = 'docs';
 
   if (process.env.NODE_ENV === 'production') {
-    app.setGlobalPrefix('api');
-    docsPrefix = 'api/docs';
+    app.setGlobalPrefix('api/v2');
+    docsPrefix = 'api/v2/docs';
   }
 
   const swaggerConfig = new DocumentBuilder()

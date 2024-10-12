@@ -509,7 +509,7 @@ module "alb" {
         healthy_threshold   = 5
         interval            = 30
         matcher             = "200"
-        path                = "/api"
+        path                = "/api/v2"
         port                = "traffic-port"
         protocol            = "HTTP"
         timeout             = 5
@@ -564,7 +564,7 @@ resource "aws_lb_listener_rule" "api" {
 
   condition {
     path_pattern {
-      values = ["/api*"]
+      values = ["/api/v2*"]
     }
 
   }
