@@ -30,7 +30,7 @@ const DocumentBoxFooter: React.FC<DocumentBoxFooterProps> = ({
     try {
       setLoading(true);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/next-api/s3-images-download`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/s3-images-download`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
