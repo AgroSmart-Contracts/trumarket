@@ -1,4 +1,4 @@
-name: Build and deploy backend containers to DEVELOPMENT env
+name: Build and deploy backend containers to PRODUCTION env
 
 on:
   workflow_dispatch:
