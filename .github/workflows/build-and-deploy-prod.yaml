@@ -68,7 +68,7 @@ jobs:
 
       - name: Force ECS deployment
         env:
-          ECS_CLUSTER: arn:aws:ecs:eu-west-1:590183941756:cluster/trumarket-dev
+          ECS_CLUSTER: arn:aws:ecs:eu-west-1:590183941756:cluster/trumarket
         run: |
-          aws ecs update-service --cluster $ECS_CLUSTER --service trumarket-$ENV-api --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service trumarket-$ENV-web --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service trumarket-api --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service trumarket-web --force-new-deployment
