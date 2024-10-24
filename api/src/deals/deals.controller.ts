@@ -129,7 +129,14 @@ export class DealsController {
   ): Promise<DealDtoResponse> {
     const user: User = req.user;
 
-    const { confirm, cancel, view, viewDocuments, ...restDealDto } = dealDto;
+    const {
+      confirm,
+      cancel,
+      view,
+      viewDocuments,
+      isPublished,
+      ...restDealDto
+    } = dealDto;
 
     let deal: Deal;
 
@@ -141,6 +148,8 @@ export class DealsController {
       deal = await this.dealsService.setDealAsViewed(id, user);
     } else if (viewDocuments) {
       deal = await this.dealsService.setDocumentsAsViewed(id, user);
+    } else if (isPublished) {
+      deal = await this.dealsService.publishDeal(id, user);
     } else {
       deal = await this.dealsService.updateDeal(id, restDealDto, user);
     }
@@ -380,7 +389,17 @@ export class DealsController {
         id,
         milestoneId,
         docId,
+        'description',
         payload.description,
+        user,
+      );
+    } else if ('publiclyVisible' in payload) {
+      doc = await this.dealsService.updateMilestoneDocument(
+        id,
+        milestoneId,
+        docId,
+        'publiclyVisible',
+        payload.publiclyVisible,
         user,
       );
     } else if (payload.view) {

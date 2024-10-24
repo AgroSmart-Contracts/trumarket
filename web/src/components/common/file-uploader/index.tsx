@@ -22,6 +22,7 @@ interface IDropZoneProps {
   open: () => void;
   uploadInProgress: boolean;
   selectedMilestone: IMilestoneDetails;
+  handleChangeDocumentVisibility: (id: string, visibility: boolean) => Promise<void>;
 }
 
 export default function DropZone({
@@ -31,6 +32,7 @@ export default function DropZone({
   open,
   uploadInProgress,
   selectedMilestone,
+  handleChangeDocumentVisibility,
 }: IDropZoneProps) {
   const { accountType } = useUserInfo();
   const { windowHeight } = useGetWindowDimension();
@@ -53,6 +55,8 @@ export default function DropZone({
               id={file.id}
               seen={file.seen}
               milestoneId={selectedMilestone.id}
+              publiclyVisible={file.publiclyVisible}
+              handleChangeDocumentVisibility={handleChangeDocumentVisibility}
             />
           ))}
         </>

@@ -64,6 +64,7 @@ export interface IUploadedFileProps {
   url: string;
   description: string;
   seen: boolean;
+  publiclyVisible: boolean;
 }
 
 export enum MilestoneStatus {

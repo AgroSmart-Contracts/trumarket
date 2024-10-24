@@ -39,7 +39,7 @@ services:
       - AWS_REGION=us-east-1
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
-      - ETHEREUM_RPC_URL=http://host.docker.internal:8545/
+      - BLOCKCHAIN_RPC_URL=http://protocol:8545/
       - NODE_ENV=development
       - LOG_LEVEL=debug
       - AUTOMATIC_DEALS_ACCEPTANCE=true

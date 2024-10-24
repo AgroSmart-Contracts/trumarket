@@ -126,6 +126,25 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
     }
   };
 
+  const [publishing, setPublishing] = useState(false);
+
+  const handlePublishment = async () => {
+    if (!shipmentDetails) return;
+
+    try {
+      setPublishing(true);
+
+      await ShipmentService.updateShipmentDealDetails(shipmentDetails.id, { isPublished: true });
+      await refetch();
+
+      closeModal();
+    } catch (err) {
+      toast.error("Error while publishing shipment");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const Modal = ShipmentModalContent({
     previewModalData,
     shipmentDetails,
@@ -138,6 +157,8 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
     handleDeleteDealMilestoneDoc,
     handleSaveChangedDocumentDescription,
     milestone: milestoneDetailsInfo,
+    handlePublishment,
+    publishing,
   });
 
   useEffect(() => {
@@ -169,7 +190,13 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
       <div className="py-[30px] ">
         <Container>
           <div className="mb-[30px] flex items-center justify-between">
-            <ShipmentDetailsHeader productName={shipmentDetails?.name} />
+            <ShipmentDetailsHeader
+              productName={shipmentDetails?.name}
+              isPublished={shipmentDetails?.isPublished}
+              publish={() => {
+                openModal(ShipmentDetailModalView.PUBLISH);
+              }}
+            />
             <ShipmentBaseInfo
               accountType={accountType}
               emailInfo={isBuyer ? shipmentDetails?.suppliers : shipmentDetails?.buyers}

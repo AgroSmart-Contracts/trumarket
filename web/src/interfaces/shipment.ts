@@ -98,6 +98,8 @@ export interface ShippingDetails {
   newForBuyer?: boolean;
   nftID?: number;
   mintTxHash?: string;
+
+  isPublished?: boolean;
 }
 
 export enum DealStatus {

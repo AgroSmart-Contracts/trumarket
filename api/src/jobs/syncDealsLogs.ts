@@ -1,6 +1,7 @@
 import { createPublicClient, http, parseAbi } from 'viem';
 
 import { config } from '@/config';
+import financeAppClient from '@/infra/finance-app/financeAppClient';
 
 import DealsLogs from '../deals-logs/deals-logs.model';
 import SyncDealsLogsJob from '../deals-logs/sync-deals-logs-job.model';
@@ -83,6 +84,30 @@ export const syncDealsLogs = async () => {
 
           return dealLog;
         });
+
+        await Promise.all(
+          dealsLogs.map(async (dealLog) => {
+            try {
+              console.log(
+                dealLog.dealId.toString(),
+                dealLog.event,
+                dealLog.message,
+                dealLog.txHash,
+              );
+              await financeAppClient.createActivity(
+                dealLog.dealId.toString(),
+                dealLog.event,
+                dealLog.message,
+                dealLog.txHash,
+                dealLog.blockTimestamp,
+              );
+            } catch (err) {
+              console.warn(
+                `Error creating activity for deal ${dealLog.dealId}: ${err.message}`,
+              );
+            }
+          }),
+        );
 
         await DealsLogs.create(dealsLogs);
         await SyncDealsLogsJob.findByIdAndUpdate(job._id, {

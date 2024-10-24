@@ -31,8 +31,12 @@ const ShipmentInfo: React.FC<ShipmentInfoProps> = ({
             <Flag code={countryCode} className="h-[20px] rounded-[4px]" />
           </div>
         ) : null}
-        <span className="text-[13px] text-tm-black-80">{value}</span>
-        <span className="text-[13px] text-tm-black-80 opacity-60">{subValue}</span>
+        <span suppressHydrationWarning className="text-[13px] text-tm-black-80">
+          {value}
+        </span>
+        <span suppressHydrationWarning className="text-[13px] text-tm-black-80 opacity-60">
+          {subValue}
+        </span>
       </div>
     </div>
   );

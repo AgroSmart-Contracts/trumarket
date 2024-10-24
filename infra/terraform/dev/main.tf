@@ -5,17 +5,22 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 
 locals {
+  name        = terraform.workspace == "dev" ? "trumarket-dev" : "trumarket"
+  environment = terraform.workspace
+  domain      = terraform.workspace == "prod" ? "dev-app.trumarket.tech" : "app.trumarket.tech"
+
+
   vpc_cidr = "10.0.0.0/16"
   azs      = slice(data.aws_availability_zones.available.names, 0, 2)
 
   api_name           = "api"
   api_container_port = 3000
 
-  as_group = "${var.name}-as-group"
+  as_group = "${local.name}-as-group"
 
   tags = {
-    Name        = var.name
-    Environment = var.environment
+    Name        = local.name
+    Environment = local.environment
     Repository  = var.repository
   }
 }
@@ -28,41 +33,41 @@ locals {
 data "aws_caller_identity" "current" {}
 
 data "aws_ssm_parameter" "api_database" {
-  name = "/${var.name}/api-database"
+  name = "/trumarket-dev/api-database"
 }
 
 data "aws_ssm_parameter" "deals_manager_address" {
-  name = "/${var.name}/deals-manager-address"
+  name = "/trumarket-dev/deals-manager-address"
 }
 
 data "aws_ssm_parameter" "private_key" {
-  name = "/${var.name}/private-key"
+  name = "/trumarket-dev/private-key"
 }
 
 data "aws_ssm_parameter" "rpc_url" {
-  name = "/${var.name}/rpc-url"
+  name = "/trumarket-dev/rpc-url"
 }
 
 data "aws_ssm_parameter" "email_host" {
-  name = "/${var.name}/email-host"
+  name = "/trumarket-dev/email-host"
 }
 
 
 data "aws_ssm_parameter" "email_username" {
-  name = "/${var.name}/email-username"
+  name = "/trumarket-dev/email-username"
 }
 
 
 data "aws_ssm_parameter" "email_password" {
-  name = "/${var.name}/email-password"
+  name = "/trumarket-dev/email-password"
 }
 
 data "aws_ssm_parameter" "vapid_public_key" {
-  name = "/${var.name}/vapid-public-key"
+  name = "/trumarket-dev/vapid-public-key"
 }
 
 data "aws_ssm_parameter" "vapid_private_key" {
-  name = "/${var.name}/vapid-private-key"
+  name = "/trumarket-dev/vapid-private-key"
 }
 
 data "aws_ssm_parameter" "ecs_optimized_ami" {
@@ -77,7 +82,7 @@ data "aws_ssm_parameter" "ecs_optimized_ami" {
 module "ecs_cluster" {
   source = "terraform-aws-modules/ecs/aws//modules/cluster"
 
-  cluster_name = var.name
+  cluster_name = local.name
 
   # Capacity provider - autoscaling groups
   default_capacity_provider_use_fargate = false
@@ -109,7 +114,7 @@ module "ecs_service_web" {
   source = "terraform-aws-modules/ecs/aws//modules/service"
 
   # Service
-  name        = "${var.name}-web"
+  name        = "${local.name}-web"
   cluster_arn = module.ecs_cluster.arn
 
   cpu    = 256
@@ -129,7 +134,7 @@ module "ecs_service_web" {
   container_definitions = {
     web = {
       essential = true
-      image     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/trumarket-web:latest-${var.environment}"
+      image     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/trumarket-web:latest-${local.environment}"
 
       port_mappings = [
         {
@@ -139,77 +144,20 @@ module "ecs_service_web" {
         }
       ]
 
-      environment = [
-        {
-          name  = "NODE_ENV"
-          value = "production"
-        },
-        {
-          name  = "NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID"
-          value = "BJC8VN_eHEJUdcXUbLini6alCG8avlQGgbQRVqF1F9Il6pCMfn7FJPd5Bi91OouSaih0mY65Qnus1cCKEQRtSZA"
-        },
-        {
-          name  = "NEXTAUTH_URL"
-          value = "https://dev-app.trumarket.tech"
-        },
-        {
-          name  = "NEXT_PUBLIC_PROJECT_ID"
-          value = "5049a45fd6aa5e2cc92299c319e36930"
-        },
-        {
-          name  = "GOOGLE_CLIENT_ID"
-          value = "937217066164-gnv307qqm997hqlod91icebc2r8bp0lf.apps.googleusercontent.com"
-        },
-        {
-          name  = "GOOGLE_CLIENT_SECRET"
-          value = "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"
-        },
-        {
-          name  = "NEXT_PUBLIC_SECRET"
-          value = "tru-122998#@"
-        },
-        {
-          name  = "NEXT_PUBLIC_AUTH0_API_URL"
-          value = "https://trumarket-dev.eu.auth0.com"
-        },
-        {
-          name  = "NEXT_PUBLIC_AUTH0_CLIENT_ID"
-          value = "8tr6fW5OoaMvXhNfQAHZsabCtaZRe3V2"
-        },
-        {
-          name  = "NEXT_PUBLIC_AUTH0_CLIENT_ID_SOCIAL"
-          value = "NXwPpOzPq8yIjrPaLLw7VDpaKeAhv0tM"
-        },
-        {
-          name  = "NEXT_PUBLIC_AUTH0_CLIENT_SECRET"
-          value = "jRW1sgud02H2QGwgwsPr-0Kvgtrf3r2313Wu0d1x1zilpcewCVhmW4ANhvFZ5hhX"
-        },
-        {
-          name  = "NEXT_PUBLIC_AUTH0_BASE_URL"
-          value = "trumarket-dev.eu.auth0.com"
-        },
-        {
-          name  = "NEXT_PUBLIC_APP_URL"
-          value = "https://dev-app.trumarket.tech"
-        },
-        {
-          name  = "NEXT_PUBLIC_API_URL"
-          value = "https://dev-app.trumarket.tech/api"
-        }
-      ]
+      environment = []
     }
   }
 
   load_balancer = {
     service = {
-      target_group_arn = module.alb.target_groups["trumarket_dev_web"].arn
+      target_group_arn = module.alb.target_groups["trumarket_web"].arn
       container_name   = "web"
       container_port   = 3000
     }
   }
 
-  tasks_iam_role_name        = "${var.name}-web-tasks"
-  tasks_iam_role_description = "Web tasks IAM role for ${var.name}"
+  tasks_iam_role_name        = "${local.name}-web-tasks"
+  tasks_iam_role_description = "Web tasks IAM role for ${local.name}"
   tasks_iam_role_policies = {
     ReadOnlyAccess = "arn:aws:iam::aws:policy/ReadOnlyAccess"
   }
@@ -246,7 +194,7 @@ module "ecs_service_api" {
   source = "terraform-aws-modules/ecs/aws//modules/service"
 
   # Service
-  name        = "${var.name}-${local.api_name}"
+  name        = "${local.name}-${local.api_name}"
   cluster_arn = module.ecs_cluster.arn
 
   cpu    = 512
@@ -268,7 +216,7 @@ module "ecs_service_api" {
     (local.api_name) = {
       essential = true
       # image     = data.aws_ecr_image.api.image_uri
-      image = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/trumarket-api:latest-${var.environment}"
+      image = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/trumarket-api:latest-${local.environment}"
 
       health_check = {
         # command = ["CMD-SHELL", "curl -f http://localhost:${local.api_container_port}/ || exit 1"]
@@ -378,14 +326,14 @@ module "ecs_service_api" {
   }
   load_balancer = {
     service = {
-      target_group_arn = module.alb.target_groups["trumarket_dev_api"].arn
+      target_group_arn = module.alb.target_groups["trumarket_api"].arn
       container_name   = local.api_name
       container_port   = local.api_container_port
     }
   }
 
-  tasks_iam_role_name        = "${var.name}-tasks"
-  tasks_iam_role_description = "Example tasks IAM role for ${var.name}"
+  tasks_iam_role_name        = "${local.name}-tasks"
+  tasks_iam_role_description = "Example tasks IAM role for ${local.name}"
   tasks_iam_role_policies = {
     ReadOnlyAccess = "arn:aws:iam::aws:policy/ReadOnlyAccess"
   }
@@ -426,7 +374,7 @@ module "alb" {
   source  = "terraform-aws-modules/alb/aws"
   version = "~> 9.0"
 
-  name = "${var.name}-api-lb"
+  name = "${local.name}-api-lb"
 
   load_balancer_type = "application"
 
@@ -474,7 +422,7 @@ module "alb" {
 
 
   target_groups = {
-    trumarket_dev_web = {
+    trumarket_web = {
       backend_protocol                  = "HTTP"
       backend_port                      = 3000
       target_type                       = "ip"
@@ -497,7 +445,7 @@ module "alb" {
       create_attachment = false
     }
 
-    trumarket_dev_api = {
+    trumarket_api = {
       backend_protocol                  = "HTTP"
       backend_port                      = local.api_container_port
       target_type                       = "ip"
@@ -531,11 +479,11 @@ resource "aws_lb_listener" "https-forward" {
   load_balancer_arn = module.alb.arn
   port              = 443
   protocol          = "HTTPS"
-  certificate_arn   = "arn:aws:acm:eu-west-1:590183941756:certificate/a1e6fac0-2030-411a-92a7-76ee2e786a34"
+  certificate_arn   = "arn:aws:acm:eu-west-1:590183941756:certificate/157dbcb2-a594-4958-a239-0a1fc5a0f689"
 
   default_action {
     type             = "forward"
-    target_group_arn = module.alb.target_groups["trumarket_dev_web"].arn
+    target_group_arn = module.alb.target_groups["trumarket_web"].arn
   }
 }
 
@@ -544,7 +492,7 @@ resource "aws_lb_listener_rule" "web" {
 
   action {
     type             = "forward"
-    target_group_arn = module.alb.target_groups["trumarket_dev_web"].arn
+    target_group_arn = module.alb.target_groups["trumarket_web"].arn
   }
 
   condition {
@@ -559,7 +507,7 @@ resource "aws_lb_listener_rule" "api" {
 
   action {
     type             = "forward"
-    target_group_arn = module.alb.target_groups["trumarket_dev_api"].arn
+    target_group_arn = module.alb.target_groups["trumarket_api"].arn
   }
 
   condition {
@@ -597,7 +545,7 @@ module "autoscaling" {
         #!/bin/bash
 
         cat <<'EOF' >> /etc/ecs/ecs.config
-        ECS_CLUSTER=${var.name}
+        ECS_CLUSTER=${local.name}
         ECS_LOGLEVEL=debug
         ECS_CONTAINER_INSTANCE_TAGS=${jsonencode(local.tags)}
         ECS_ENABLE_TASK_IAM_ROLE=true
@@ -606,7 +554,7 @@ module "autoscaling" {
     }
   }
 
-  name = "${var.name}-${each.key}"
+  name = "${local.name}-${each.key}"
 
   image_id      = jsondecode(data.aws_ssm_parameter.ecs_optimized_ami.value)["image_id"]
   instance_type = each.value.instance_type
@@ -616,8 +564,8 @@ module "autoscaling" {
   ignore_desired_capacity_changes = true
 
   create_iam_instance_profile = true
-  iam_role_name               = var.name
-  iam_role_description        = "ECS role for ${var.name}"
+  iam_role_name               = local.name
+  iam_role_description        = "ECS role for ${local.name}"
   iam_role_policies = {
     AmazonEC2ContainerServiceforEC2Role = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
     AmazonSSMManagedInstanceCore        = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
@@ -649,7 +597,7 @@ module "autoscaling_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 5.0"
 
-  name        = "${var.name}-autoscaling-sg"
+  name        = "${local.name}-autoscaling-sg"
   description = "Autoscaling group security group"
   vpc_id      = module.vpc.vpc_id
 
@@ -674,7 +622,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
 
-  name = "${var.name}-vpc"
+  name = "${local.name}-vpc"
   cidr = local.vpc_cidr
 
   azs             = local.azs
@@ -692,7 +640,7 @@ module "vpc" {
 ################################################################################
 
 resource "aws_iam_role" "task_role" {
-  name = "${var.name}-task-role"
+  name = "${local.name}-task-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -714,7 +662,7 @@ resource "aws_iam_role" "task_role" {
 }
 
 resource "aws_iam_role" "task_execution_role" {
-  name = "${var.name}-task-execution-role"
+  name = "${local.name}-task-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -732,7 +680,7 @@ resource "aws_iam_role" "task_execution_role" {
   })
 
   inline_policy {
-    name = "${var.name}-task-role-execution-policy"
+    name = "${local.name}-task-role-execution-policy"
 
     policy = jsonencode({ Version = "2012-10-17"
       Statement = [
@@ -801,7 +749,7 @@ resource "aws_route53_zone" "zone" {
 
 resource "aws_route53_record" "api" {
   zone_id = aws_route53_zone.zone.zone_id
-  name    = var.domain
+  name    = local.domain
   type    = "A"
 
   alias {
@@ -817,7 +765,7 @@ resource "aws_route53_record" "api" {
 
 
 resource "aws_s3_bucket" "bucket" {
-  bucket = "${var.name}-bucket"
+  bucket = "${local.name}-bucket"
 
   tags = local.tags
 }
@@ -869,5 +817,5 @@ POLICY
 
 data "aws_ecr_image" "api" {
   repository_name = "trumarket-api"
-  image_tag       = "latest-${var.environment}"
+  image_tag       = "latest-${local.environment}"
 }

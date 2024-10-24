@@ -69,7 +69,7 @@ async function bootstrap() {
     }),
   );
 
-  schedule.scheduleJob('*/10 * * * *', syncDealsLogs);
+  schedule.scheduleJob('* * * * *', syncDealsLogs);
 
   await app.listen(process.env.PORT || 4000);
 }

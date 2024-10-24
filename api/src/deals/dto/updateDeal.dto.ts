@@ -224,4 +224,13 @@ export class UpdateDealDto {
   @IsOptional()
   @Expose()
   viewDocuments?: boolean;
+
+  @ApiProperty({
+    required: false,
+    description: 'Change deal documents as viewed',
+  })
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  isPublished?: boolean;
 }
