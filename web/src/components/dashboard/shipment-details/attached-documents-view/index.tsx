@@ -63,6 +63,17 @@ const AttachedDocumentsView: React.FC<AttachedDocumentsViewProps> = ({
     }
   };
 
+  const handleChangeDocumentVisibility = async (docId: string, visibility: boolean) => {
+    if (!dealId) return;
+
+    try {
+      await ShipmentService.updateDocumentVisibility(dealId, milestones[currentMilestone].id, docId, visibility);
+      await refetch();
+    } catch (err) {
+      toast.error(`Error making document visible, please try again!`);
+    }
+  };
+
   return (
     <div className="flex  flex-col justify-between rounded-bl-[4px] rounded-br-[4px]  bg-tm-white p-[20px]">
       <div className={classNames("flex flex-wrap gap-[10px] overflow-y-scroll")}>
@@ -73,6 +84,7 @@ const AttachedDocumentsView: React.FC<AttachedDocumentsViewProps> = ({
           uploadedFiles={currentMilestoneFiles}
           uploadInProgress={uploadInProgress}
           selectedMilestone={milestones[currentMilestone]}
+          handleChangeDocumentVisibility={handleChangeDocumentVisibility}
         />
       </div>
 

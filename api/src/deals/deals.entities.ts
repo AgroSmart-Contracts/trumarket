@@ -7,6 +7,7 @@ export interface DocumentFile {
   url: string;
   seenByUsers: string[];
   seen: boolean;
+  publiclyVisible: boolean;
 }
 
 export interface Wallet {
@@ -108,6 +109,7 @@ export class Deal {
   currentMilestone: number;
   milestones: Milestone[];
   status: DealStatus;
+  isPublished: boolean;
 
   // financial properties
   investmentAmount: number;

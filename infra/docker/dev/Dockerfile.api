@@ -8,7 +8,7 @@ ENV COMMIT_HASH=$COMMIT_HASH
 WORKDIR /app
 
 # Install dependencies
-COPY package*.json ./
+COPY ./package*.json ./
 COPY ./api/package*.json ./api/
 
 RUN npm install
@@ -20,4 +20,4 @@ COPY ./api ./api
 EXPOSE 3000
 
 # Run the application
-CMD ["npm", "run", "start:dev", "-w", "api"]
+CMD ["npm", "run", "start:dev","-w","api"]

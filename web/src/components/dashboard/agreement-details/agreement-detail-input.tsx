@@ -6,7 +6,7 @@ import ValidationErrorMessage from "src/components/common/validation-error-messa
 
 interface AgreementDetailInputProps {
   inputName: string;
-  defaultValue: string;
+  defaultValue: string | undefined;
   isValueChanged: boolean;
   handleChange: (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => void;
   title?: string;
@@ -56,7 +56,7 @@ const AgreementDetailInput: React.FC<AgreementDetailInputProps> = ({
         name={inputName}
         type={inputType}
         autoComplete="off"
-        size={defaultValue.toString().length + 1}
+        size={defaultValue ? defaultValue.toString().length + 1 : undefined}
         disabled={!editable || !enabledToEdit}
         className={classNames(
           "notranslate w-auto !bg-[#ff000000] px-[10px] py-[2px] text-[13px] font-medium leading-[1em] tracking-normal  text-tm-black-80 outline-none",

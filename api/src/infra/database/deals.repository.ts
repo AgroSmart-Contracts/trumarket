@@ -157,7 +157,8 @@ export class DealsMongooseRepository
     dealId: string,
     milestoneId: string,
     docId: string,
-    description: string,
+    key: string,
+    value: string | boolean,
   ): Promise<DocumentFile> {
     const deal = await DealModel.findOneAndUpdate(
       {
@@ -165,7 +166,7 @@ export class DealsMongooseRepository
         'milestones.docs._id': docId,
       },
       {
-        $set: { 'milestones.$.docs.$[doc].description': description },
+        $set: { [`milestones.$.docs.$[doc].${key}`]: value },
       },
       { new: true, arrayFilters: [{ 'doc._id': docId }] },
     );

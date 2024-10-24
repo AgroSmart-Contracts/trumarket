@@ -6,9 +6,11 @@ import { BlockchainService } from '@/blockchain/blockchain.service';
 import { config } from '@/config';
 import { providers } from '@/constants';
 import { BadRequestError, ForbiddenError, UnauthorizedError } from '@/errors';
+import financeAppClient from '@/infra/finance-app/financeAppClient';
+import { logger } from '@/logger';
 import { NotificationsService } from '@/notifications/notifications.service';
 import { Page } from '@/types';
-import { User } from '@/users/users.entities';
+import { RoleType, User } from '@/users/users.entities';
 import { UsersService } from '@/users/users.service';
 
 import {
@@ -220,6 +222,7 @@ export class DealsService {
       dealUpdate.status = DealStatus.Confirmed;
 
       if (config.automaticDealsAcceptance && deal.buyers.length > 0) {
+        logger.debug('Automatic deal acceptance enabled! Minting NFT...');
         const buyer = await this.users.findByEmail(deal.buyers[0].email);
 
         const txHash = await this.blockchain.mintNFT(
@@ -325,6 +328,22 @@ export class DealsService {
     });
 
     return dealUpdated;
+  }
+
+  async publishDeal(dealId: string, user: User): Promise<Deal> {
+    // TODO: verify restriction over who can publish a deal
+    if (user.role !== RoleType.REGULAR) {
+      throw new UnauthorizedError('You are not allowed to publish this deal');
+    }
+
+    try {
+      await financeAppClient.publishShipment(await this.findById(dealId));
+
+      return this.dealsRepository.updateById(dealId, { isPublished: true });
+    } catch (error) {
+      logger.error(error);
+      throw new BadRequestError('Failed to publish deal');
+    }
   }
 
   async updateDeal(
@@ -499,7 +518,8 @@ export class DealsService {
     dealId: string,
     milestoneId: string,
     docId: string,
-    description: string,
+    key: string,
+    value: string | boolean,
     user: User,
   ): Promise<DocumentFile> {
     const deal = await this.findById(dealId);
@@ -525,7 +545,8 @@ export class DealsService {
       dealId,
       milestoneId,
       docId,
-      description,
+      key,
+      value,
     );
 
     this.notifications.sendNewMilestoneDocumentUploadedNotification(
@@ -786,6 +807,13 @@ export class DealsService {
       MilestoneApprovalStatus.Submitted
     ) {
       throw new BadRequestError('Milestone review was not submitted');
+    }
+
+    if (deal.isPublished) {
+      await financeAppClient.updateMilestone(
+        deal.id,
+        deal.milestones[milestoneIndex],
+      );
     }
 
     await this.blockchain.changeMilestoneStatus(

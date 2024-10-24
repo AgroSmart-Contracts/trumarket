@@ -14,4 +14,10 @@ export class UpdateDocumentDto {
   @IsOptional()
   @Expose()
   view?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  publiclyVisible?: boolean;
 }

@@ -24,6 +24,7 @@ const config = {
       "tm-black-transparent-05": "#0000000d",
       "tm-yellow-transparent": "#edad211a",
       "tm-green-transparent": "#278f7c1a",
+      "tm-green-light": "#278f7c33",
     },
     extend: {
       backgroundImage: {

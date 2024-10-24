@@ -18,6 +18,10 @@ const documentSchema = new Schema({
     type: [String],
     default: [],
   },
+  publiclyVisible: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 documentSchema.set('toJSON', {
@@ -217,6 +221,10 @@ const dealSchema = new Schema({
     type: String,
     enum: ['proposal', 'confirmed', 'finished'],
     default: 'proposal',
+  },
+  isPublished: {
+    type: Boolean,
+    default: false,
   },
 
   // financial properties

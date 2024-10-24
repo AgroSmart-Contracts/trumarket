@@ -15,6 +15,7 @@ interface ShipmentModalContentParams {
     url: string;
     id?: string;
     description: string;
+    publiclyVisible: boolean;
   };
   shipmentDetails?: ShippingDetails;
   isBuyer: boolean;
@@ -26,6 +27,8 @@ interface ShipmentModalContentParams {
   handleSaveChangedDocumentDescription: (documentId: string) => Promise<void>;
   modalView: any;
   milestone: IMilestoneDetails | null;
+  handlePublishment: () => Promise<void>;
+  publishing: boolean;
 }
 
 export enum ShipmentDetailModalView {
@@ -34,6 +37,7 @@ export enum ShipmentDetailModalView {
   DELETE_ATTACHMENT,
   EDIT_ATTACHMENT,
   PREVIOUS_MILESTONE_DOCS,
+  PUBLISH,
 }
 
 export const ShipmentModalContent = ({
@@ -48,6 +52,8 @@ export const ShipmentModalContent = ({
   updateDocLoading,
   handleSaveChangedDocumentDescription,
   milestone,
+  handlePublishment,
+  publishing,
 }: ShipmentModalContentParams) => {
   const ShipmentDetailsModalContent = {
     [ShipmentDetailModalView.DOCUMENT_PREVIEW]: {
@@ -139,11 +145,45 @@ export const ShipmentModalContent = ({
               isTextArea
               textareaAutoHeigh
             />
+            <p className="text-left text-[13px] font-bold leading-[1.2em] text-tm-black-80">
+              Publicly visible to investors
+            </p>
+            <Input
+              type="checkbox"
+              name="publiclyVisible"
+              defaultValue={previewModalData.publiclyVisible ? "true" : "false"}
+              onChange={(e) => handleChangeDocumentDescription(e.target.value)}
+            />
           </div>
         </ModalContent>
       ),
       showHeader: true,
       headerText: "Edit file attachment",
+      fullScreen: false,
+      classOverRides: "",
+      showCloseIcon: true,
+    },
+    [ShipmentDetailModalView.PUBLISH]: {
+      content: (
+        <ModalContent
+          primaryOptionText="Cancel"
+          secondaryOptionText="Publish"
+          wrapperContainerClassOverrides="!pt-[60px]"
+          primaryOptionAction={() => closeModal()}
+          secondaryOptionLoading={publishing}
+          secondaryOptionAction={() => handlePublishment()}
+        >
+          <div className="flex flex-col gap-[3px]">
+            <p className="text-left text-[13px] font-bold leading-[1.2em] text-tm-black-80">
+              Publishing a shipment will display it in{" "}
+              <a href="https://finance.trumarket.tech">https://finance.trumarket.tech</a>. This action is unreversible.
+              Are you sure you want to publish the deal?
+            </p>
+          </div>
+        </ModalContent>
+      ),
+      showHeader: true,
+      headerText: "Publish shipment",
       fullScreen: false,
       classOverRides: "",
       showCloseIcon: true,

@@ -37,7 +37,8 @@ export class ShipmentService {
       | { cancel: boolean }
       | { currentMilestone: MilestoneEnum; signature: string }
       | { view: boolean }
-      | { viewDocuments: boolean },
+      | { viewDocuments: boolean }
+      | { isPublished: boolean },
   ): Promise<ShippingDetails> {
     const response = await axiosInstance.put(`/deals/${dealId}`, {
       ...shipmentData,
@@ -106,6 +107,18 @@ export class ShipmentService {
   ): Promise<IMilestoneDetails> {
     const response = await axiosInstance.put(`/deals/${dealId}/milestones/${milestoneId}/docs/${docId}`, {
       description,
+    });
+    return response.data;
+  }
+
+  static async updateDocumentVisibility(
+    dealId: string,
+    milestoneId: string,
+    docId: string,
+    publiclyVisible: boolean,
+  ): Promise<IMilestoneDetails> {
+    const response = await axiosInstance.put(`/deals/${dealId}/milestones/${milestoneId}/docs/${docId}`, {
+      publiclyVisible,
     });
     return response.data;
   }

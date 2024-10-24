@@ -35,7 +35,8 @@ export interface DealsRepository extends Repository<Deal> {
     dealId: string,
     milestoneId: string,
     docId: string,
-    description: string,
+    key: string,
+    value: string | boolean,
   ): Promise<DocumentFile>;
   setMilestoneDocumentAsViewed(
     dealId: string,

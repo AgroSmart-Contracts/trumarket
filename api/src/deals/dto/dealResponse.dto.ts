@@ -213,4 +213,8 @@ export class DealDtoResponse {
   @ApiProperty()
   @Expose()
   newDocuments: boolean;
+
+  @ApiProperty()
+  @Expose()
+  isPublished: boolean;
 }
