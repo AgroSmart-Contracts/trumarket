@@ -8,6 +8,7 @@ export type PreviewModalContent = {
     url: string;
     id?: string;
     description: string;
+    publiclyVisible: boolean;
   };
 };
 
@@ -16,6 +17,7 @@ const initialState: PreviewModalContent = {
     url: "",
     id: "",
     description: "",
+    publiclyVisible: false,
   },
 };
 
@@ -25,7 +27,7 @@ export const previewModalContentSlice = createSlice({
   reducers: {
     setPreviewModalContent: (
       state: PreviewModalContent,
-      action: PayloadAction<{ url: string; id?: string; description: string }>,
+      action: PayloadAction<{ url: string; id?: string; description: string; publiclyVisible: boolean }>,
     ) => {
       state.modalContent = action.payload;
     },
