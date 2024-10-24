@@ -26,6 +26,7 @@ interface FileActionsWrapperProps {
   allowOnlyDownload?: boolean;
   seen?: boolean;
   milestoneId?: string;
+  publiclyVisible: boolean;
 }
 
 const FileActionsWrapper: React.FC<FileActionsWrapperProps> = ({
@@ -39,6 +40,7 @@ const FileActionsWrapper: React.FC<FileActionsWrapperProps> = ({
   allowOnlyDownload = false,
   isVideo = false,
   seen = true,
+  publiclyVisible = false,
 }) => {
   const { openModal } = useModal();
 
@@ -48,7 +50,7 @@ const FileActionsWrapper: React.FC<FileActionsWrapperProps> = ({
   const { accountType } = useUserInfo();
   const handlePreview = async () => {
     openModal(ShipmentDetailModalView.DOCUMENT_PREVIEW);
-    dispatch(setPreviewModalContent({ id, url, description: description || "" }));
+    dispatch(setPreviewModalContent({ id, url, description: description || "", publiclyVisible }));
     if (!seen) {
       await ShipmentService.markMilestoneDocumentAsSeen(query.id as string, milestoneId as string, id);
     }
@@ -56,12 +58,12 @@ const FileActionsWrapper: React.FC<FileActionsWrapperProps> = ({
 
   const handleDelete = () => {
     openModal(ShipmentDetailModalView.DELETE_ATTACHMENT);
-    dispatch(setPreviewModalContent({ id, url, description: description || "" }));
+    dispatch(setPreviewModalContent({ id, url, description: description || "", publiclyVisible }));
   };
 
   const handleEdit = () => {
     openModal(ShipmentDetailModalView.EDIT_ATTACHMENT);
-    dispatch(setPreviewModalContent({ id, url, description: description || "" }));
+    dispatch(setPreviewModalContent({ id, url, description: description || "", publiclyVisible }));
   };
 
   return (

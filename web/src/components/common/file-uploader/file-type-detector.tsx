@@ -21,6 +21,7 @@ interface FileTypeDetectorProps {
   allowOnlyDownload?: boolean;
   seen?: boolean;
   milestoneId?: string;
+  publiclyVisible: boolean;
 }
 
 const FileTypeDetector: React.FC<FileTypeDetectorProps> = ({
@@ -32,6 +33,7 @@ const FileTypeDetector: React.FC<FileTypeDetectorProps> = ({
   milestoneId,
   seen = true,
   allowOnlyDownload = false,
+  publiclyVisible = false,
 }) => {
   if (fileType?.startsWith("image") || imageExtensions.includes(fileExtension)) {
     return (
@@ -42,6 +44,7 @@ const FileTypeDetector: React.FC<FileTypeDetectorProps> = ({
         description={description}
         id={id}
         allowOnlyDownload={allowOnlyDownload}
+        publiclyVisible={publiclyVisible}
       >
         <img src={url} className="h-full w-full rounded-[4px] object-cover" alt={`Image file: ${fileType}`} />
       </DetectorWrapperBox>
@@ -58,6 +61,7 @@ const FileTypeDetector: React.FC<FileTypeDetectorProps> = ({
         allowOnlyDownload={allowOnlyDownload}
         milestoneId={milestoneId}
         isVideo
+        publiclyVisible={publiclyVisible}
       >
         <video src={url} className="h-full w-full rounded-[4px] object-cover" autoPlay={false}></video>
       </DetectorWrapperBox>
@@ -78,6 +82,7 @@ const FileTypeDetector: React.FC<FileTypeDetectorProps> = ({
         allowOnlyDownload={allowOnlyDownload}
         milestoneId={milestoneId}
         invert
+        publiclyVisible={publiclyVisible}
       >
         <Image
           src="/assets/m-word.png"
@@ -100,6 +105,7 @@ const FileTypeDetector: React.FC<FileTypeDetectorProps> = ({
         milestoneId={milestoneId}
         id={id}
         invert
+        publiclyVisible={publiclyVisible}
       >
         <Image
           src="/assets/m-pdf.png"
@@ -126,6 +132,7 @@ const FileTypeDetector: React.FC<FileTypeDetectorProps> = ({
         milestoneId={milestoneId}
         id={id}
         invert
+        publiclyVisible={publiclyVisible}
       >
         <Image
           src="/assets/m-excell.webp"
@@ -147,6 +154,7 @@ const FileTypeDetector: React.FC<FileTypeDetectorProps> = ({
       milestoneId={milestoneId}
       id={id}
       invert
+      publiclyVisible={publiclyVisible}
     >
       <Image
         src="/assets/undetected-file.png"
@@ -171,6 +179,7 @@ const DetectorWrapperBox = ({
   allowOnlyDownload = false,
   isVideo = false,
   seen = true,
+  publiclyVisible = false,
 }: {
   invert?: boolean;
   children: React.ReactNode;
@@ -181,6 +190,7 @@ const DetectorWrapperBox = ({
   isVideo?: boolean;
   seen?: boolean;
   milestoneId?: string;
+  publiclyVisible: boolean;
 }) => {
   return (
     <div
@@ -196,6 +206,7 @@ const DetectorWrapperBox = ({
         allowOnlyDownload={allowOnlyDownload}
         seen={seen}
         milestoneId={milestoneId}
+        publiclyVisible={publiclyVisible}
       />
       {children}
     </div>
