@@ -2,6 +2,7 @@ import { ActorSubclass } from '@dfinity/agent';
 import * as crypto from 'crypto';
 
 import { Deal, Milestone } from '@/deals/deals.entities';
+import { logger } from '@/logger';
 
 import { createActor } from './trumarket-icp-app-backend';
 import { _SERVICE } from './trumarket-icp-app-backend/trumarket-icp-app-backend.did';
@@ -14,6 +15,11 @@ class FinanceAppClient {
   canister: ActorSubclass<_SERVICE>;
 
   constructor() {
+    if (!privateKey || !canisterId || !icpRpcProvider) {
+      logger.warn('Missing ICP configuration');
+      return;
+    }
+
     this.canister = createActor(canisterId, {
       agentOptions: {
         host: icpRpcProvider,

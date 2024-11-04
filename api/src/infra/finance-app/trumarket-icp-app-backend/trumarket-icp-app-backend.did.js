@@ -145,6 +145,6 @@ export const idlFactory = ({ IDL }) => {
     updateMilestone: IDL.Func([IDL.Text, rec_12, IDL.Text], [], []),
   });
 };
-export const init = ({ IDL }) => {
+export const init = ({}) => {
   return [];
 };
