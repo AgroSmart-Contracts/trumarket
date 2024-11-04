@@ -147,6 +147,7 @@ const AgreementDetailsView: React.FC<AgreementDetailsViewProps> = () => {
       variety: comparativeData.variety,
       description: comparativeData.description,
       shippingStartDate: new Date(comparativeData.shippingStartDate),
+      expectedShippingEndDate: new Date(comparativeData.expectedShippingEndDate),
       offerUnitPrice: comparativeData.offerUnitPrice,
       presentation: comparativeData.presentation,
       quantity: comparativeData.quantity,
