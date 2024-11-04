@@ -43,6 +43,7 @@ const OriginAndDestination: React.FC<OriginAndDestinationProps> = ({ setSelected
       destination: shipmentFormData.destination,
       port_origin: shipmentFormData.port_origin,
       shippingStartDate: shipmentFormData.shippingStartDate,
+      expectedShippingEndDate: shipmentFormData.expectedShippingEndDate,
       port_destination: shipmentFormData.port_destination,
     },
   });
@@ -186,7 +187,18 @@ const OriginAndDestination: React.FC<OriginAndDestinationProps> = ({ setSelected
           errors={errors}
         />
       </div>
-
+      <div className="flex flex-col gap-[5px]">
+        <FieldTitle>What is the expected arrival date?</FieldTitle>
+        <DateTimePicker
+          name="expectedShippingEndDate"
+          classOverrides="!bg-[#ff000000]"
+          register={register("expectedShippingEndDate", {
+            required: "field is required!",
+          })}
+          hasError={Boolean(errors.expectedShippingEndDate)}
+          errors={errors}
+        />
+      </div>
       <div className="mt-[30px] flex gap-[10px]">
         <div className="!w-auto">
           <Button onClick={() => setSelectedIndex((prev) => prev - 1)}>

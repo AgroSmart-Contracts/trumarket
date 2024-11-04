@@ -7,7 +7,7 @@ data "aws_availability_zones" "available" {}
 locals {
   name        = terraform.workspace == "dev" ? "trumarket-dev" : "trumarket"
   environment = terraform.workspace
-  domain      = terraform.workspace == "prod" ? "dev-app.trumarket.tech" : "app.trumarket.tech"
+  domain      = terraform.workspace == "prod" ? "app.trumarket.tech" : "dev-app.trumarket.tech"
 
 
   vpc_cidr = "10.0.0.0/16"
@@ -238,7 +238,7 @@ module "ecs_service_api" {
       environment : [
         {
           name  = "APP_DOMAIN",
-          value = "https://trumarket-demo.vercel.app"
+          value = "https://app.trumarket.tech"
         },
         {
           name = "DATABASE_URL",

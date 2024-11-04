@@ -274,6 +274,11 @@ const dealSchema = new Schema({
     type: Boolean,
     default: false,
   },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 dealSchema.pre('save', function (next) {

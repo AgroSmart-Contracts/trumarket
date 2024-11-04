@@ -57,26 +57,7 @@ export default function CreatableInput({
 
   const [inputValue, setInputValue] = useState("");
 
-  const handleKeyDown = (event: React.KeyboardEvent, onChange: (options: Option[]) => void, value: Option[]) => {
-    if (!inputValue) return;
-    switch (event.key) {
-      case "Enter":
-      case "Tab":
-      case ",":
-      case " ":
-        event.preventDefault();
-        const inputValues = inputValue
-          .split(/[, ]+/)
-          .map((v) => v.trim())
-          .filter((v) => v);
-        const newOptions = inputValues.map(createOption);
-        onChange([...value, ...newOptions]);
-        setInputValue("");
-        break;
-    }
-  };
-
-  const handleBlur = (event: React.FocusEvent, onChange: (options: Option[]) => void, value: Option[]) => {
+  const changeInputValue = (event: any, onChange: (options: Option[]) => void, value: Option[]) => {
     if (!inputValue) return;
     event.preventDefault();
     const inputValues = inputValue
@@ -84,8 +65,27 @@ export default function CreatableInput({
       .map((v) => v.trim())
       .filter((v) => v);
     const newOptions = inputValues.map(createOption);
-    onChange([...value, ...newOptions]);
+    const options = [...value, ...newOptions];
+    const uniqueOptions: any = Array.from(new Set(options.map((option) => option.value.toLowerCase()))).map((value) =>
+      options.find((option) => option.value === value),
+    );
+    onChange(uniqueOptions);
     setInputValue("");
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent, onChange: (options: Option[]) => void, value: Option[]) => {
+    if (!inputValue) return;
+    switch (event.key) {
+      case "Enter":
+      case "Tab":
+      case ",":
+      case " ":
+        changeInputValue(event, onChange, value);
+    }
+  };
+
+  const handleBlur = (event: React.FocusEvent, onChange: (options: Option[]) => void, value: Option[]) => {
+    changeInputValue(event, onChange, value);
   };
 
   return (

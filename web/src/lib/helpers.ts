@@ -174,16 +174,6 @@ export const milestoneDescriptions = [
   "port_of_destination",
 ];
 
-export const mockExpectedShippingEndDate = () => {
-  const currentDate = new Date();
-
-  const currentMonth = currentDate.getMonth();
-
-  currentDate.setMonth(currentMonth + 1);
-
-  return currentDate;
-};
-
 export const getCountryCode = (countryName: string) => {
   return CountryList.find((country) => country.name === countryName)?.code;
 };

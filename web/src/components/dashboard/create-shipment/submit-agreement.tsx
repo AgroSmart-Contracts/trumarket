@@ -16,7 +16,7 @@ import { ICreateShipmentParams, ISubmitAgreementForm } from "src/interfaces/ship
 import { ShipmentService } from "src/controller/ShipmentAPI.service";
 import { useUserInfo } from "src/lib/hooks/useUserInfo";
 import { AccountTypeEnum } from "src/interfaces/global";
-import { milestoneDescriptions, mockExpectedShippingEndDate, normalizeField } from "src/lib/helpers";
+import { milestoneDescriptions, normalizeField } from "src/lib/helpers";
 import FieldTitle from "src/components/common/input/field-title";
 
 interface SubmitAgreementProps {
@@ -72,7 +72,7 @@ const ProductDetails: React.FC<SubmitAgreementProps> = ({ setSelectedIndex, sele
       milestones,
       // hardcodedValues
       investmentAmount: 0,
-      expectedShippingEndDate: mockExpectedShippingEndDate(),
+      expectedShippingEndDate: shipmentFormData.expectedShippingEndDate,
       contractId: 0,
       roi: 0,
       netBalance: 0,
