@@ -1,6 +1,5 @@
 import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
-import type { Principal } from '@dfinity/principal';
 
 export interface rec_0 {
   id: string;
