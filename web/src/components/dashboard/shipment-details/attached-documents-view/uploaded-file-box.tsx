@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import FileTypeDetector from "src/components/common/file-uploader/file-type-detector";
 import { AccountTypeEnum } from "src/interfaces/global";
@@ -33,6 +33,15 @@ const UploadedFileBox: React.FC<UploadedFileBoxProps> = ({
 }) => {
   const { accountType } = useUserInfo();
   const isBuyer = accountType === AccountTypeEnum.BUYER;
+  const [publishEnabled, setPublishEnabled] = React.useState(false);
+
+  useEffect(() => {
+    const key = localStorage.getItem("publishEnabled");
+    if (key) {
+      setPublishEnabled(true);
+    }
+  }, []);
+
   return (
     <div className={`group relative max-h-[200px] w-full max-w-[150px] rounded-[4px] border border-tm-black-20 `}>
       {isBuyer && !seen ? (
@@ -51,7 +60,7 @@ const UploadedFileBox: React.FC<UploadedFileBoxProps> = ({
         id={id}
         publiclyVisible={publiclyVisible}
       />
-      {handleChangeDocumentVisibility ? (
+      {handleChangeDocumentVisibility && publishEnabled ? (
         <div
           className={`relative -top-[3px] max-h-[80px] min-h-[80px] w-full max-w-[150px] rounded-[4px] ${publiclyVisible ? "bg-tm-green-light" : "bg-tm-white"} p-[10px] shadow-inner`}
         >
