@@ -268,7 +268,10 @@ const AgreementDetailsView: React.FC<AgreementDetailsViewProps> = () => {
       secondaryOptionText: "Go to shipment",
       primaryOptionLoading: false,
       secondaryOptionLoading: false,
-      primaryOptionAction: () => openInNewTab(process.env.NEXT_PUBLIC_CONTRACT_EXPLORER_URL as string),
+      primaryOptionAction: () =>
+        openInNewTab(
+          `${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER as string}/token/${process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS}`,
+        ),
       secondaryOptionAction: () => {
         closeModal();
         push(`/dashboard/shipment-details/${shipmentId}`);

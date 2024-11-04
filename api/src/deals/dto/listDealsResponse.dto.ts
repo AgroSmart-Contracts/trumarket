@@ -137,4 +137,8 @@ export class ListDealDtoResponse {
   @ApiProperty()
   @Expose()
   newDocuments: boolean;
+
+  @ApiProperty()
+  @Expose()
+  createdAt: Date;
 }

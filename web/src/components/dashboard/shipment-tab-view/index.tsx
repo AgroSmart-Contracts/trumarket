@@ -34,19 +34,19 @@ const ShipmentTabView: React.FC<TabViewProps> = () => {
 
   //!! TODO it should be converted to single API call after there will be endpoint to fetch `Count` for each status
   const { data: confirmedShipmentList, isLoading: isConfirmedShipmentListLoading } = useQuery({
-    queryKey: ["get-confirmed-shipments", selectedIndex],
+    queryKey: ["get-confirmed-shipments"],
     queryFn: () => ShipmentService.getShipments(DealStatus.Confirmed),
     initialData: [],
   });
 
   const { data: pendingShipmentList, isLoading: isPendingShipmentListLoading } = useQuery({
-    queryKey: ["get-pending-shipments", selectedIndex],
+    queryKey: ["get-pending-shipments"],
     queryFn: () => ShipmentService.getShipments(DealStatus.Proposal),
     initialData: [],
   });
 
   const { data: finishedShipmentList, isLoading: isFinishedShipmentListLoading } = useQuery({
-    queryKey: ["get-finished-shipments", selectedIndex],
+    queryKey: ["get-finished-shipments"],
     queryFn: () => ShipmentService.getShipments(DealStatus.Finished),
     initialData: [],
   });

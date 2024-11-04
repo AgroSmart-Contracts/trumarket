@@ -10,6 +10,7 @@ export interface IOriginAndDestination {
   destination: string;
   port_origin?: string;
   shippingStartDate: Date | string;
+  expectedShippingEndDate: Date | string;
   port_destination?: string;
   transport: string;
 }

@@ -31,38 +31,45 @@ export class DealsMongooseRepository
 
   async findByUser(userId: string, query: FindByUserQuery): Promise<Deal[]> {
     return (
-      await this.find({
-        $or: [{ 'buyers.id': userId }, { 'suppliers.id': userId }],
-        ...query,
-      })
-    ).map((deal) => {
-      deal.milestones = deal.milestones.map((m) => {
-        return {
-          ...m,
-          docs: m.docs.map((d) => {
-            d.seen = d.seenByUsers ? d.seenByUsers.includes(userId) : false;
-            delete d.seenByUsers;
-            return {
-              ...d,
-            };
-          }),
-        };
+      await this.find(
+        {
+          $or: [{ 'buyers.id': userId }, { 'suppliers.id': userId }],
+          ...query,
+        },
+        null,
+        {
+          sort: { createdAt: -1 },
+        },
+      )
+    ) // Sort by creation date in descending order
+      .map((deal) => {
+        deal.milestones = deal.milestones.map((m) => {
+          return {
+            ...m,
+            docs: m.docs.map((d) => {
+              d.seen = d.seenByUsers ? d.seenByUsers.includes(userId) : false;
+              delete d.seenByUsers;
+              return {
+                ...d,
+              };
+            }),
+          };
+        });
+
+        const participant = deal.buyers.find((b) => b.id === userId);
+        if (participant) {
+          if (participant.new) {
+            deal.new = true;
+          }
+        } else {
+          const participant = deal.suppliers.find((s) => s.id === userId);
+          if (participant.new) {
+            deal.new = true;
+          }
+        }
+
+        return deal;
       });
-
-      const participant = deal.buyers.find((b) => b.id === userId);
-      if (participant) {
-        if (participant.new) {
-          deal.new = true;
-        }
-      } else {
-        const participant = deal.suppliers.find((s) => s.id === userId);
-        if (participant.new) {
-          deal.new = true;
-        }
-      }
-
-      return deal;
-    });
   }
 
   async findByEmail(email: string): Promise<Deal> {

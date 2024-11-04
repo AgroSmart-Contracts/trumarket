@@ -127,6 +127,8 @@ export class Deal {
   // ui helper properties
   newDocuments: boolean;
   new: boolean;
+
+  createdAt: Date;
 }
 
 export interface DealLog {
