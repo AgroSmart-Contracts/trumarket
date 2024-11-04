@@ -36,8 +36,6 @@ function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
 
   // useCheckNotificationPermission();
 
-  console.log("session", session);
-
   return (
     <>
       {/* eslint-disable-next-line */}

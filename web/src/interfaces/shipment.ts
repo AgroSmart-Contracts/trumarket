@@ -34,7 +34,7 @@ export interface ICreateShipmentParams
   proposalSupplierEmail?: string;
   proposalBuyerEmail?: string;
   investmentAmount: number;
-  expectedShippingEndDate?: any;
+  expectedShippingEndDate: any;
   contractId: string | number;
   portOfOrigin?: string;
   suppliersEmails?: string[];
