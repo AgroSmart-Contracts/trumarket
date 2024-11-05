@@ -24,6 +24,18 @@ const NotificationsSettingsSchema: Schema = new Schema(
   { _id: false },
 );
 
+const companySchema = new Schema({
+  name: String,
+  country: String,
+  taxId: String,
+});
+
+companySchema.set('toJSON', {
+  transform: function (doc, ret) {
+    return ret;
+  },
+});
+
 const UserSchema: Schema = new Schema({
   email: { type: String, unique: true, sparse: true },
   accountType: {
@@ -59,6 +71,10 @@ const UserSchema: Schema = new Schema({
   },
   emailNotifications: {
     type: NotificationsSettingsSchema,
+  },
+  company: {
+    type: companySchema,
+    required: false,
   },
 });
 

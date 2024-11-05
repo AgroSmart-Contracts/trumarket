@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import DirectionsBoatIcon from "@mui/icons-material/DirectionsBoat";
 import FlightIcon from "@mui/icons-material/Flight";
@@ -16,6 +16,7 @@ import CreatableInput from "src/components/common/select/creatable";
 import FieldTitle from "src/components/common/input/field-title";
 
 import ExtendedNextButton from "./extended-next-button";
+import { AuthService } from "src/controller/AuthAPI.service";
 
 interface CompanyDataProps {
   setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
@@ -41,6 +42,28 @@ const CompanyData: React.FC<CompanyDataProps> = ({ setSelectedIndex, selectedInd
       participants: shipmentFormData?.participants,
     },
   });
+
+  useEffect(() => {
+    const values = getValues();
+    console.log({ values });
+    if (values.companyName || values.taxId || values.country || values.participants.length) {
+      return;
+    }
+
+    AuthService.getUserProfileInfo().then((user) => {
+      if (!user.company) return;
+      setValue("companyName", user.company.name);
+      setValue("taxId", user.company.taxId);
+
+      const country = user.company
+        ? countryOrigins.find((country) => user.company && country.value === user.company.country)
+        : undefined;
+
+      if (country) {
+        setValue("country", country);
+      }
+    });
+  }, []);
 
   const handleNextStep = async (data: any) => {
     Object.keys(data).map((key) => {

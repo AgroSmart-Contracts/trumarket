@@ -1,3 +1,4 @@
+import { Company } from "./../../../api/src/users/users.entities";
 interface IPasswordLess {}
 
 export enum IUserRole {
@@ -18,6 +19,7 @@ export interface UserProfileInfo {
   kycVerified: boolean;
   desktopNotifications: DesktopNotifications;
   emailNotifications: EmailNotifications;
+  company?: Company;
 }
 
 export interface DesktopNotifications {

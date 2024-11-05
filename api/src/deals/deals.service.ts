@@ -10,7 +10,7 @@ import financeAppClient from '@/infra/finance-app/financeAppClient';
 import { logger } from '@/logger';
 import { NotificationsService } from '@/notifications/notifications.service';
 import { Page } from '@/types';
-import { RoleType, User } from '@/users/users.entities';
+import { AccountType, RoleType, User } from '@/users/users.entities';
 import { UsersService } from '@/users/users.service';
 
 import {
@@ -105,6 +105,16 @@ export class DealsService {
         new: true,
       };
     });
+
+    if (user.accountType === AccountType.Buyer) {
+      await this.users.updateById(user.id, {
+        company: dealPayload.buyerCompany,
+      });
+    } else if (user.accountType === AccountType.Supplier) {
+      await this.users.updateById(user.id, {
+        company: dealPayload.supplierCompany,
+      });
+    }
 
     const deal = await this.dealsRepository.create(dealPayload);
 
