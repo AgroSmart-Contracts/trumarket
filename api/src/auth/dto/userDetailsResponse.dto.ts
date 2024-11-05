@@ -1,6 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
+export class CompanyDto {
+  @ApiProperty()
+  @Expose()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  country: string;
+
+  @ApiProperty()
+  @Expose()
+  taxId: string;
+}
+
 export class NotificationsSettingsDto {
   @ApiProperty()
   @Expose()
@@ -81,4 +95,8 @@ export class UserDetailsResponseDto {
   @ApiProperty({ type: NotificationsSettingsDto })
   @Expose()
   emailNotifications?: NotificationsSettingsDto;
+
+  @ApiProperty({ type: CompanyDto })
+  @Expose()
+  company?: CompanyDto;
 }

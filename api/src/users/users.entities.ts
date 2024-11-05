@@ -1,3 +1,9 @@
+export class Company {
+  name: string;
+  country: string;
+  taxId: string;
+}
+
 export enum AccountType {
   Supplier = 'supplier',
   Buyer = 'buyer',
@@ -40,4 +46,6 @@ export class User {
   kycVerified: boolean;
   desktopNotifications?: NotificationsSettings;
   emailNotifications?: NotificationsSettings;
+
+  company: Company;
 }
