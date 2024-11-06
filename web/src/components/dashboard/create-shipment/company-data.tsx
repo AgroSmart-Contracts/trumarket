@@ -45,7 +45,6 @@ const CompanyData: React.FC<CompanyDataProps> = ({ setSelectedIndex, selectedInd
 
   useEffect(() => {
     const values = getValues();
-    console.log({ values });
     if (values.companyName || values.taxId || values.country || values.participants.length) {
       return;
     }

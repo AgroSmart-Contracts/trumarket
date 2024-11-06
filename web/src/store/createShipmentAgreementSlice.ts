@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import type { RootState } from "../lib/store";
 
@@ -17,6 +17,12 @@ export const shipmentAgreementSlice = createSlice({
   name: "shipmentAgreement",
   initialState,
   reducers: {
+    cloneShipmentAgreementState: (
+      state: ShipmentAgreementData,
+      action: PayloadAction<{ shipment: { [key: string]: string } }>,
+    ) => {
+      return { ...state, formValues: action.payload.shipment };
+    },
     resetShipmentAgreementState: (state: ShipmentAgreementData) => {
       state = initialState;
       return state;
@@ -29,7 +35,8 @@ export const shipmentAgreementSlice = createSlice({
 });
 
 // actions
-export const { resetShipmentAgreementState, setShipmentAgreementState } = shipmentAgreementSlice.actions;
+export const { resetShipmentAgreementState, setShipmentAgreementState, cloneShipmentAgreementState } =
+  shipmentAgreementSlice.actions;
 
 // selectors
 export const selectShipmentAgreementState = (state: RootState) => state.shipmentAgreement.formValues;
