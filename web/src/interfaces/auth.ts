@@ -1,5 +1,8 @@
-import { Company } from "./../../../api/src/users/users.entities";
-interface IPasswordLess {}
+interface Company {
+  name: string;
+  country: string;
+  taxId: string;
+}
 
 export enum IUserRole {
   REGULAR,
