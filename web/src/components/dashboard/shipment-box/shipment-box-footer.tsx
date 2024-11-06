@@ -10,6 +10,8 @@ import InformationRow from "src/components/common/information-row";
 import InformationRowDivider from "src/components/common/information-row/information-row-divider";
 import { AgreementPartyInfo } from "src/interfaces/shipment";
 import MuiTooltip from "src/components/common/mui-tooltip";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import { useRouter } from "next/router";
 
 interface ShipmentBoxFooterProps {
   accountType: AccountTypeEnum;
@@ -30,11 +32,13 @@ const ShipmentBoxFooter: React.FC<ShipmentBoxFooterProps> = ({
   action,
   entityId,
 }) => {
+  const router = useRouter();
   const isBuyer = accountType === AccountTypeEnum.BUYER;
+
   return (
     <div>
       <div className="flex items-center justify-between">
-        <div className="flex items-center  px-[20px] py-[19px]">
+        <div className="flex w-[70%]   items-center px-[20px] py-[19px]">
           <InformationRow
             label={isBuyer ? "Supplier:" : "Buyer:"}
             underlined={false}
@@ -68,7 +72,19 @@ const ShipmentBoxFooter: React.FC<ShipmentBoxFooterProps> = ({
             labelClassOverrides="opacity-80"
           />
         </div>
-        <div className="pr-[20px]">
+        <div className="flex w-[30%] justify-end gap-[10px] pr-[20px]">
+          <Button
+            classOverrides="!px-[20px]"
+            variant={ButtonVariants.FILLED_BLUE}
+            onClick={() => router.push("/dashboard/create-shipment?cloneShipmentId=" + entityId)}
+          >
+            <div className="flex items-center justify-between gap-[6px]">
+              <p className="text-[13px] font-bold uppercase leading-[1.2em] tracking-normal !text-tm-white">
+                Clone Shipment
+              </p>
+              <AddCircleIcon className="!h-[15px] !w-[15px] !fill-tm-white" />
+            </div>
+          </Button>
           <Button classOverrides="!py-[7px] !px-[12px] !min-w-[156px]" onClick={() => action()}>
             <div className="flex w-full items-center justify-between gap-[13px]">
               <p className="text-[13px] font-bold uppercase leading-[1em] text-tm-white">{actionButtonText}</p>

@@ -67,15 +67,15 @@ const ShipmentBox: React.FC<ShipmentBoxProps> = ({
   };
 
   return (
-    <Link href={link}>
-      <div className="rounded-[5px] bg-tm-white">
-        <div className="flex">
-          {/* <div className="max-w-[190px]">
+    <div className="rounded-[5px] bg-tm-white">
+      <div className="flex">
+        {/* <div className="max-w-[190px]">
           <div className="p-[10px]">
             <ShipmentBoxImage />
           </div>
         </div> */}
-          <div className="flex-1 flex-col">
+        <div className="flex-1 flex-col">
+          <Link href={link}>
             <ShipmentBoxHeader
               entityTitle={shipment.name}
               entityId={shipment.id}
@@ -124,21 +124,21 @@ const ShipmentBox: React.FC<ShipmentBoxProps> = ({
                 />
               </div>
             </div>
-            <div className="border-t border-t-tm-black-20">
-              <ShipmentBoxFooter
-                accountType={accountType}
-                emailInfo={(isBuyer ? shipment.suppliers : shipment.buyers) || ""}
-                value={shipment.totalValue}
-                contract={`${shipment.contractId}` || "0"}
-                actionButtonText={actionButtonText}
-                entityId={shipment.id}
-                action={() => handleNavigate()}
-              />
-            </div>
+          </Link>
+          <div className="border-t border-t-tm-black-20">
+            <ShipmentBoxFooter
+              accountType={accountType}
+              emailInfo={(isBuyer ? shipment.suppliers : shipment.buyers) || ""}
+              value={shipment.totalValue}
+              contract={`${shipment.contractId}` || "0"}
+              actionButtonText={actionButtonText}
+              entityId={shipment.id}
+              action={() => handleNavigate()}
+            />
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
