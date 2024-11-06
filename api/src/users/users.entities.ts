@@ -47,5 +47,5 @@ export class User {
   desktopNotifications?: NotificationsSettings;
   emailNotifications?: NotificationsSettings;
 
-  company: Company;
+  company?: Company;
 }
