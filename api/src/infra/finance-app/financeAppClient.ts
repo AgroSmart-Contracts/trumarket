@@ -7,7 +7,8 @@ import { logger } from '@/logger';
 import { createActor } from './trumarket-icp-app-backend';
 import { _SERVICE } from './trumarket-icp-app-backend/trumarket-icp-app-backend.did';
 
-const privateKey = process.env.ICP_PK;
+// TODO: integrate safer way to access canister
+// const privateKey = process.env.ICP_PK;
 const canisterId = process.env.ICP_CANISTER_ID;
 const icpRpcProvider = process.env.ICP_RPC_PROVIDER;
 
@@ -15,7 +16,7 @@ class FinanceAppClient {
   canister: ActorSubclass<_SERVICE>;
 
   constructor() {
-    if (!privateKey || !canisterId || !icpRpcProvider) {
+    if (!canisterId || !icpRpcProvider) {
       logger.warn('Missing ICP configuration');
       return;
     }
