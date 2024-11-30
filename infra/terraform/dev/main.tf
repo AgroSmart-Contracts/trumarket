@@ -255,7 +255,7 @@ module "ecs_service_api" {
         },
         {
           name  = "BLOCKCHAIN_CHAIN_ID",
-          value = 80002
+          value = 11155111
         },
         {
           name  = "DEALS_MANAGER_CONTRACT_ADDRESS",
@@ -329,6 +329,14 @@ module "ecs_service_api" {
           name  = "ONFIDO_WEBHOOK_TOKEN",
           value = "GjbcDcUp93zIMSGDxP284XF4qe86vm59"
         },
+        {
+          name  = "ICP_CANISTER_ID",
+          value = "uibem-miaaa-aaaal-qr7qq-cai"
+        },
+        {
+          name  = "ICP_RPC_PROVIDER",
+          value = "https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io"
+        }
       ]
     }
   }
