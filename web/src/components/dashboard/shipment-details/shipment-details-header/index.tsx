@@ -1,12 +1,13 @@
 import { CheckCircle } from "@phosphor-icons/react";
 import React, { useEffect } from "react";
-import { useModal } from "src/context/modal-context";
+import { AccountTypeEnum } from "src/interfaces/global";
 
 interface ShipmentDetailsHeaderProps {
   productName?: string;
   shipmentNumber?: string;
   publish: () => void;
   isPublished?: boolean;
+  userAccountType: string;
 }
 
 const ShipmentDetailsHeader: React.FC<ShipmentDetailsHeaderProps> = ({
@@ -14,6 +15,7 @@ const ShipmentDetailsHeader: React.FC<ShipmentDetailsHeaderProps> = ({
   shipmentNumber,
   publish,
   isPublished,
+  userAccountType,
 }) => {
   const [publishEnabled, setPublishEnabled] = React.useState(false);
 
@@ -30,6 +32,7 @@ const ShipmentDetailsHeader: React.FC<ShipmentDetailsHeaderProps> = ({
         <h1 className="font-bold">{productName}</h1>
         {/* <p className="font-light">#{shipmentNumber}</p> */}
         {publishEnabled &&
+          userAccountType === AccountTypeEnum.BUYER &&
           (isPublished ? (
             <p className="flex items-center text-sm font-light text-tm-green">
               Published

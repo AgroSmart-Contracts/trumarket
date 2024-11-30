@@ -44,6 +44,7 @@ export enum DealStatus {
   Proposal = 'proposal',
   Confirmed = 'confirmed',
   Finished = 'finished',
+  Repaid = 'repaid',
   Cancelled = 'cancelled',
 }
 
@@ -63,6 +64,7 @@ export enum MilestoneApprovalStatus {
 export class DealParticipant {
   id?: string;
   email: string;
+  walletAddress?: string;
   approved?: boolean;
   new?: boolean;
 }
@@ -84,6 +86,7 @@ export class Deal {
   // smart contract properties
   nftID: number;
   mintTxHash: string;
+  vaultAddress: string;
 
   // shipping properties
   contractId: number;

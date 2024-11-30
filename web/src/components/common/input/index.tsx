@@ -76,7 +76,8 @@ const Input: React.FC<InputProps> = ({
             name={name}
             className={classNames(
               classOverrides,
-              " w-full rounded-[4px]  border p-[10px] text-[13px] font-bold leading-[1.2em] tracking-normal text-tm-black-80 outline-none placeholder:font-light",
+              " w-full rounded-[4px]  border text-[13px] font-bold leading-[1.2em] tracking-normal text-tm-black-80 outline-none placeholder:font-light " +
+                (rest.type === "range" ? "" : "p-[10px]"),
               {
                 "!border-2 border-tm-danger": hasError,
                 "border-tm-black-20": !hasError,

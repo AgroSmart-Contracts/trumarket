@@ -40,9 +40,14 @@ const PaymentValues: React.FC<PaymentValueProps> = ({ setSelectedIndex, selected
     port_of_origin: shipmentFormData.port_of_origin,
     transit: shipmentFormData.transit,
     port_of_destination: shipmentFormData.port_of_destination,
+    investmentAmountPercentage: shipmentFormData.investmentAmountPercentage || "100",
   };
   const [formValues, setFormValues] = useState<any>(defaultValues);
-  const paymentTranchPercentage = calculateTranchPercentageSum(formValues, ["quantity", "offerUnitPrice"]);
+  const paymentTranchPercentage = calculateTranchPercentageSum(formValues, [
+    "quantity",
+    "offerUnitPrice",
+    "investmentAmountPercentage",
+  ]);
   const validPercentageValue = paymentTranchPercentage < 100 || paymentTranchPercentage > 100;
   const {
     handleSubmit,
@@ -148,10 +153,43 @@ const PaymentValues: React.FC<PaymentValueProps> = ({ setSelectedIndex, selected
             >
               Total:{" "}
               <span className="notranslate">
-                {calculateTranchPercentageSum(formValues, ["quantity", "offerUnitPrice"]) || "0"}
+                {calculateTranchPercentageSum(formValues, [
+                  "quantity",
+                  "offerUnitPrice",
+                  "investmentAmountPercentage",
+                ]) || "0"}
               </span>
               %
             </p>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-[13px]  font-normal leading-[1.2em]">
+              Investment amount :{" "}
+              <span className="notranslate font-bold text-tm-black-80">
+                {CurrencyFormatter(
+                  Number(watch("quantity") || 0) *
+                    Number(watch("offerUnitPrice") || 0) *
+                    (Number(watch("investmentAmountPercentage") || 0) / 100),
+                ) || "-"}
+              </span>{" "}
+            </p>
+            <div className="flex items-center gap-2">
+              <Input
+                name="investmentAmountPercentage"
+                classOverrides="!bg-[#ff000000]"
+                placeholder="Investment Amount Percentage"
+                register={register("investmentAmountPercentage", {
+                  required: "field is required!",
+                })}
+                hasError={Boolean(errors.investmentAmountPercentage)}
+                errors={errors}
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+              />
+              <span>{Number(watch("investmentAmountPercentage"))} %</span>
+            </div>
           </div>
         </div>
       </div>

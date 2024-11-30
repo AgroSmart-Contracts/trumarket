@@ -1,11 +1,13 @@
 import { CHAIN_NAMESPACES } from "@web3auth/base";
 
+console.log(process.env.NEXT_PUBLIC_BLOCKCHAIN_CHAIN_ID);
+
 export const chainConfigEth = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
-  chainId: "0x1",
-  rpcTarget: "https://eth-mainnet.g.alchemy.com/v2/D7BQsRkNKYrgU0NLQufvYcshu36QMe9F",
-  displayName: "Ethereum Mainnet",
-  blockExplorer: "https://goerli.etherscan.io",
-  ticker: "ETH",
-  tickerName: "Ethereum",
+  chainId: process.env.NEXT_PUBLIC_BLOCKCHAIN_CHAIN_ID,
+  rpcTarget: process.env.NEXT_PUBLIC_BLOCKCHAIN_RPC_URL,
+  displayName: process.env.NEXT_PUBLIC_BLOCKCHAIN_NAME,
+  blockExplorer: process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER,
+  ticker: process.env.NEXT_PUBLIC_BLOCKCHAIN_TICKER,
+  tickerName: process.env.NEXT_PUBLIC_BLOCKCHAIN_TICKER_NAME,
 };

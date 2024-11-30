@@ -135,6 +135,7 @@ export class DealsController {
       view,
       viewDocuments,
       isPublished,
+      repaid,
       ...restDealDto
     } = dealDto;
 
@@ -150,6 +151,8 @@ export class DealsController {
       deal = await this.dealsService.setDocumentsAsViewed(id, user);
     } else if (isPublished) {
       deal = await this.dealsService.publishDeal(id, user);
+    } else if (repaid) {
+      deal = await this.dealsService.setDealAsRepaid(id, user);
     } else {
       deal = await this.dealsService.updateDeal(id, restDealDto, user);
     }

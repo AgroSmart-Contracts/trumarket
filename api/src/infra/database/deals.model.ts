@@ -48,6 +48,7 @@ const participantSchema = new Schema({
   id: String,
   email: String,
   approved: Boolean,
+  walletAddress: String,
   new: Boolean,
 });
 
@@ -136,6 +137,10 @@ const dealSchema = new Schema({
     type: String,
     required: false,
   },
+  vaultAddress: {
+    type: String,
+    required: false,
+  },
 
   // shipping properties
   contractId: {
@@ -219,7 +224,7 @@ const dealSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['proposal', 'confirmed', 'finished'],
+    enum: ['proposal', 'confirmed', 'finished', 'repaid'],
     default: 'proposal',
   },
   isPublished: {

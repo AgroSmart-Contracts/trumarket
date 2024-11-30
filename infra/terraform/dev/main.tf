@@ -262,6 +262,14 @@ module "ecs_service_api" {
           value = data.aws_ssm_parameter.deals_manager_address.value
         },
         {
+          name  = "INVESTMENT_TOKEN_CONTRACT_ADDRESS",
+          value = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+        },
+        {
+          name  = "INVESTMENT_TOKEN_SYMBOL",
+          value = "USDC"
+        },
+        {
           name  = "AUTOMATIC_DEALS_ACCEPTANCE",
           value = "true"
         },

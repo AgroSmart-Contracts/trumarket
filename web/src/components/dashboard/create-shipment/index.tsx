@@ -228,11 +228,6 @@ const CreateShipment: React.FC<CreateShipment> = () => {
         otherCompanyParticipants = shipment.buyers.map((p) => ({ label: p.email, value: p.email }));
       }
 
-      console.log({
-        companyParticipants,
-        otherCompanyParticipants,
-      });
-
       dispatch(
         cloneShipmentAgreementState({
           shipment: {

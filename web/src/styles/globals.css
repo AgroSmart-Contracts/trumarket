@@ -59,6 +59,15 @@ html {
   gap: 0;
 }
 
+button:disabled{
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+button:hover {
+  filter: brightness(110%);
+}
+
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

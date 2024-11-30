@@ -11,4 +11,5 @@ REPORT_GAS=true npx hardhat test
 npm run local:node
 npm run local:deploy
 npm run local:mint-deal
+npm run local:fund-deal
 ```

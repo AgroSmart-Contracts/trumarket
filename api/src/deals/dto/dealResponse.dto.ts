@@ -81,6 +81,10 @@ export class DealDtoResponse {
 
   @ApiProperty()
   @Expose()
+  vaultAddress: string;
+
+  @ApiProperty()
+  @Expose()
   origin: string;
 
   @ApiProperty()

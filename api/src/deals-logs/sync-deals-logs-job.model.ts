@@ -1,5 +1,10 @@
 import * as mongoose from 'mongoose';
 
+export enum DealsLogsJobType {
+  DealsManager = 'DealsManager',
+  Vault = 'Vault',
+}
+
 // Define the interface for SyncDealsLogsJob document
 interface ISyncDealsLogsJob extends mongoose.Document {
   type: string;
@@ -7,6 +12,8 @@ interface ISyncDealsLogsJob extends mongoose.Document {
   lastBlock: number;
   lastExecution: Date;
   lastStatus: string;
+  active: boolean;
+  dealId?: number;
 }
 
 // Define the Mongoose Schema for SyncDealsLogsJob
@@ -31,6 +38,14 @@ const SyncDealsLogsJobSchema = new mongoose.Schema({
   },
   error: {
     type: String,
+  },
+  active: {
+    type: Boolean,
+    default: true,
+  },
+  dealId: {
+    type: Number,
+    required: false,
   },
   createdAt: {
     type: Date,

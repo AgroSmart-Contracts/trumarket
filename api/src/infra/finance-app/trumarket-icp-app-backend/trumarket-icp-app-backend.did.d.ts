@@ -12,7 +12,9 @@ export interface rec_0 {
   name: string;
   origin: string;
   transport: string;
+  vaultAddress: [] | [string];
   description: string;
+  investmentAmount: number;
   portOfOrigin: string;
   nftID: number;
   currentMilestone: number;
@@ -82,7 +84,9 @@ export interface rec_4 {
   name: string;
   origin: string;
   transport: string;
+  vaultAddress: [] | [string];
   description: string;
+  investmentAmount: number;
   portOfOrigin: string;
   nftID: number;
   currentMilestone: number;
@@ -120,7 +124,9 @@ export interface rec_8 {
   name: string;
   origin: string;
   transport: string;
+  vaultAddress: [] | [string];
   description: string;
+  investmentAmount: number;
   portOfOrigin: string;
   nftID: number;
   currentMilestone: number;

@@ -1,115 +1,224 @@
-import { createPublicClient, http, parseAbi } from 'viem';
+import { createPublicClient, http, parseAbi, PublicClient } from 'viem';
 
 import { config } from '@/config';
 import financeAppClient from '@/infra/finance-app/financeAppClient';
 
 import DealsLogs from '../deals-logs/deals-logs.model';
-import SyncDealsLogsJob from '../deals-logs/sync-deals-logs-job.model';
+import SyncDealsLogsJob, {
+  DealsLogsJobType,
+} from '../deals-logs/sync-deals-logs-job.model';
 import { logger } from '../logger';
+
+type DealLog = {
+  dealId?: number;
+  event: string;
+  args: any;
+  blockNumber: number;
+  blockTimestamp: Date;
+  txHash: string;
+  message: string;
+};
+
+async function getDealsManagerLogs(
+  client: PublicClient,
+  fromBlock: bigint,
+  toBlock: bigint,
+  contractAddress: string,
+): Promise<DealLog[]> {
+  const logs = await client.getLogs({
+    fromBlock,
+    toBlock,
+    address: contractAddress as `0x${string}`,
+    events: parseAbi([
+      `event DealCreated(uint256 dealId)`,
+      `event DealMilestoneChanged(uint256 dealId, uint8 milestone)`,
+      `event DealCompleted(uint256 dealId)`,
+    ]),
+  });
+
+  const dealsLogs = logs.map((log) => {
+    const dealLog: DealLog = {
+      dealId: +log.args.dealId.toString(),
+      event: log.eventName,
+      args: log.args,
+      blockNumber: +log.blockNumber.toString(),
+      blockTimestamp: new Date(),
+      txHash: log.transactionHash,
+      message: '',
+    };
+
+    switch (log.eventName) {
+      case 'DealCreated':
+        dealLog.message = 'Deal created.';
+        break;
+      case 'DealCompleted':
+        dealLog.message = 'Deal completed.';
+        break;
+      case 'DealMilestoneChanged':
+        dealLog.message = `Deal status changed to milestone ${log.args.milestone}.`;
+        break;
+    }
+
+    return dealLog;
+  });
+
+  return dealsLogs;
+}
+
+async function getDealVaultLogs(
+  client: PublicClient,
+  fromBlock: bigint,
+  toBlock: bigint,
+  contractAddress: string,
+): Promise<DealLog[]> {
+  const logs = await client.getLogs({
+    fromBlock,
+    toBlock,
+    address: config.investmentTokenContractAddress as `0x${string}`,
+    events: parseAbi([
+      `event Transfer(address indexed from, address indexed to, uint256 value)`,
+    ]),
+  });
+
+  const filteredLogs = logs.filter(
+    (log) =>
+      log.args.from.toLowerCase() === contractAddress.toLowerCase() ||
+      log.args.to.toLowerCase() === contractAddress.toLowerCase(),
+  );
+
+  const dealsLogs = filteredLogs.map((log) => {
+    const dealLog: DealLog = {
+      event: log.eventName,
+      args: log.args,
+      blockNumber: +log.blockNumber.toString(),
+      blockTimestamp: new Date(),
+      txHash: log.transactionHash,
+      message: '',
+    };
+
+    if (log.args.from.toLowerCase() === contractAddress.toLowerCase()) {
+      dealLog.message = `Deal ${log.args.to} reclaimed ${log.args.value} tokens.`;
+    } else {
+      dealLog.message = `Deal ${log.args.from} deposited ${log.args.value} tokens.`;
+    }
+
+    return dealLog;
+  });
+
+  return dealsLogs;
+}
 
 export const syncDealsLogs = async () => {
   logger.debug('Syncing deals logs');
 
-  const jobs = await SyncDealsLogsJob.find();
+  const jobs = await SyncDealsLogsJob.find({ active: true });
 
   if (!jobs.length) {
     const job = await SyncDealsLogsJob.create({
       contract: config.dealsManagerContractAddress,
       lastBlock: 0,
-      type: 'syncDealsLogs',
+      type: DealsLogsJobType.DealsManager,
     });
     jobs.push(job);
+  }
+
+  let fromBlock: bigint;
+  let toBlock: bigint;
+  let client: PublicClient;
+
+  try {
+    client = createPublicClient({
+      transport: http(config.blockchainRpcUrl as string),
+    }) as any;
+
+    toBlock = await client.getBlockNumber();
+
+    logger.debug({ fromBlock, toBlock }, 'got block number');
+  } catch (err) {
+    logger.error(err, 'Error syncing deals logs');
   }
 
   await Promise.all(
     jobs.map(async (job) => {
       try {
-        logger.debug({ contract: job.contract }, 'Syncing deals logs');
-        const client = createPublicClient({
-          transport: http(config.blockchainRpcUrl as string),
-        });
-
-        const fromBlock = job.lastBlock
-          ? BigInt(job.lastBlock + 1)
-          : BigInt('0');
-        const toBlock = await client.getBlockNumber();
-
-        logger.debug({ fromBlock, toBlock }, 'got block number');
+        fromBlock = job.lastBlock ? BigInt(job.lastBlock + 1) : BigInt('0');
 
         if (fromBlock > toBlock) {
           return;
         }
 
+        logger.debug({ contract: job.contract }, 'Syncing deals logs');
+
+        let dealsLogs: DealLog[] = [];
+
         logger.debug(
           {
             fromBlock,
             toBlock,
+            type: job.type,
             contractAddress: job.contract,
           },
           'syncing deals logs from deals contract',
         );
-        const logs = await client.getLogs({
-          fromBlock,
-          toBlock,
-          address: job.contract as `0x${string}`,
-          events: parseAbi([
-            `event DealCreated(uint256 dealId)`,
-            `event DealMilestoneChanged(uint256 dealId, uint8 milestone)`,
-            `event DealCompleted(uint256 dealId)`,
-          ]),
-        });
 
-        const dealsLogs = logs.map((log) => {
-          const dealLog: any = {
-            dealId: +log.args.dealId.toString(),
-            event: log.eventName,
-            args: log.args,
-            blockNumber: +log.blockNumber.toString(),
-            blockTimestamp: new Date(),
-            txHash: log.transactionHash,
-            message: '',
-          };
+        switch (job.type) {
+          case DealsLogsJobType.DealsManager:
+            console.log('getting deals manager logs');
+            dealsLogs = await getDealsManagerLogs(
+              client,
+              fromBlock,
+              toBlock,
+              job.contract,
+            );
+            break;
+          case DealsLogsJobType.Vault:
+            dealsLogs = await getDealVaultLogs(
+              client,
+              fromBlock,
+              toBlock,
+              job.contract,
+            );
 
-          switch (log.eventName) {
-            case 'DealCreated':
-              dealLog.message = 'Deal created.';
-              break;
-            case 'DealCompleted':
-              dealLog.message = 'Deal completed.';
-              break;
-            case 'DealMilestoneChanged':
-              dealLog.message = `Deal status changed to milestone ${log.args.milestone}.`;
-              break;
-          }
-
-          return dealLog;
-        });
-
-        await Promise.all(
-          dealsLogs.map(async (dealLog) => {
-            try {
-              console.log(
-                dealLog.dealId.toString(),
-                dealLog.event,
-                dealLog.message,
-                dealLog.txHash,
-              );
-              await financeAppClient.createActivity(
-                dealLog.dealId.toString(),
-                dealLog.event,
-                dealLog.message,
-                dealLog.txHash,
-                dealLog.blockTimestamp,
-              );
-            } catch (err) {
-              console.warn(
-                `Error creating activity for deal ${dealLog.dealId}: ${err.message}`,
-              );
+            if (job.dealId !== undefined && job.dealId !== null) {
+              dealsLogs = dealsLogs.map((dealLog) => ({
+                dealId: job.dealId,
+                ...dealLog,
+              }));
             }
-          }),
-        );
+            break;
+          default:
+            console.warn('(syncDealsLogs) Unknown job type:', job.type);
+            break;
+        }
 
-        await DealsLogs.create(dealsLogs);
+        if (dealsLogs.length) {
+          await Promise.all(
+            dealsLogs.map(async (dealLog) => {
+              try {
+                logger.debug(
+                  dealLog.dealId.toString(),
+                  dealLog.event,
+                  dealLog.message,
+                  dealLog.txHash,
+                );
+                await financeAppClient.createActivity(
+                  dealLog.dealId.toString(),
+                  dealLog.event,
+                  dealLog.message,
+                  dealLog.txHash,
+                  dealLog.blockTimestamp,
+                );
+              } catch (err) {
+                console.warn(
+                  `Error creating activity for deal ${dealLog.dealId}: ${err.message}`,
+                );
+              }
+            }),
+          );
+
+          await DealsLogs.create(dealsLogs);
+        }
+
         await SyncDealsLogsJob.findByIdAndUpdate(job._id, {
           $set: {
             lastBlock: +toBlock.toString(),
