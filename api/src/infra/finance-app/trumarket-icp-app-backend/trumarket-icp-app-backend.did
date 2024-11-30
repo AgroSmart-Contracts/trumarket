@@ -16,7 +16,9 @@ type rec_8 = record {
     name : text;
     origin : text;
     transport : text;
+    vaultAddress : opt text;
     description : text;
+    investmentAmount : float32;
     portOfOrigin : text;
     nftID : int32;
     currentMilestone : int16;
@@ -54,7 +56,9 @@ type rec_4 = record {
     name : text;
     origin : text;
     transport : text;
+    vaultAddress : opt text;
     description : text;
+    investmentAmount : float32;
     portOfOrigin : text;
     nftID : int32;
     currentMilestone : int16;
@@ -80,7 +84,9 @@ type rec_0 = record {
     name : text;
     origin : text;
     transport : text;
+    vaultAddress : opt text;
     description : text;
+    investmentAmount : float32;
     portOfOrigin : text;
     nftID : int32;
     currentMilestone : int16;

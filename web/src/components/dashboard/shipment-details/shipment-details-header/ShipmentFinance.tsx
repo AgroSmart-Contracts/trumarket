@@ -131,6 +131,7 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
         <a
           href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER}/token/${vaultAddress}`}
           target="_blank"
+          rel="noreferrer"
           className="bg-gray-100 rounded px-3 py-1 font-mono text-sm"
         >
           {truncateAddress(vaultAddress)}
@@ -178,8 +179,8 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
                   )}
                   {+amountFunded >= repayFunds && (
                     <p>
-                      Shipment is completed. The required funds have been successfully repaid. Click "Complete" to
-                      unlock the funds to be reclaimed by the investors.
+                      Shipment is completed. The required funds have been successfully repaid. Click
+                      &quot;Complete&quot; to unlock the funds to be reclaimed by the investors.
                     </p>
                   )}
                 </div>

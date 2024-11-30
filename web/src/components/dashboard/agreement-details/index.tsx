@@ -160,6 +160,7 @@ const AgreementDetailsView: React.FC<AgreementDetailsViewProps> = () => {
       milestones,
       // hardcodedValues
       investmentAmount: 0,
+      investmentAmountPercentage: "0",
       contractId: 0,
       roi: 0,
       netBalance: 0,
