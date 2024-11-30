@@ -1,5 +1,4 @@
 import { ActorSubclass } from '@dfinity/agent';
-import * as crypto from 'crypto';
 
 import { Deal, Milestone } from '@/deals/deals.entities';
 import { logger } from '@/logger';
@@ -30,13 +29,13 @@ class FinanceAppClient {
 
   _createSignature() {
     return '202a9e30f303a8ec8ed0a7d2143100728dae672e3cbcaf12eb7d484329f3e1b026751f93cded7b1a0540fb07d47b50e042f9ff443d9123d4a6a64156a585ef6782704240a9f5124c0682d231c7c12287b22cd96de9ca5f97e968ebb01f2505b8e6d0c617a8b30c65ab457f0ee4f2bed26aa4a0adbf4bf769a30b51291a274ae424f488a726528f9d45f38223db67dd12213ad0d34b96416edb22f676d099f9310b05f24540bb35c7b799d3fc03e3706fa6ed777d0e152c4bb97d5e8f6ca3fa6b37e4d959413e4de5a3330dbef508a44b5bd0371b0cf4114ebd83d0093937625062fcc14fe220a754eb4d6cb5d4063214068048b6c0177e958ad1dc76ca9ee54e';
-    const sign = crypto.createSign('SHA256');
-    sign.update('This is a secret message');
-    sign.end();
+    // const sign = crypto.createSign('SHA256');
+    // sign.update('This is a secret message');
+    // sign.end();
 
-    const signature = sign.sign(privateKey, 'hex');
+    // const signature = sign.sign(privateKey, 'hex');
 
-    return signature;
+    // return signature;
   }
 
   async publishShipment(shipment: Deal) {
