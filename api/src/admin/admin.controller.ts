@@ -18,6 +18,9 @@ import { BlockchainService } from '@/blockchain/blockchain.service';
 import { DealsService } from '@/deals/deals.service';
 import { DealLogsDtoResponse } from '@/deals/dto/dealLogsResponse.dto';
 import { ListDealDtoResponse } from '@/deals/dto/listDealsResponse.dto';
+import SyncDealsLogsJob, {
+  DealsLogsJobType,
+} from '@/deals-logs/sync-deals-logs-job.model';
 import { AdminAccessRestricted } from '@/decorators/adminRestricted';
 import { InternalServerError } from '@/errors';
 import { Page } from '@/types';
@@ -111,11 +114,21 @@ export class AdminController {
 
     const txHash = await this.blockchainService.mintNFT(
       deal.milestones.map((m) => m.fundsDistribution),
+      deal.investmentAmount,
       buyer.walletAddress,
     );
 
     const nftID = await this.blockchainService.getNftID(txHash);
+    const vaultAddress = await this.blockchainService.vault(nftID);
 
-    await this.dealsService.assignNftIdToDeal(id, nftID, txHash);
+    await SyncDealsLogsJob.create({
+      type: DealsLogsJobType.Vault,
+      contract: vaultAddress,
+      lastBlock: 0,
+      active: true,
+      dealId: nftID,
+    });
+
+    await this.dealsService.assignNftIdToDeal(id, nftID, txHash, vaultAddress);
   }
 }

@@ -3,6 +3,7 @@ import { ICompanyBaseInfo, IMilestoneDetails, ITransportType, MilestoneStatus } 
 export interface IPaymentValuesForm {
   quantity: string;
   offerUnitPrice: string;
+  investmentAmountPercentage: string;
 }
 
 export interface IOriginAndDestination {
@@ -55,6 +56,7 @@ export interface ICreateShipmentParams
 export interface AgreementPartyInfo {
   approved?: boolean;
   email: string;
+  walletAddress: string;
   id: string;
   new: boolean;
 }
@@ -99,6 +101,7 @@ export interface ShippingDetails {
   newForBuyer?: boolean;
   nftID?: number;
   mintTxHash?: string;
+  vaultAddress?: string;
 
   isPublished?: boolean;
 }
@@ -107,6 +110,7 @@ export enum DealStatus {
   Proposal = "proposal",
   Confirmed = "confirmed",
   Finished = "finished",
+  Repaid = "repaid",
   Cancelled = "cancelled",
   All = "all",
 }

@@ -39,15 +39,20 @@ import { DEALS_MANAGER_ABI } from './dealsManager.abi';
           },
         });
 
-        const client = await createWalletClient({
+        const writeClient = await createWalletClient({
           account,
           transport: http(config.blockchainRpcUrl),
           chain,
         });
+
+        const publicClient = await createPublicClient({
+          transport: http(config.blockchainRpcUrl),
+        });
+
         return getContract({
           abi: DEALS_MANAGER_ABI.abi,
           address: config.dealsManagerContractAddress as `0x${string}`,
-          client: { wallet: client } as any,
+          client: { wallet: writeClient, public: publicClient } as any,
         });
       },
     },

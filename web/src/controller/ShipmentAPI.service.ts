@@ -38,7 +38,8 @@ export class ShipmentService {
       | { currentMilestone: MilestoneEnum; signature: string }
       | { view: boolean }
       | { viewDocuments: boolean }
-      | { isPublished: boolean },
+      | { isPublished: boolean }
+      | { repaid: boolean },
   ): Promise<ShippingDetails> {
     const response = await axiosInstance.put(`/deals/${dealId}`, {
       ...shipmentData,

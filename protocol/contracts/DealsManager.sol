@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
+import {DealVault} from "./DealVault.sol";
+
 contract DealsManager is ERC721, ERC721Burnable, Ownable {
     event DealCreated(uint256 dealId);
     event DealMilestoneChanged(uint256 dealId, uint8 milestone);
@@ -16,6 +18,7 @@ contract DealsManager is ERC721, ERC721Burnable, Ownable {
     struct Deal {
         uint8 status;
         uint8[7] milestones;
+        address vault;
         uint256 maxDeposit;
         address borrower;
     }
@@ -45,7 +48,11 @@ contract DealsManager is ERC721, ERC721Burnable, Ownable {
 
         require(sum == 100, "Milestones distribution should be 100");
 
-        Deal memory deal = Deal(0, milestones, maxDeposit, borrower);
+        address vault = address(
+            new DealVault(underlying, maxDeposit, maxDeposit, address(this))
+        );
+
+        Deal memory deal = Deal(0, milestones, vault, maxDeposit, borrower);
 
         deals.push(deal);
 
@@ -66,6 +73,12 @@ contract DealsManager is ERC721, ERC721Burnable, Ownable {
         return deals[tokenId].status;
     }
 
+    function vault(uint256 tokenId) public view returns (address) {
+        require(tokenId <= _nextTokenId, "Deal not found");
+
+        return deals[tokenId].vault;
+    }
+
     function maxDeposit(uint256 tokenId) public view returns (uint256) {
         require(tokenId <= _nextTokenId, "Deal not found");
 
@@ -80,6 +93,29 @@ contract DealsManager is ERC721, ERC721Burnable, Ownable {
         );
         require(milestone > 0 && milestone < 8, "Invalid milestone");
 
+        if (milestone == 1) {
+            uint256 funded = DealVault(deals[tokenId].vault).totalAssets();
+            require(
+                funded == deals[tokenId].maxDeposit,
+                "Vault not funded completely"
+            );
+            DealVault(deals[tokenId].vault).pause();
+            DealVault(deals[tokenId].vault).blockDeposits();
+        }
+
+        // transfer % of funds
+        if (deals[tokenId].milestones[milestone - 1] != 0) {
+            uint256 amountToTransfer = Math.mulDiv(
+                deals[tokenId].maxDeposit,
+                deals[tokenId].milestones[milestone - 1],
+                100
+            );
+            DealVault(deals[tokenId].vault).transferToBorrower(
+                deals[tokenId].borrower,
+                amountToTransfer
+            );
+        }
+
         deals[tokenId].status++;
         emit DealMilestoneChanged(tokenId, milestone);
     }
@@ -87,6 +123,8 @@ contract DealsManager is ERC721, ERC721Burnable, Ownable {
     function setDealCompleted(uint256 tokenId) public onlyOwner {
         require(tokenId <= _nextTokenId, "Deal not found");
         require(deals[tokenId].status == 7, "all milestones must be completed");
+
+        DealVault(deals[tokenId].vault).complete();
 
         deals[tokenId].status++;
         emit DealCompleted(tokenId);

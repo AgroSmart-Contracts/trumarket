@@ -49,6 +49,10 @@ export interface DealsRepository extends Repository<Deal> {
     milestoneId: string,
     docId: string,
   ): Promise<void>;
-  assignUserToDeals(userId: string, userEmail: string): Promise<void>;
+  assignUserToDeals(
+    userId: string,
+    userEmail: string,
+    walletAddress: string,
+  ): Promise<void>;
   findDealsLogs(dealId: number): Promise<DealLog[]>;
 }

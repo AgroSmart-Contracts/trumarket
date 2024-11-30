@@ -2,8 +2,7 @@
   "name": "trumarket",
   "private": true,
   "workspaces": [
-    "api",
-    "protocol"
+    "api"
   ],
   "version": "1.0.0",
   "description": "",

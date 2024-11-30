@@ -227,14 +227,26 @@ export class DealsMongooseRepository
     );
   }
 
-  async assignUserToDeals(userId: string, userEmail: string): Promise<void> {
+  async assignUserToDeals(
+    userId: string,
+    userEmail: string,
+    walletAddress: string,
+  ): Promise<void> {
     await DealModel.updateMany(
       { 'buyers.email': userEmail },
-      { $set: { 'buyers.$.id': userId } },
+      {
+        $set: { 'buyers.$.id': userId },
+        'buyers.$.walletAddress': walletAddress,
+      },
     );
     await DealModel.updateMany(
       { 'suppliers.email': userEmail },
-      { $set: { 'suppliers.$.id': userId } },
+      {
+        $set: {
+          'suppliers.$.id': userId,
+          'suppliers.$.walletAddress': walletAddress,
+        },
+      },
     );
   }
 

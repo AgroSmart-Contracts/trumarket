@@ -157,7 +157,15 @@ const AgreementDetailList: React.FC<AgreementDetailListProps> = ({
           />
           <AgreementDetailsListItem
             handleChange={handleChange}
-            title="TotalValue:"
+            title="Investment Amount:"
+            inputName="investmentAmount"
+            defaultValue={CurrencyFormatter(comparativeData.investmentAmount)}
+            isValueChanged={isValueChanged("investmentAmount")}
+            editable={false}
+          />
+          <AgreementDetailsListItem
+            handleChange={handleChange}
+            title="Total Value:"
             inputName="totalValue"
             defaultValue={CurrencyFormatter(comparativeData.totalValue)}
             isValueChanged={isValueChanged("totalValue")}

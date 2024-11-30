@@ -40,6 +40,7 @@ interface web3AuthContextType {
   web3authPnPInstance: Web3AuthNoModal;
   logout: () => void;
   initPnP: () => void;
+  privateKeyProvider: EthereumPrivateKeyProvider;
 }
 
 const web3AuthContext = createContext<web3AuthContextType | undefined>(undefined);
@@ -175,6 +176,7 @@ export const Web3AuthContextProvider: React.FC<{ children: ReactNode }> = ({ chi
     getUserInfo,
     setJWT,
     logout,
+    privateKeyProvider: ethereumPrivateKeyProvider,
   };
 
   return <web3AuthContext.Provider value={contextValue}>{children}</web3AuthContext.Provider>;

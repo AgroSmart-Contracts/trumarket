@@ -9,6 +9,7 @@ import { AppModule } from './app.module';
 import { config } from './config';
 import { ErrorsFilter } from './errors.filter';
 import { syncDealsLogs } from './jobs/syncDealsLogs';
+import { logger } from './logger';
 
 webpush.setVapidDetails(
   'mailto:' + config.mailTo,
@@ -17,6 +18,7 @@ webpush.setVapidDetails(
 );
 
 async function bootstrap() {
+  logger.info('Starting server...');
   const app = await NestFactory.create(AppModule);
 
   let docsPrefix = 'docs';

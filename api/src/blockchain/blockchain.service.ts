@@ -36,10 +36,18 @@ export class BlockchainService {
     return Number(logs[0].args.dealId);
   }
 
-  async mintNFT(distributions: number[], borrower: string): Promise<string> {
+  async vault(nftID: number): Promise<string> {
+    return this.dealsManager.read.vault([nftID]);
+  }
+
+  async mintNFT(
+    distributions: number[],
+    maxDeposit: number,
+    borrower: string,
+  ): Promise<string> {
     const tx = await this.dealsManager.write.mint([
       distributions,
-      parseEther('0'),
+      parseEther('' + maxDeposit),
       borrower,
     ]);
 
@@ -65,5 +73,11 @@ export class BlockchainService {
       message: message,
       signature: signature,
     });
+  }
+
+  async setDealAsCompleted(nftId: number): Promise<string> {
+    const tx = await this.dealsManager.write.setDealCompleted([nftId]);
+
+    return tx;
   }
 }

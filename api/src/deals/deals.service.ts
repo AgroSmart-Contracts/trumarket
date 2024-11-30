@@ -5,12 +5,15 @@ import { s3Service } from '@/aws/s3.service';
 import { BlockchainService } from '@/blockchain/blockchain.service';
 import { config } from '@/config';
 import { providers } from '@/constants';
+import SyncDealsLogsJob, {
+  DealsLogsJobType,
+} from '@/deals-logs/sync-deals-logs-job.model';
 import { BadRequestError, ForbiddenError, UnauthorizedError } from '@/errors';
 import financeAppClient from '@/infra/finance-app/financeAppClient';
 import { logger } from '@/logger';
 import { NotificationsService } from '@/notifications/notifications.service';
 import { Page } from '@/types';
-import { AccountType, RoleType, User } from '@/users/users.entities';
+import { AccountType, User } from '@/users/users.entities';
 import { UsersService } from '@/users/users.service';
 
 import {
@@ -237,11 +240,23 @@ export class DealsService {
 
         const txHash = await this.blockchain.mintNFT(
           deal.milestones.map((m) => m.fundsDistribution),
+          deal.investmentAmount,
           buyer.walletAddress,
         );
         const nftID = await this.blockchain.getNftID(txHash);
+        const vault = await this.blockchain.vault(nftID);
+
+        await SyncDealsLogsJob.create({
+          type: DealsLogsJobType.Vault,
+          contract: vault,
+          lastBlock: 0,
+          active: true,
+          dealId: nftID,
+        });
+
         dealUpdate.nftID = nftID;
         dealUpdate.mintTxHash = txHash;
+        dealUpdate.vaultAddress = vault;
       }
     }
 
@@ -341,15 +356,70 @@ export class DealsService {
   }
 
   async publishDeal(dealId: string, user: User): Promise<Deal> {
-    // TODO: verify restriction over who can publish a deal
-    if (user.role !== RoleType.REGULAR) {
+    if (user.accountType !== AccountType.Buyer) {
       throw new UnauthorizedError('You are not allowed to publish this deal');
     }
 
     try {
       await financeAppClient.publishShipment(await this.findById(dealId));
 
+      const dealsLogs = await this.findDealsLogs(dealId);
+
+      await Promise.all(
+        dealsLogs.map(async (dealLog) => {
+          try {
+            console.log(
+              dealLog.dealId.toString(),
+              dealLog.event,
+              dealLog.message,
+              dealLog.txHash,
+            );
+            await financeAppClient.createActivity(
+              dealLog.dealId.toString(),
+              dealLog.event,
+              dealLog.message,
+              dealLog.txHash,
+              dealLog.blockTimestamp,
+            );
+          } catch (err) {
+            console.warn(
+              `Error creating activity for deal ${dealLog.dealId}: ${err.message}`,
+            );
+          }
+        }),
+      );
+
       return this.dealsRepository.updateById(dealId, { isPublished: true });
+    } catch (error) {
+      logger.error(error);
+      throw new BadRequestError('Failed to publish deal');
+    }
+  }
+
+  async setDealAsRepaid(dealId: string, user: User): Promise<Deal> {
+    if (user.accountType !== AccountType.Buyer) {
+      throw new UnauthorizedError(
+        'You are not allowed to set this deal as repaid',
+      );
+    }
+
+    try {
+      const deal = await this.findById(dealId);
+
+      if (deal.status !== DealStatus.Finished) {
+        throw new BadRequestError('Deal is not finished');
+      }
+
+      await SyncDealsLogsJob.updateOne(
+        { contract: deal.vaultAddress },
+        { $set: { active: false } },
+      );
+
+      this.blockchain.setDealAsCompleted(deal.nftID as number);
+
+      return this.dealsRepository.updateById(dealId, {
+        status: DealStatus.Repaid,
+      });
     } catch (error) {
       logger.error(error);
       throw new BadRequestError('Failed to publish deal');
@@ -630,9 +700,14 @@ export class DealsService {
     dealId: string,
     nftID: number,
     mintTxHash: string,
+    vaultAddress: string,
   ): Promise<Deal> {
     await this.findById(dealId);
-    return this.dealsRepository.updateById(dealId, { nftID, mintTxHash });
+    return this.dealsRepository.updateById(dealId, {
+      nftID,
+      mintTxHash,
+      vaultAddress,
+    });
   }
 
   checkDealAccess(deal: Deal, user: User, errorMessage?: string): void {
@@ -689,7 +764,11 @@ export class DealsService {
   }
 
   async assignUserToDeals(user: User): Promise<void> {
-    return this.dealsRepository.assignUserToDeals(user.id, user.email);
+    return this.dealsRepository.assignUserToDeals(
+      user.id,
+      user.email,
+      user.walletAddress,
+    );
   }
 
   async updateCurrentMilestone(
@@ -819,17 +898,17 @@ export class DealsService {
       throw new BadRequestError('Milestone review was not submitted');
     }
 
+    await this.blockchain.changeMilestoneStatus(
+      deal.nftID as number,
+      milestoneIndex + 1,
+    );
+
     if (deal.isPublished) {
       await financeAppClient.updateMilestone(
         deal.id,
         deal.milestones[milestoneIndex],
       );
     }
-
-    await this.blockchain.changeMilestoneStatus(
-      deal.nftID as number,
-      milestoneIndex + 1,
-    );
 
     const milestone = this.dealsRepository.upadteMilestoneStatus(
       dealId,
@@ -909,6 +988,7 @@ export class DealsService {
         return {
           id: user.id,
           email: user.email,
+          walletAddress: user.walletAddress,
         };
       }
 

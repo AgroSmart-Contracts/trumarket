@@ -24,7 +24,7 @@ interface SubmitAgreementProps {
   selectedIndex: number;
 }
 
-const ProductDetails: React.FC<SubmitAgreementProps> = ({ setSelectedIndex, selectedIndex }) => {
+const SubmitAgreement: React.FC<SubmitAgreementProps> = ({ setSelectedIndex, selectedIndex }) => {
   const { accountType, userInfo } = useUserInfo();
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
@@ -70,14 +70,18 @@ const ProductDetails: React.FC<SubmitAgreementProps> = ({ setSelectedIndex, sele
       portOfOrigin: shipmentFormData.port_origin,
       portOfDestination: shipmentFormData.port_destination,
       milestones,
-      // hardcodedValues
-      investmentAmount: 0,
       expectedShippingEndDate: shipmentFormData.expectedShippingEndDate,
+      investmentAmountPercentage: shipmentFormData.investmentAmountPercentage,
+      investmentAmount:
+        +shipmentFormData.offerUnitPrice *
+        +shipmentFormData.quantity *
+        (+shipmentFormData.investmentAmountPercentage / 100),
+      // hardcodedValues
       contractId: 0,
       roi: 0,
       netBalance: 0,
       revenue: 0,
-      nftID: 3,
+      nftID: 0,
     };
 
     if (isBuyer) {
@@ -167,4 +171,4 @@ const ProductDetails: React.FC<SubmitAgreementProps> = ({ setSelectedIndex, sele
   );
 };
 
-export default ProductDetails;
+export default SubmitAgreement;

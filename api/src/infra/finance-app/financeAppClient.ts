@@ -74,8 +74,10 @@ class FinanceAppClient {
         quantity: shipment.quantity,
         transport: shipment.transport,
         description: shipment.description || '',
+        investmentAmount: shipment.investmentAmount,
         nftID: shipment.nftID || 0,
         mintTxHash: shipment.mintTxHash || '',
+        vaultAddress: shipment.vaultAddress ? [shipment.vaultAddress] : [],
       },
       signature,
     );

@@ -233,4 +233,14 @@ export class UpdateDealDto {
   @IsOptional()
   @Expose()
   isPublished?: boolean;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Set deal as repaid. This action will unlock deal funds to be reclaimed.',
+  })
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  repaid?: boolean;
 }

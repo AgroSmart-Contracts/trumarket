@@ -16,6 +16,7 @@ import AttachedDocumentsView from "src/components/dashboard/shipment-details/att
 import DocumentBoxHeader from "src/components/dashboard/shipment-details/document-box-header/header";
 import ShipmentBaseInfo from "src/components/dashboard/shipment-details/shipment-base-info";
 import ShipmentDetailsHeader from "src/components/dashboard/shipment-details/shipment-details-header";
+import ShipmentFinance from "src/components/dashboard/shipment-details/shipment-details-header/ShipmentFinance";
 import ShipmentMilestoneStatus from "src/components/dashboard/shipment-details/shipment-milestone-status";
 import {
   ShipmentDetailModalView,
@@ -47,6 +48,7 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
   const dispatch = useAppDispatch();
   const shipmentDetailsCurrentMilestone = useAppSelector(selectShipmentDetailsCurrentMilestone);
   const milestoneDetails = useAppSelector(selectMilestoneDetails);
+
   const currentMilestoneDetails = milestoneDetails[shipmentDetailsCurrentMilestone];
   const { modalOpen, closeModal, openModal, modalView } = useModal();
   const previewModalData = useAppSelector(selectPreviewModalContent);
@@ -54,8 +56,8 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
   const isBuyer = accountType === AccountTypeEnum.BUYER;
   const [deleteDocLoading, setDeleteDocLoading] = useState(false);
   const [updateDocLoading, setUpdateDocLoading] = useState(false);
-  const [selectedMilestone, setSelectedMilestone] = useState<MilestoneEnum>(MilestoneEnum.M);
   const [milestoneDetailsInfo, setMilestoneDetailsInfo] = useState<IMilestoneDetails | null>(null);
+  const [completing, setCompleting] = useState(false);
 
   const handleDeleteDealMilestoneDoc = async (documentId: string) => {
     try {
@@ -145,6 +147,21 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
     }
   };
 
+  const handleComplete = async () => {
+    if (!shipmentDetails) return;
+
+    try {
+      setCompleting(true);
+      await ShipmentService.updateShipmentDealDetails(shipmentDetails.id, { repaid: true });
+      refetch();
+    } catch (err) {
+      console.error(err);
+      toast.error("Error while completing shipment");
+    }
+
+    setCompleting(false);
+  };
+
   const Modal = ShipmentModalContent({
     previewModalData,
     shipmentDetails,
@@ -189,21 +206,46 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
       </Head>
       <div className="py-[30px] ">
         <Container>
-          <div className="mb-[30px] flex items-center justify-between">
-            <ShipmentDetailsHeader
-              productName={shipmentDetails?.name}
-              isPublished={shipmentDetails?.isPublished}
-              publish={() => {
-                openModal(ShipmentDetailModalView.PUBLISH);
-              }}
-            />
-            <ShipmentBaseInfo
-              accountType={accountType}
-              emailInfo={isBuyer ? shipmentDetails?.suppliers : shipmentDetails?.buyers}
-              value={shipmentDetails?.totalValue || 0}
-              identifier={(shipmentDetails?.id as string) || "-"}
-              handleShowAgreement={() => openModal(ShipmentDetailModalView.AGREEMENT_DETAILS)}
-            />
+          <div className="mb-[30px] flex items-start justify-between gap-[10px]">
+            <div className="w-[35%]">
+              <ShipmentDetailsHeader
+                productName={shipmentDetails?.name}
+                userAccountType={accountType}
+                isPublished={shipmentDetails?.isPublished}
+                publish={() => {
+                  openModal(ShipmentDetailModalView.PUBLISH);
+                }}
+              />
+            </div>
+            <div className="w-[65%]">
+              <ShipmentBaseInfo
+                accountType={accountType}
+                emailInfo={isBuyer ? shipmentDetails?.suppliers : shipmentDetails?.buyers}
+                value={shipmentDetails?.totalValue || 0}
+                identifier={(shipmentDetails?.id as string) || "-"}
+                handleShowAgreement={() => openModal(ShipmentDetailModalView.AGREEMENT_DETAILS)}
+              />
+              {shipmentDetails?.investmentAmount &&
+              shipmentDetails?.vaultAddress &&
+              accountType === AccountTypeEnum.BUYER ? (
+                <ShipmentFinance
+                  currentMilestone={shipmentDetails.currentMilestone}
+                  requestFundAmount={shipmentDetails.investmentAmount}
+                  vaultAddress={shipmentDetails.vaultAddress}
+                  nftID={shipmentDetails.nftID}
+                  shipmentStatus={shipmentDetails.status}
+                  handleComplete={handleComplete}
+                  borrowerAddress={
+                    shipmentDetails.buyers.length && shipmentDetails.buyers[0].walletAddress
+                      ? shipmentDetails.buyers[0].walletAddress
+                      : ""
+                  }
+                  completing={completing}
+                />
+              ) : (
+                <></>
+              )}
+            </div>
           </div>
           <div className="flex items-start gap-[10px]">
             <div className="w-[35%] ">

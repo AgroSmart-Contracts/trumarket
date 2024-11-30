@@ -72,7 +72,7 @@ export default function SocialGoogle() {
         <Loading classOverrides="!h-[30px] !w-[30px]" />
         <div className="flex flex-col gap-[10px]">
           <h3 className="text-center text-[26px] font-bold leading-[1.2em] tracking-normal text-tm-theme-text">
-            {isSignIn ? "You will be logged in in a few seconds…" : "Your account will be created in a few seconds…"}
+            {isSignIn ? "You will be logged in a few seconds…" : "Your account will be created in a few seconds…"}
           </h3>
           <p className="text-center text-[13px] leading-[1.2em] text-tm-theme-text">Don&apos;t close this window</p>
         </div>
