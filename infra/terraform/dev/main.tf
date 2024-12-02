@@ -251,11 +251,11 @@ module "ecs_service_api" {
         },
         {
           name  = "BLOCKCHAIN_EXPLORER",
-          value = data.aws_ssm_parameter.rpc_url.value
+          value = "https://sepolia.etherscan.io"
         },
         {
           name  = "BLOCKCHAIN_PRIVATE_KEY",
-          value = "https://sepolia.etherscan.io"
+          value = data.aws_ssm_parameter.private_key.value
         },
         {
           name  = "BLOCKCHAIN_CHAIN_ID",
