@@ -155,6 +155,7 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
               <a
                 href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER}/address/${userInfo.user.walletAddress}`}
                 target="_blank"
+                rel="noreferrer"
                 className="bg-gray-100 rounded px-3 py-1 font-mono text-sm"
               >
                 {truncateAddress(userInfo.user.walletAddress)}
