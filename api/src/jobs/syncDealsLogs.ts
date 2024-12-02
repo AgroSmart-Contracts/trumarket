@@ -1,4 +1,10 @@
-import { createPublicClient, http, parseAbi, PublicClient } from 'viem';
+import {
+  createPublicClient,
+  formatUnits,
+  http,
+  parseAbi,
+  PublicClient,
+} from 'viem';
 
 import { config } from '@/config';
 import financeAppClient from '@/infra/finance-app/financeAppClient';
@@ -97,9 +103,9 @@ async function getDealVaultLogs(
     };
 
     if (log.args.from.toLowerCase() === contractAddress.toLowerCase()) {
-      dealLog.message = `Deal ${log.args.to} reclaimed ${log.args.value} tokens.`;
+      dealLog.message = `${log.args.to} reclaimed ${formatUnits(log.args.value, config.investmentTokenDecimals ? +config.investmentTokenDecimals : 18)} tokens.`;
     } else {
-      dealLog.message = `Deal ${log.args.from} deposited ${log.args.value} tokens.`;
+      dealLog.message = `${log.args.from} deposited ${formatUnits(log.args.value, config.investmentTokenDecimals ? +config.investmentTokenDecimals : 18)} tokens.`;
     }
 
     return dealLog;

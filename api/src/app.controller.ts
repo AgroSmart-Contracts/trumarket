@@ -59,6 +59,23 @@ export class AppController {
     });
   }
 
+  @Get('/config')
+  @ApiOperation({ summary: 'Get application configuration' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns application configuration',
+  })
+  getConfig(): Record<string, any> {
+    return {
+      evmChainId: '0x' + (+config.blockchainChainId).toString(16),
+      blockchainExplorer: config.blockchainExplorer,
+      investmentTokenAddress: config.investmentTokenContractAddress,
+      investmentTokenSymbol: config.investmentTokenSymbol,
+      investmentTokenDecimals: config.investmentTokenDecimals,
+      dealsManagerAddress: config.dealsManagerContractAddress,
+    };
+  }
+
   @Get()
   @ApiOperation({ summary: 'Get application version' })
   @ApiResponse({ status: 200, description: 'Returns application version' })

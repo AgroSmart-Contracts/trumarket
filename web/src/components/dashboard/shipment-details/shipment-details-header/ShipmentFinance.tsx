@@ -12,6 +12,9 @@ import Deposit from "./Deposit";
 
 const erc20Address = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_CONTRACT_ADDRESS as string as "0x";
 const erc20Symbol = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_SYMBOL || "USDC";
+const erc20Decimals = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_DECIMALS
+  ? +process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_DECIMALS
+  : 18;
 
 interface ShipmentFinanceProps {
   vaultAddress: string;
@@ -93,7 +96,7 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
     const provider = new ethers.BrowserProvider(privateKeyProvider as any);
     const signer = await provider.getSigner();
     const signerErc20 = new ethers.Contract(erc20Address, ERC20Abi, signer);
-    const tx = await signerErc20.transfer(vaultAddress, parseUnits("" + amount, 18));
+    const tx = await signerErc20.transfer(vaultAddress, parseUnits("" + amount, erc20Decimals));
     await tx.wait();
 
     fetchFinanceData();
@@ -150,7 +153,8 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
                 <span className="text-gray-700 font-medium">Borrower</span>
               </div>
               <a
-                href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER}/address/${vaultAddress}`}
+                href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER}/address/${userInfo.user.walletAddress}`}
+                target="_blank"
                 className="bg-gray-100 rounded px-3 py-1 font-mono text-sm"
               >
                 {truncateAddress(userInfo.user.walletAddress)}

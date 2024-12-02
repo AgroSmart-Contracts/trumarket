@@ -14,10 +14,12 @@ export const config = {
     process.env.BLOCKCHAIN_RPC_URL || 'http://host.docker.internal:8545/',
   blockchainPrivateKey: process.env.BLOCKCHAIN_PRIVATE_KEY || '',
   blockchainChainId: process.env.BLOCKCHAIN_CHAIN_ID || '',
+  blockchainExplorer: process.env.BLOCKCHAIN_EXPLORER || '',
   dealsManagerContractAddress: process.env.DEALS_MANAGER_CONTRACT_ADDRESS || '',
   investmentTokenContractAddress:
     process.env.INVESTMENT_TOKEN_CONTRACT_ADDRESS || '',
   investmentTokenSymbol: process.env.INVESTMENT_TOKEN_SYMBOL || '',
+  investmentTokenDecimals: process.env.INVESTMENT_TOKEN_DECIMALS || '',
   automaticDealsAcceptance: process.env.AUTOMATIC_DEALS_ACCEPTANCE === 'true',
   emailHost: process.env.EMAIL_HOST || '',
   emailUsername: process.env.EMAIL_USERNAME || '',
