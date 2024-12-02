@@ -250,8 +250,12 @@ module "ecs_service_api" {
           value = data.aws_ssm_parameter.rpc_url.value
         },
         {
+          name  = "BLOCKCHAIN_EXPLORER",
+          value = data.aws_ssm_parameter.rpc_url.value
+        },
+        {
           name  = "BLOCKCHAIN_PRIVATE_KEY",
-          value = data.aws_ssm_parameter.private_key.value
+          value = "https://sepolia.etherscan.io"
         },
         {
           name  = "BLOCKCHAIN_CHAIN_ID",
@@ -263,11 +267,15 @@ module "ecs_service_api" {
         },
         {
           name  = "INVESTMENT_TOKEN_CONTRACT_ADDRESS",
-          value = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+          value = "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"
         },
         {
           name  = "INVESTMENT_TOKEN_SYMBOL",
-          value = "USDC"
+          value = "USDT"
+        },
+        {
+          name  = "INVESTMENT_TOKEN_DECIMALS",
+          value = "6"
         },
         {
           name  = "AUTOMATIC_DEALS_ACCEPTANCE",

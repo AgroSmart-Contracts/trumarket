@@ -4,8 +4,8 @@ import hre from 'hardhat';
 
 import deployed from './addresses/deployed.json';
 
-//const wallet = '0x6bc9A4Cd646754f3bEd42b779F9b0C061D279e9D';
-const wallet = '0x454ee62498b8e40bf064cd2c9a01a04e814fe677'; // buyer
+// const wallet = '0x6bc9A4Cd646754f3bEd42b779F9b0C061D279e9D';
+const wallet = '0x0b00Ef4025bE8067bf00A60d54Ca0e60607c1e8d'; // buyer
 
 async function main() {
   const [deployerAccount, financialAccount, dealsManagerAccount] =

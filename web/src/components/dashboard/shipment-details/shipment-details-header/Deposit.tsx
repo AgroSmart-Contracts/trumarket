@@ -1,6 +1,4 @@
-import { Info } from "@phosphor-icons/react";
 import React, { useEffect, useState } from "react";
-import { eth } from "web3";
 import ErrorMessage from "./ErrorMessage";
 
 interface Props {
