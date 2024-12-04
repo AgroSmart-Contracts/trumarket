@@ -33,7 +33,7 @@ locals {
 data "aws_caller_identity" "current" {}
 
 data "aws_ssm_parameter" "api_database" {
-  name = "/trumarket-dev/api-database"
+  name = terraform.workspace == "prod" ? "/trumarket/api-database" : "/trumarket-dev/api-database"
 }
 
 data "aws_ssm_parameter" "deals_manager_address" {
@@ -555,7 +555,7 @@ module "autoscaling" {
   for_each = {
     (local.as_group) = {
       instance_type              = "t2.micro"
-      desired_capacity           = 1
+      desired_capacity           = 2
       use_mixed_instances_policy = false
       mixed_instances_policy = {
         #   override = [
