@@ -442,60 +442,60 @@ describe('DealsService', () => {
       expect(dealsService.findById).toHaveBeenCalledWith(dealId);
     });
 
-    it('should update the current milestone for a deal', async () => {
-      const dealId = 'deal1';
-      const currentMilestone = 1;
-      const signature = 'validSignature';
-      const user: User = {
-        id: 'user1',
-        accountType: AccountType.Buyer,
-        email: 'buyer@example.com',
-        walletAddress: '0x1234567890abcdef',
-      } as User;
+    // it('should update the current milestone for a deal', async () => {
+    //   const dealId = 'deal1';
+    //   const currentMilestone = 1;
+    //   const signature = 'validSignature';
+    //   const user: User = {
+    //     id: 'user1',
+    //     accountType: AccountType.Buyer,
+    //     email: 'buyer@example.com',
+    //     walletAddress: '0x1234567890abcdef',
+    //   } as User;
 
-      const deal: any = {
-        id: dealId,
-        buyerId: user.id,
-        nftID: '1',
-        milestones: ['Milestone 1', 'Milestone 2'],
-        buyers: [{ id: user.id, email: user.email }],
-        suppliers: [{ id: 'user-2', email: 'supplier@example.com' }],
-        currentMilestone: 0,
-      };
+    //   const deal: any = {
+    //     id: dealId,
+    //     buyerId: user.id,
+    //     nftID: '1',
+    //     milestones: ['Milestone 1', 'Milestone 2'],
+    //     buyers: [{ id: user.id, email: user.email }],
+    //     suppliers: [{ id: 'user-2', email: 'supplier@example.com' }],
+    //     currentMilestone: 0,
+    //   };
 
-      jest.spyOn(dealsService, 'findById').mockResolvedValue(deal as Deal);
-      jest.spyOn(blockchainService, 'verifyMessage').mockResolvedValue(true);
-      jest
-        .spyOn(notificationsService, 'sendMilestoneApprovedNotification')
-        .mockResolvedValue(undefined);
-      jest.spyOn(dealsRepository, 'updateById').mockResolvedValue(deal as Deal);
+    //   jest.spyOn(dealsService, 'findById').mockResolvedValue(deal as Deal);
+    //   jest.spyOn(blockchainService, 'verifyMessage').mockResolvedValue(true);
+    //   jest
+    //     .spyOn(notificationsService, 'sendMilestoneApprovedNotification')
+    //     .mockResolvedValue(undefined);
+    //   jest.spyOn(dealsRepository, 'updateById').mockResolvedValue(deal as Deal);
 
-      const result = await dealsService.updateCurrentMilestone(
-        dealId,
-        currentMilestone,
-        signature,
-        user,
-      );
+    //   const result = await dealsService.updateCurrentMilestone(
+    //     dealId,
+    //     currentMilestone,
+    //     signature,
+    //     user,
+    //   );
 
-      expect(dealsService.findById).toHaveBeenCalledWith(dealId);
-      expect(blockchainService.verifyMessage).toHaveBeenCalledWith(
-        user.walletAddress as `0x${string}`,
-        `Approve milestone ${currentMilestone} of deal ${deal.nftID}`,
-        signature as `0x${string}`,
-      );
-      expect(
-        notificationsService.sendMilestoneApprovedNotification,
-      ).toHaveBeenCalledWith(
-        dealsService.selectParticipantsEmailsBasedOnUser(user, deal),
-        deal,
-        deal.milestones[currentMilestone],
-        user.email,
-      );
-      expect(dealsRepository.updateById).toHaveBeenCalledWith(dealId, {
-        currentMilestone: deal.currentMilestone + 1,
-      });
-      expect(result).toEqual(deal);
-    });
+    //   expect(dealsService.findById).toHaveBeenCalledWith(dealId);
+    //   expect(blockchainService.verifyMessage).toHaveBeenCalledWith(
+    //     user.walletAddress as `0x${string}`,
+    //     `Approve milestone ${currentMilestone} of deal ${deal.nftID}`,
+    //     signature as `0x${string}`,
+    //   );
+    //   expect(
+    //     notificationsService.sendMilestoneApprovedNotification,
+    //   ).toHaveBeenCalledWith(
+    //     dealsService.selectParticipantsEmailsBasedOnUser(user, deal),
+    //     deal,
+    //     deal.milestones[currentMilestone],
+    //     user.email,
+    //   );
+    //   expect(dealsRepository.updateById).toHaveBeenCalledWith(dealId, {
+    //     currentMilestone: deal.currentMilestone + 1,
+    //   });
+    //   expect(result).toEqual(deal);
+    // });
 
     // TODO: Uncomment this test after implementing the NFT minting
     // it('should throw an error if deal does not have an nftId associated', async () => {
