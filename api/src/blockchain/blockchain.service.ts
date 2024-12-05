@@ -1,11 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   parseAbi,
-  parseEther,
   parseEventLogs,
+  parseUnits,
   PublicClient,
   verifyMessage,
 } from 'viem';
+
+import { config } from '@/config';
 
 import { InternalServerError } from '../errors';
 
@@ -47,7 +49,7 @@ export class BlockchainService {
   ): Promise<string> {
     const tx = await this.dealsManager.write.mint([
       distributions,
-      parseEther('' + maxDeposit),
+      parseUnits('' + maxDeposit, +config.investmentTokenDecimals),
       borrower,
     ]);
 
