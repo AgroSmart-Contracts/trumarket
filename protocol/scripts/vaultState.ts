@@ -5,7 +5,7 @@ import hre from 'hardhat';
 import contracts from './addresses/vaults.json';
 import deployed from './addresses/deployed.json';
 
-const vaultAddress = '0xbf9fBFf01664500A33080Da5d437028b07DFcC55';
+const vaultAddress = '0xead0ceCD53c8B263AAB6752106Bf4282E93e9eE1';
 //  || contracts['dealVault'];
 
 async function main() {
