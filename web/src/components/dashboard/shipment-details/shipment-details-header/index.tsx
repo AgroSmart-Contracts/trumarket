@@ -20,10 +20,10 @@ const ShipmentDetailsHeader: React.FC<ShipmentDetailsHeaderProps> = ({
   const [publishEnabled, setPublishEnabled] = React.useState(false);
 
   useEffect(() => {
-    const key = localStorage.getItem("publishEnabled");
-    if (key) {
-      setPublishEnabled(true);
-    }
+    // const key = localStorage.getItem("publishEnabled");
+    // if (key) {
+    setPublishEnabled(true);
+    // }
   }, []);
 
   return (
