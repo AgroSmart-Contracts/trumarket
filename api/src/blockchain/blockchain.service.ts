@@ -53,9 +53,15 @@ export class BlockchainService {
       borrower,
     ]);
 
-    await tx.wait();
+    await this.waitForTx(tx);
 
     return tx;
+  }
+
+  async waitForTx(txHash: `0x${string}`): Promise<void> {
+    await this.publicClient.getTransactionReceipt({
+      hash: txHash,
+    });
   }
 
   async changeMilestoneStatus(
@@ -64,7 +70,7 @@ export class BlockchainService {
   ): Promise<string> {
     const tx = await this.dealsManager.write.proceed([nftId, milestone]);
 
-    await tx.wait();
+    await this.waitForTx(tx);
 
     return tx;
   }
@@ -84,7 +90,7 @@ export class BlockchainService {
   async setDealAsCompleted(nftId: number): Promise<string> {
     const tx = await this.dealsManager.write.setDealCompleted([nftId]);
 
-    await tx.wait();
+    await this.waitForTx(tx);
 
     return tx;
   }

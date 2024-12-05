@@ -30,8 +30,6 @@ const PaymentValues: React.FC<PaymentValueProps> = ({ setSelectedIndex, selected
   const shipmentFormData = useAppSelector(selectShipmentAgreementState);
   const [sumError, setSumError] = useState(false);
 
-  console.log(shipmentFormData);
-
   const defaultValues = {
     quantity: shipmentFormData.quantity,
     offerUnitPrice: shipmentFormData.offerUnitPrice,
