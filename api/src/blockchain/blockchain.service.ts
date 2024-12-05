@@ -59,7 +59,7 @@ export class BlockchainService {
   }
 
   async waitForTx(txHash: `0x${string}`): Promise<void> {
-    await this.publicClient.getTransactionReceipt({
+    await this.publicClient.waitForTransactionReceipt({
       hash: txHash,
     });
   }
