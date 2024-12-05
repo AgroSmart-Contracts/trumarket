@@ -8,6 +8,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+import * as Sentry from '@sentry/nestjs';
 
 import { HttpError } from './errors';
 import { logger } from './logger';
@@ -43,6 +44,7 @@ export class ErrorsFilter implements ExceptionFilter {
     if (exception instanceof HttpError && exception.statusCode < 500) {
       logger.warn(exception.message, exception.stack);
     } else if (exception instanceof Error) {
+      Sentry.captureException(exception);
       logger.error(exception, exception.message);
     }
 
