@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Contract, ethers, formatEther, parseUnits } from "ethers";
+import { Contract, ethers, formatEther, formatUnits, parseUnits } from "ethers";
 import DealVaultAbi from "./DealVault.abi";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
 import { useUserInfo } from "src/lib/hooks/useUserInfo";
 import ERC20Abi from "./ERC20.abi";
 import { DealStatus } from "src/interfaces/shipment";
 import { Card } from "@mui/material";
-import { CurrencyFormatter } from "src/lib/helpers";
 import { Info } from "@phosphor-icons/react";
 import Deposit from "./Deposit";
 
@@ -78,8 +77,8 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
 
       const ethBalance = await provider.getBalance(userInfo.user.walletAddress);
 
-      setAmountFunded(formatEther(amountFunded));
-      setBalance(formatEther(balance));
+      setAmountFunded(formatUnits(amountFunded, erc20Decimals));
+      setBalance(formatUnits(balance, erc20Decimals));
       setBalanceEth(formatEther(ethBalance));
     } catch (error) {
       console.error("Error fetching finance data:", error);
@@ -110,12 +109,16 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
         <div className="text-gray-600 flex items-center gap-2">
           <span className="text-sm">Total pool assets</span>
         </div>
-        <div className="text-gray-900 text-3xl font-semibold">{CurrencyFormatter(+amountFunded)}</div>
+        <div className="text-gray-900 text-3xl font-semibold">
+          {erc20Symbol} {(+amountFunded).toFixed(2)}
+        </div>
         {/* Progress bar */}
         <div>
           <div className="text-gray-600 mb-1 flex justify-between text-sm">
             <span>{progressPercentage.toFixed(1)}% filled</span>
-            <span>Target: {CurrencyFormatter(requestFundAmount)}</span>
+            <span>
+              Target: {erc20Symbol} {requestFundAmount.toFixed(2)}
+            </span>
           </div>
           <div className="bg-gray-200 h-2 w-full overflow-hidden rounded-full">
             <div
