@@ -17,5 +17,9 @@
   "devDependencies": {
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-simple-import-sort": "^12.1.0"
+  },
+  "dependencies": {
+    "@sentry/nestjs": "^8.42.0",
+    "@sentry/profiling-node": "^8.42.0"
   }
 }

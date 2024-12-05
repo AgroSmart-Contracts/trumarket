@@ -1,5 +1,6 @@
 import { Inject, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { SentryModule } from '@sentry/nestjs/setup';
 import { Connection } from 'mongoose';
 import { LoggerModule } from 'nestjs-pino';
 import pino from 'pino';
@@ -17,6 +18,7 @@ import { loggerOptions } from './logger';
 import { UsersModule } from './users/users.module';
 
 const modules = [
+  SentryModule.forRoot(),
   JwtModule.register({
     secret: config.jwtSecret,
     signOptions: { expiresIn: '1d' },
