@@ -53,6 +53,8 @@ export class BlockchainService {
       borrower,
     ]);
 
+    await tx.wait();
+
     return tx;
   }
 
@@ -61,6 +63,8 @@ export class BlockchainService {
     milestone: number,
   ): Promise<string> {
     const tx = await this.dealsManager.write.proceed([nftId, milestone]);
+
+    await tx.wait();
 
     return tx;
   }
@@ -79,6 +83,8 @@ export class BlockchainService {
 
   async setDealAsCompleted(nftId: number): Promise<string> {
     const tx = await this.dealsManager.write.setDealCompleted([nftId]);
+
+    await tx.wait();
 
     return tx;
   }
