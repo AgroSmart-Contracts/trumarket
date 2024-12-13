@@ -20,6 +20,11 @@ export class BlockchainService {
     private publicClient: PublicClient,
   ) {}
 
+  async getLastBlock(): Promise<number> {
+    const blockNumber = await this.publicClient.getBlockNumber();
+    return Number(blockNumber);
+  }
+
   async getNftID(txHash: string): Promise<number> {
     const receipt = await this.publicClient.waitForTransactionReceipt({
       hash: txHash as `0x${string}`,
