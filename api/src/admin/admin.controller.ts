@@ -112,6 +112,8 @@ export class AdminController {
 
     const buyer = await this.usersService.findByEmail(deal.buyers[0].email);
 
+    const lastBlock = await this.blockchainService.getLastBlock();
+
     const txHash = await this.blockchainService.mintNFT(
       deal.milestones.map((m) => m.fundsDistribution),
       deal.investmentAmount,
@@ -124,7 +126,7 @@ export class AdminController {
     await SyncDealsLogsJob.create({
       type: DealsLogsJobType.Vault,
       contract: vaultAddress,
-      lastBlock: 0,
+      lastBlock,
       active: true,
       dealId: nftID,
     });

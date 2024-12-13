@@ -238,6 +238,8 @@ export class DealsService {
         logger.debug('Automatic deal acceptance enabled! Minting NFT...');
         const buyer = await this.users.findByEmail(deal.buyers[0].email);
 
+        const lastBlock = await this.blockchain.getLastBlock();
+
         const txHash = await this.blockchain.mintNFT(
           deal.milestones.map((m) => m.fundsDistribution),
           deal.investmentAmount,
@@ -249,7 +251,7 @@ export class DealsService {
         await SyncDealsLogsJob.create({
           type: DealsLogsJobType.Vault,
           contract: vault,
-          lastBlock: 0,
+          lastBlock,
           active: true,
           dealId: nftID,
         });
