@@ -14,3 +14,11 @@ export interface HeadCell {
 }
 
 export type Order = "asc" | "desc";
+
+export interface User {
+  id: string;
+  email: string;
+  accountType: string;
+  role: number;
+  walletAddress: string;
+}
