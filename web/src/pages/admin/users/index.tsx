@@ -1,14 +1,29 @@
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 
 import Deals from "src/components/admin/deals";
+import Users from "src/components/admin/users";
 import Container from "src/components/common/container";
+import { AdminService } from "src/controller/AdminAPI.service";
 
 interface AdminProps {}
 
 const Admin: React.FC<AdminProps> = () => {
   const { pathname } = useRouter();
+  const {
+    data: users,
+    isLoading: isDealsDataLoading,
+    refetch,
+    isSuccess,
+  } = useQuery({
+    queryKey: ["get-users"],
+    queryFn: () => AdminService.getUsers(),
+    placeholderData: {
+      data: [],
+    },
+  });
 
   return (
     <Container>
@@ -28,7 +43,7 @@ const Admin: React.FC<AdminProps> = () => {
           </Link>
         </div>
 
-        <Deals />
+        <Users />
       </div>
     </Container>
   );

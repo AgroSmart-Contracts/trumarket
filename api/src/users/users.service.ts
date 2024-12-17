@@ -25,6 +25,10 @@ export class UsersService {
     return this.users.findByEmails(emails);
   }
 
+  async findAll(): Promise<User[] | undefined> {
+    return this.users.findAll();
+  }
+
   async create(createUserDto: Partial<User>): Promise<User> {
     logger.debug({ createUserDto }, 'Creating new user');
 

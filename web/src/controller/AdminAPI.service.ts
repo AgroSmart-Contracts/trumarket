@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 
 import axiosInstance from "src/config/axios";
-import { IGetDealsParameters } from "src/interfaces/admin";
+import { IGetDealsParameters, User } from "src/interfaces/admin";
 import { NftDealLogs, ShippingDetails } from "src/interfaces/shipment";
 
 export class AdminService {
@@ -13,6 +13,11 @@ export class AdminService {
         emailSearch,
       },
     });
+    return response.data;
+  }
+
+  static async getUsers(): Promise<User[]> {
+    const response = await axiosInstance.get(`/users`);
     return response.data;
   }
 
