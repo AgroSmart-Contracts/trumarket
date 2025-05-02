@@ -8,7 +8,9 @@ import { DealStatus } from "src/interfaces/shipment";
 import { Card } from "@mui/material";
 import { Info } from "@phosphor-icons/react";
 import Deposit from "./Deposit";
+import DealsManagerAbi from "./DealsManager.abi";
 
+const dealsManagerAddress = process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS as string as "0x";
 const erc20Address = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_CONTRACT_ADDRESS as string as "0x";
 const erc20Symbol = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_SYMBOL || "USDC";
 const erc20Decimals = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_DECIMALS
@@ -95,8 +97,15 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
     const provider = new ethers.BrowserProvider(privateKeyProvider as any);
     const signer = await provider.getSigner();
     const signerErc20 = new ethers.Contract(erc20Address, ERC20Abi, signer);
-    const tx = await signerErc20.transfer(vaultAddress, parseUnits("" + amount, erc20Decimals));
-    await tx.wait();
+    const dealsManager = new ethers.Contract(dealsManagerAddress, DealsManagerAbi, signer);
+
+    // First approve the DealsManager to spend the tokens
+    const approveTx = await signerErc20.approve(dealsManagerAddress, parseUnits("" + amount, erc20Decimals));
+    await approveTx.wait();
+
+    // Then call donateToDeal on the DealsManager
+    const donateTx = await dealsManager.donateToDeal(nftID, parseUnits("" + amount, erc20Decimals));
+    await donateTx.wait();
 
     fetchFinanceData();
   };

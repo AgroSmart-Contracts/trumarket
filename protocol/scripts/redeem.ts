@@ -1,43 +1,30 @@
-import { privateKeyToAccount } from 'viem/accounts';
-import { formatEther } from 'viem';
-import { parseEther } from 'viem';
+import { ethers } from 'ethers';
 import hre from 'hardhat';
 
 import contracts from './addresses/vaults.json';
 import deployed from './addresses/deployed.json';
 
-const pk = '0xe91d1e08333eb6e5ac05905ad77994df445e81213c49d59821f5b2ba8415b7f6';
-const vaultAddress = '0xCf3d072edE5dD8bF26915896856237F9b25A4BD0';
-//  || contracts['dealVault'];
+const vaultAddress = contracts['dealVault'] || '0xCafac3dD18aC6c6e92c921884f9E4176737C052c';
 
 async function main() {
-  const [bobWalletClient, aliceWalletClient] =
-    await hre.viem.getWalletClients();
+  const [bobWallet, aliceWallet] = await hre.ethers.getSigners();
 
-  const account = privateKeyToAccount(pk);
-
-  const vault = await hre.viem.getContractAt(
-    'DealVault' as string,
-    vaultAddress as `0x${string}`
+  const vault = await hre.ethers.getContractAt(
+    'DealVault',
+    vaultAddress as string
   );
 
-  const totalAssets = await vault.read.totalAssets([], {
-    account: bobWalletClient.account,
-  });
+  await vault.connect(bobWallet).redeem(
+    ethers.parseEther('100'),
+    bobWallet.address,
+    bobWallet.address
+  );
 
-  const totalToRedeem = await vault.read.maxRedeem([account.address], {
-    account,
-  });
-  // const maxDeposit = await vault.read.maxDeposit([vaultAddress], {
-  //   account: bobWalletClient.account,
-  // });
-  const maxDeposit = 0;
-
-  // await vault.write.redeem([totalToRedeem, account.address, account.address], {
-  //   account,
-  // });
-
-  console.log({ totalAssets, maxDeposit, totalToRedeem });
+  console.log(
+    `BOB: ${ethers.formatEther(
+      await vault.balanceOf(bobWallet.address)
+    )} shares`
+  );
 }
 
 main()

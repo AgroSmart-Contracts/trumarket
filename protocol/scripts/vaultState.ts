@@ -1,31 +1,34 @@
-import { formatEther } from 'viem';
-import { parseEther } from 'viem';
+import { ethers } from 'ethers';
 import hre from 'hardhat';
 
 import contracts from './addresses/vaults.json';
 import deployed from './addresses/deployed.json';
 
-const vaultAddress = '0xCf3d072edE5dD8bF26915896856237F9b25A4BD0';
-//  || contracts['dealVault'];
+const vaultAddress = contracts['dealVault'] || '0xCafac3dD18aC6c6e92c921884f9E4176737C052c';
 
 async function main() {
-  const [bobWalletClient, aliceWalletClient] =
-    await hre.viem.getWalletClients();
+  const [bobWallet, aliceWallet] = await hre.ethers.getSigners();
 
-  const vault = await hre.viem.getContractAt(
-    'DealVault' as string,
-    vaultAddress as `0x${string}`
+  const vault = await hre.ethers.getContractAt(
+    'DealVault',
+    vaultAddress as string
+  );
+  const erc20 = await hre.ethers.getContractAt(
+    'ERC20Mock',
+    deployed['ERC20'] as string
   );
 
-  const totalAssets = await vault.read.totalAssets([], {
-    account: bobWalletClient.account,
-  });
-  // const maxDeposit = await vault.read.maxDeposit([vaultAddress], {
-  //   account: bobWalletClient.account,
-  // });
-  const maxDeposit = 0;
+  const totalAssets = await vault.totalAssets();
+  const maxDeposit = await vault.maxDeposit(bobWallet.address);
+  const maxMint = await vault.maxMint(bobWallet.address);
+  const paused = await vault.paused();
 
-  console.log({ totalAssets, maxDeposit });
+  console.log('Vault state:', {
+    totalAssets: ethers.formatEther(totalAssets),
+    maxDeposit: ethers.formatEther(maxDeposit),
+    maxMint: ethers.formatEther(maxMint),
+    paused,
+  });
 }
 
 main()

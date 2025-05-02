@@ -18,7 +18,7 @@ export class BlockchainService {
     private dealsManager: any,
     @Inject('PublicClient')
     private publicClient: PublicClient,
-  ) {}
+  ) { }
 
   async getLastBlock(): Promise<number> {
     const blockNumber = await this.publicClient.getBlockNumber();
@@ -31,7 +31,9 @@ export class BlockchainService {
     });
 
     const logs = parseEventLogs({
-      abi: parseAbi([`event DealCreated(uint256 dealId)`]),
+      abi: parseAbi([
+        `event DealCreated(uint256 indexed dealId, address indexed borrower, uint256 maxDeposit)`,
+      ]),
       eventName: 'DealCreated',
       logs: receipt.logs,
     });

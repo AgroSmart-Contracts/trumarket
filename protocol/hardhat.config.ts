@@ -1,6 +1,8 @@
 import { HardhatUserConfig } from 'hardhat/config';
-import '@nomicfoundation/hardhat-toolbox-viem';
+import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-gas-reporter';
+import 'solidity-coverage';
+import '@typechain/hardhat';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -15,8 +17,6 @@ const config: HardhatUserConfig = {
   gasReporter: {
     enabled: process.env.REPORT_GAS ? true : false,
     currency: 'EUR',
-    L1: 'polygon',
-    L1Etherscan: process.env.ETHERSCAN_API_KEY,
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
   },
   solidity: {
@@ -27,6 +27,10 @@ const config: HardhatUserConfig = {
         runs: 200,
       },
     },
+  },
+  typechain: {
+    outDir: 'typechain-types',
+    target: 'ethers-v6',
   },
   networks: {
     hardhat: {
@@ -40,7 +44,7 @@ const config: HardhatUserConfig = {
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts,
     },
-  },
+  }
 };
 
 export default config;
