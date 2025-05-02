@@ -18,7 +18,7 @@ async function main() {
   // Deploy the contract
   const contract = await factory.deploy(
     wallet.address,
-    '0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0'
+    '0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0' // Investment token address (USDT)
   );
 
   // Wait for the contract to be mined

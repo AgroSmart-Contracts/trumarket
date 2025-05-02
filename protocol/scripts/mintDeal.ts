@@ -1,40 +1,35 @@
-import { parseEther } from 'viem';
+import { ethers } from 'ethers';
 import hre from 'hardhat';
 import deployed from './addresses/deployed.json';
 import * as fs from 'fs';
 import * as path from 'path';
 
 async function main() {
-  const [bobWalletClient, aliceWalletClient, dealsManagerAccount] =
-    await hre.viem.getWalletClients();
+  const [bobWallet, aliceWallet, dealsManagerWallet] = await hre.ethers.getSigners();
 
-  const dealsManager = await hre.viem.getContractAt(
-    'DealsManager' as string,
-    deployed['Deals Manager'] as `0x${string}`,
-    {
-      client: {
-        wallet: dealsManagerAccount,
-      },
-    }
+  const dealsManager = await hre.ethers.getContractAt(
+    'DealsManager',
+    deployed['Deals Manager'] as string,
+    dealsManagerWallet
   );
 
-  const tx = await dealsManager.write.mint([
+  const tx = await dealsManager.mint(
     [0, 0, 100, 0, 0, 0, 0],
-    parseEther('0'),
-    dealsManagerAccount.account.address,
-  ]);
+    ethers.parseEther('0'),
+    dealsManagerWallet.address
+  );
 
-  // await dealsManager.write.proceed([2, 1]);
+  // await dealsManager.proceed(2, 1);
 
-  const status = await dealsManager.read.status([0]);
+  const status = await dealsManager.status(0);
 
   console.log('Minted NFT with next details:', {
-    owner: dealsManagerAccount.account.address,
+    owner: dealsManagerWallet.address,
     milestones: [0, 0, 100, 0, 0, 0, 0],
     status,
   });
 
-  const vault = await dealsManager.read.vault([0]);
+  const vault = await dealsManager.vault(0);
 
   fs.writeFileSync(
     path.join(__dirname, './addresses/vaults.json'),

@@ -1,46 +1,42 @@
+import { ethers } from 'ethers';
 import hre from 'hardhat';
 import * as fs from 'fs';
 import * as path from 'path';
-import { parseEther } from 'viem';
 
 async function main() {
-  const [deployerAccount, financialAccount, dealsManagerAccount] =
-    await hre.viem.getWalletClients();
+  const [_1, _2, deployerWallet] = await hre.ethers.getSigners();
 
-  const erc20 = await hre.viem.deployContract('ERC20Mock');
+  const erc20 = await hre.ethers.deployContract('ERC20Mock');
+  await erc20.waitForDeployment();
 
-  console.log(`ERC20 deployed to ${erc20.address}`);
-
-  const dealsManager = await hre.viem.deployContract('DealsManager', [
-    dealsManagerAccount.account.address,
-    erc20.address,
+  const dealsManager = await hre.ethers.deployContract('DealsManager', [
+    deployerWallet.address,
+    await erc20.getAddress(),
   ]);
+  await dealsManager.waitForDeployment();
 
-  console.log(`Deals Manager deployed to ${dealsManager.address}`);
-
-  // const maxDeposit = parseEther('100');
-  // const maxMint = parseEther('108');
-
-  // const dealVault = await hre.viem.deployContract('DealVault', [
-  //   erc20.address,
-  //   maxDeposit,
-  //   maxMint,
+  // const dealVault = await hre.ethers.deployContract('DealVault', [
+  //   await erc20.getAddress(),
+  //   'Deal Vault',
+  //   'DV',
   // ]);
+  // await dealVault.waitForDeployment();
+
+  const deployed = {
+    'Deals Manager': await dealsManager.getAddress(),
+    ERC20: await erc20.getAddress(),
+    // 'Deal Vault': await dealVault.getAddress(),
+  };
 
   fs.writeFileSync(
     path.join(__dirname, './addresses/deployed.json'),
-    `
-{
-  "Deals Manager":"${dealsManager.address}",
-  "ERC20":"${erc20.address}"
-}
-`
+    JSON.stringify(deployed, null, 2)
   );
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+main()
+  .then(() => process.exit())
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

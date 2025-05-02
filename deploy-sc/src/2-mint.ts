@@ -1,5 +1,4 @@
-import { polygonAmoy } from 'viem/chains';
-import { AlchemyProvider, ethers, parseEther } from 'ethers';
+import { AlchemyProvider, ethers } from 'ethers';
 import { DealsManagerContract } from './contract';
 
 require('dotenv').config();
@@ -16,7 +15,7 @@ async function main() {
   );
 
   // Define contract address and ABI
-  const newContractAddress = '0xe74bddDe356bAdD2A7d1E90D9a628543F8ac8477';
+  const newContractAddress = '0xE674499B626cf872Def5E373D36b6139ED357e71';
 
   // Create contracts instances
 

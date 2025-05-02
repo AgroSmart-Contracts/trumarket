@@ -40,7 +40,7 @@ export class AppController {
   constructor(
     @Inject(providers.DatabaseConnection)
     private readonly db: mongoose.Connection,
-  ) {}
+  ) { }
 
   @Get('/health')
   @ApiOperation({ summary: 'Get application status' })

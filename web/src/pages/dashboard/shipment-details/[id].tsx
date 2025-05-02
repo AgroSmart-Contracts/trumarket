@@ -40,7 +40,7 @@ import {
   setShipmentDetailsCurrentMilestone,
 } from "src/store/shipmentDetailsSlice";
 
-interface ShipmentDetailsProps {}
+interface ShipmentDetailsProps { }
 
 const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
   const { query } = useRouter();
@@ -226,8 +226,8 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
                 handleShowAgreement={() => openModal(ShipmentDetailModalView.AGREEMENT_DETAILS)}
               />
               {shipmentDetails?.investmentAmount &&
-              shipmentDetails?.vaultAddress &&
-              accountType === AccountTypeEnum.BUYER ? (
+                shipmentDetails?.vaultAddress &&
+                accountType === AccountTypeEnum.BUYER ? (
                 <ShipmentFinance
                   currentMilestone={shipmentDetails.currentMilestone}
                   requestFundAmount={shipmentDetails.investmentAmount}

@@ -13,17 +13,29 @@
     "test": "npx hardhat test --typecheck --show-stack-traces",
     "test:e2e": "echo 'No operation script'",
     "lint": "echo 'No operation script'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "coverage": "SOLIDITY_COVERAGE=true npx hardhat coverage",
+    "typechain": "npx hardhat typechain"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
-    "@nomicfoundation/hardhat-viem": "^2.0.0",
-    "@openzeppelin/contracts": "^5.0.1",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "chai": "^4.3.10",
     "dotenv": "^16.4.5",
-    "hardhat": "^2.22.4",
-    "hardhat-gas-reporter": "^2.2.2",
-    "viem": "^2.9.18"
+    "hardhat": "^2.20.1",
+    "hardhat-gas-reporter": "^1.0.9",
+    "solidity-coverage": "^0.8.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1",
+    "ethers": "^6.11.1"
   }
 }

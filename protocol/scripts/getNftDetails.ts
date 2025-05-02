@@ -1,23 +1,25 @@
-import { formatEther } from 'viem';
-import { parseEther } from 'viem';
+import { ethers } from 'ethers';
 import hre from 'hardhat';
 
-import contracts from './addresses/vaults.json';
 import deployed from './addresses/deployed.json';
 
 async function main() {
-  const [bobWalletClient, aliceWalletClient] =
-    await hre.viem.getWalletClients();
+  const [bobWallet, aliceWallet] = await hre.ethers.getSigners();
 
-  const dealsManager = await hre.viem.getContractAt(
-    'DealsManager' as string,
-    deployed['Deals Manager'] as `0x${string}`
+  const dealsManager = await hre.ethers.getContractAt(
+    'DealsManager',
+    deployed['Deals Manager'] as string
   );
 
-  const status = await dealsManager.read.status([0]);
-  const vaultAddress = await dealsManager.read.vault([0]);
+  const status = await dealsManager.status(0);
+  const milestones = await dealsManager.milestones(0);
+  const vault = await dealsManager.vault(0);
 
-  console.log({ status, vaultAddress });
+  console.log('NFT details:', {
+    status,
+    milestones,
+    vault,
+  });
 }
 
 main()

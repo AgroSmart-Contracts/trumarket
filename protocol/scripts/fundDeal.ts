@@ -1,34 +1,31 @@
-import { formatEther } from 'viem';
-import { parseEther } from 'viem';
+import { ethers } from 'ethers';
 import hre from 'hardhat';
 
 import contracts from './addresses/vaults.json';
 import deployed from './addresses/deployed.json';
 
-const vaultAddress =
-  '0xCafac3dD18aC6c6e92c921884f9E4176737C052c' || contracts['dealVault'];
+const vaultAddress = contracts['dealVault'] || '0xCafac3dD18aC6c6e92c921884f9E4176737C052c';
 
 async function main() {
-  const [bobWalletClient, aliceWalletClient] =
-    await hre.viem.getWalletClients();
+  const [bobWallet, aliceWallet] = await hre.ethers.getSigners();
 
-  const vault = await hre.viem.getContractAt(
-    'DealVault' as string,
-    vaultAddress as `0x${string}`
+  const vault = await hre.ethers.getContractAt(
+    'DealVault',
+    vaultAddress as string
   );
-  const erc20 = await hre.viem.getContractAt(
+  const erc20 = await hre.ethers.getContractAt(
     'ERC20Mock',
-    deployed['ERC20'] as `0x${string}`
+    deployed['ERC20'] as string
   );
 
-  const bobErc20Amount = parseEther('100');
-  await erc20.write.mint([bobWalletClient.account.address, bobErc20Amount]);
+  const bobErc20Amount = ethers.parseEther('100');
+  await erc20.mint(bobWallet.address, bobErc20Amount);
 
-  await erc20.write.approve([vaultAddress as `0x${string}`, parseEther('100')]);
+  await erc20.approve(vaultAddress as string, ethers.parseEther('100'));
 
-  await vault.write.deposit(
-    [parseEther('100'), bobWalletClient.account.address],
-    { account: bobWalletClient.account }
+  await vault.connect(bobWallet).deposit(
+    ethers.parseEther('100'),
+    bobWallet.address
   );
 }
 

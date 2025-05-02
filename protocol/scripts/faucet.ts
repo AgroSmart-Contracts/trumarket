@@ -1,5 +1,4 @@
-import { formatEther } from 'viem';
-import { parseEther } from 'viem';
+import { ethers } from 'ethers';
 import hre from 'hardhat';
 
 import deployed from './addresses/deployed.json';
@@ -8,19 +7,40 @@ import deployed from './addresses/deployed.json';
 const wallet = '0x0b00Ef4025bE8067bf00A60d54Ca0e60607c1e8d'; // buyer
 
 async function main() {
-  const [deployerAccount, financialAccount, dealsManagerAccount] =
-    await hre.viem.getWalletClients();
+  const [bobWallet, aliceWallet] = await hre.ethers.getSigners();
 
-  const erc20 = await hre.viem.getContractAt(
+  const erc20 = await hre.ethers.getContractAt(
     'ERC20Mock',
-    deployed['ERC20'] as `0x${string}`
+    deployed['ERC20'] as string
   );
 
-  await erc20.write.mint([wallet, parseEther('10000')]);
-  await deployerAccount.sendTransaction({
+  const bobErc20Amount = ethers.parseEther('100');
+  await erc20.mint(bobWallet.address, bobErc20Amount);
+
+  const aliceErc20Amount = ethers.parseEther('100');
+  await erc20.mint(aliceWallet.address, aliceErc20Amount);
+
+  const walletErc20Amount = ethers.parseEther('1000');
+  await erc20.mint(wallet, walletErc20Amount);
+
+  const ethAmount = ethers.parseEther('10');
+  await bobWallet.sendTransaction({
     to: wallet,
-    value: parseEther('100'),
+    value: ethAmount
   });
+
+  console.log(
+    `BOB: ${ethers.formatEther(
+      await erc20.balanceOf(bobWallet.address)
+    )} tokens`
+  );
+  console.log(
+    `ALICE: ${ethers.formatEther(
+      await erc20.balanceOf(aliceWallet.address)
+    )} tokens`
+  );
+
+
 }
 
 main()

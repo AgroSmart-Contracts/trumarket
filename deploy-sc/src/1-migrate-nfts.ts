@@ -1,5 +1,4 @@
-import { polygonAmoy } from 'viem/chains';
-import { AlchemyProvider, ethers, parseEther } from 'ethers';
+import { AlchemyProvider, ethers } from 'ethers';
 import { DealsManagerContract } from './contract';
 
 require('dotenv').config();
