@@ -41,11 +41,11 @@ data "aws_ssm_parameter" "deals_manager_address" {
 }
 
 data "aws_ssm_parameter" "private_key" {
-  name = "/trumarket-dev/private-key"
+  name = terraform.workspace == "prod" ? "/trumarket/private-key" : "/trumarket-dev/private-key"
 }
 
 data "aws_ssm_parameter" "rpc_url" {
-  name = "/trumarket-dev/rpc-url"
+  name = terraform.workspace == "prod" ? "/trumarket/rpc-url" : "/trumarket-dev/rpc-url"
 }
 
 data "aws_ssm_parameter" "email_host" {
