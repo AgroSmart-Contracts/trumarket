@@ -15,9 +15,15 @@ if (process.env.PRIVATE_KEY) {
 
 const config: HardhatUserConfig = {
   gasReporter: {
-    enabled: process.env.REPORT_GAS ? true : false,
-    currency: 'EUR',
+    enabled: true,
+    currency: 'USD',
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
+    token: 'ETH',
+    gasPriceApi: 'https://api.etherscan.io/api?module=proxy&action=eth_gasPrice',
+    showTimeSpent: true,
+    showMethodSig: true,
+    noColors: true,
+    outputFile: 'gas-report.txt',
   },
   solidity: {
     version: '0.8.24',
@@ -35,6 +41,14 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
+      forking: process.env.ALCHEMY_API_KEY ? {
+        url: `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+        blockNumber: 4600000
+      } : undefined
+    },
+    base: {
+      url: `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts,
     },
     amoy: {
       url: `https://polygon-amoy.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
@@ -44,6 +58,14 @@ const config: HardhatUserConfig = {
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts,
     },
+  },
+  etherscan: {
+    apiKey: {
+      base: 'JQ5KF4MA5DW77VGPW9DMT9VXXHU536DGKB'
+    },
+  },
+  mocha: {
+    timeout: 120000
   }
 };
 
