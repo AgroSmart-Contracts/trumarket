@@ -37,7 +37,7 @@ data "aws_ssm_parameter" "api_database" {
 }
 
 data "aws_ssm_parameter" "deals_manager_address" {
-  name = "/trumarket-dev/deals-manager-address"
+  name = terraform.workspace == "prod" ? "/trumarket/deals-manager-address" : "/trumarket-dev/deals-manager-address"
 }
 
 data "aws_ssm_parameter" "private_key" {
@@ -251,7 +251,7 @@ module "ecs_service_api" {
         },
         {
           name  = "BLOCKCHAIN_EXPLORER",
-          value = "https://sepolia.etherscan.io"
+          value = terraform.workspace == "prod" ? "https://basescan.org/" : "https://sepolia.etherscan.io"
         },
         {
           name  = "BLOCKCHAIN_PRIVATE_KEY",
@@ -259,7 +259,7 @@ module "ecs_service_api" {
         },
         {
           name  = "BLOCKCHAIN_CHAIN_ID",
-          value = 11155111
+          value = terraform.workspace == "prod" ? 8453 : 11155111
         },
         {
           name  = "DEALS_MANAGER_CONTRACT_ADDRESS",
@@ -267,15 +267,15 @@ module "ecs_service_api" {
         },
         {
           name  = "INVESTMENT_TOKEN_CONTRACT_ADDRESS",
-          value = "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"
+          value = terraform.workspace == "prod" ? "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" : "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"
         },
         {
           name  = "INVESTMENT_TOKEN_SYMBOL",
-          value = "USDT"
+          value = terraform.workspace == "prod" ? "USDC" : "USDT"
         },
         {
           name  = "INVESTMENT_TOKEN_DECIMALS",
-          value = "6"
+          value = terraform.workspace == "prod" ? "6" : "6"
         },
         {
           name  = "AUTOMATIC_DEALS_ACCEPTANCE",
@@ -339,11 +339,11 @@ module "ecs_service_api" {
         },
         {
           name  = "ICP_CANISTER_ID",
-          value = "uibem-miaaa-aaaal-qr7qq-cai"
+          value = terraform.workspace == "prod" ? "uibem-miaaa-aaaal-qr7qq-cai" : ""
         },
         {
           name  = "ICP_RPC_PROVIDER",
-          value = "https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io"
+          value = terraform.workspace == "prod" ? "https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io" : ""
         }
       ]
     }

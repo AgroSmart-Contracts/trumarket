@@ -39,6 +39,10 @@ class FinanceAppClient {
   }
 
   async publishShipment(shipment: Deal) {
+    if (!this.canister) {
+      return;
+    }
+
     const signature = this._createSignature();
 
     await this.canister.createShipment(
@@ -84,6 +88,10 @@ class FinanceAppClient {
   }
 
   async updateMilestone(id: string, milestone: Milestone) {
+    if (!this.canister) {
+      return;
+    }
+
     const signature = this._createSignature();
 
     await this.canister.updateMilestone(
