@@ -35,7 +35,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = () => {
     <div className="flex w-full justify-center pt-[60px] md:pt-[90px]">
       <div className="flex w-full flex-col items-center  overflow-x-hidden">
         <div className="pb-[120px]">
-          <h1 className="text-[26px] font-bold leading-[1.2em] tracking-normal text-tm-black-80">Create an account</h1>
+          <h1 className="text-[26px] font-bold leading-[1.2em] tracking-normal text-tm-black-80">Create an account!</h1>
         </div>
         <div className="relative -right-[20px] -top-[75px] w-full">
           <div className="absolute right-1/2">
