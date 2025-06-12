@@ -24,7 +24,7 @@ import { chainConfigEth } from "src/lib/web3/chain-configs";
 import { parseToken, uiConsole } from "../lib/helpers";
 import EthereumRpc from "../lib/web3/evm.web3";
 
-export interface web3AuthContextState {}
+export interface web3AuthContextState { }
 
 interface web3AuthContextType {
   init: () => Promise<void>;
