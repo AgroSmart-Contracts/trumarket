@@ -18,7 +18,7 @@ import { selectIsTermsAndConditionsChecked, setTermsAndConditionsChecked } from 
 
 import OTPInputWrapper from "../../otp-input-wrapper";
 
-interface WithWeb3WalletProps {}
+interface WithWeb3WalletProps { }
 
 const WithWeb3Wallet: React.FC<WithWeb3WalletProps> = () => {
   const router = useRouter();
@@ -58,11 +58,16 @@ const WithWeb3Wallet: React.FC<WithWeb3WalletProps> = () => {
     }
     try {
       setSignUpLoading(true);
+
+      if (web3authPnPInstance.status === ADAPTER_STATUS.CONNECTED) {
+        await web3authPnPInstance.logout();
+      }
+
       await web3authPnPInstance.connectTo(WALLET_ADAPTERS.METAMASK);
       const jwt = await web3authPnPInstance.authenticateUser();
 
       if (web3authPnPInstance.status === ADAPTER_STATUS.CONNECTED) {
-        router.push(`/account-type?web3authToken=${jwt.idToken}&auth0Token=${auth0Jwt}`);
+        window.location.href = `/account-type?web3authToken=${jwt.idToken}&auth0Token=${auth0Jwt}`;
       }
     } catch (err) {
       uiConsole(err);
@@ -79,6 +84,11 @@ const WithWeb3Wallet: React.FC<WithWeb3WalletProps> = () => {
     }
     try {
       setSignUpLoading(true);
+
+      if (web3authPnPInstance.status === ADAPTER_STATUS.CONNECTED) {
+        await web3authPnPInstance.logout();
+      }
+
       await web3authPnPInstance.connectTo(WALLET_ADAPTERS.WALLET_CONNECT_V2);
       const jwt = await web3authPnPInstance.authenticateUser();
 
