@@ -555,7 +555,7 @@ module "autoscaling" {
   for_each = {
     (local.as_group) = {
       instance_type              = "t2.micro"
-      desired_capacity           = 2
+      desired_capacity           = 1
       use_mixed_instances_policy = false
       mixed_instances_policy = {
         #   override = [

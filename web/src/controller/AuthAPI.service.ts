@@ -26,6 +26,9 @@ export class AuthService {
       redirect_uri: process.env.NEXT_PUBLIC_APP_URL,
       otp,
     });
+
+    console.log("response", response.data);
+
     return response.data;
   }
 
