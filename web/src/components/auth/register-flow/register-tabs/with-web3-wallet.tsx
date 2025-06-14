@@ -63,7 +63,11 @@ const WithWeb3Wallet: React.FC<WithWeb3WalletProps> = () => {
         await web3authPnPInstance.logout();
       }
 
-      await web3authPnPInstance.connectTo(WALLET_ADAPTERS.METAMASK);
+      try {
+        await web3authPnPInstance.connectTo(WALLET_ADAPTERS.METAMASK);
+      } catch (error) {
+        console.warn('error', error)
+      }
       const jwt = await web3authPnPInstance.authenticateUser();
 
       if (web3authPnPInstance.status === ADAPTER_STATUS.CONNECTED) {
