@@ -7,7 +7,7 @@ import StepCounter from "src/components/common/step-counter";
 
 import RegisterTabs from "./register-tabs";
 
-interface RegisterFlowProps {}
+interface RegisterFlowProps { }
 
 const RegisterFlow: React.FC<RegisterFlowProps> = () => {
   const { push, query } = useRouter();
