@@ -41,6 +41,7 @@ interface web3AuthContextType {
   logout: () => void;
   initPnP: () => void;
   privateKeyProvider: EthereumPrivateKeyProvider;
+  isPnPInitialized: boolean;
 }
 
 const web3AuthContext = createContext<web3AuthContextType | undefined>(undefined);
@@ -69,6 +70,7 @@ export const Web3AuthContextProvider: React.FC<{ children: ReactNode }> = ({ chi
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState({});
+  const [isPnPInitialized, setIsPnPInitialized] = useState(false);
 
   const init = async () => {
     try {
@@ -110,6 +112,7 @@ export const Web3AuthContextProvider: React.FC<{ children: ReactNode }> = ({ chi
       if (web3authPnPInstance.status === ADAPTER_STATUS.CONNECTED) {
         EthereumRpc.setGlobalProvider(web3authPnPInstance.provider as IProvider);
       }
+      setIsPnPInitialized(true);
     } catch (err) {
       uiConsole(err);
     }
@@ -118,8 +121,8 @@ export const Web3AuthContextProvider: React.FC<{ children: ReactNode }> = ({ chi
   //init on mount
   useEffect(() => {
     init();
-    initPnP();
-  }, [router.asPath]);
+    initPnP()
+  }, []);
 
   useEffect(() => {
     if (web3authPnPInstance.status === ADAPTER_STATUS.CONNECTED) {
@@ -177,6 +180,7 @@ export const Web3AuthContextProvider: React.FC<{ children: ReactNode }> = ({ chi
     setJWT,
     logout,
     privateKeyProvider: ethereumPrivateKeyProvider,
+    isPnPInitialized,
   };
 
   return <web3AuthContext.Provider value={contextValue}>{children}</web3AuthContext.Provider>;

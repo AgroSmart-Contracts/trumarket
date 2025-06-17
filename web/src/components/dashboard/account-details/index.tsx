@@ -5,16 +5,20 @@ import React, { useCallback, useEffect, useState } from "react";
 import Loading from "src/components/common/loading";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
 import { UserProfileInfo } from "src/interfaces/auth";
+import WithdrawModal from "./WithdrawModal";
 
 interface UserInfoProps {
   userProfileInfo?: UserProfileInfo;
 }
 
 const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
-  const { web3authPnPInstance } = useWeb3AuthContext();
+  const { web3authPnPInstance, isPnPInitialized, initPnP } = useWeb3AuthContext();
   const [balance, setBalance] = useState<string>("");
   const [tokenBalance, setTokenBalance] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [withdrawType, setWithdrawType] = useState<"ETH" | "TOKEN">("ETH");
+
   const userDetails = [
     {
       label: "Account Type",
@@ -30,6 +34,51 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
     },
   ];
 
+  const handleWithdraw = async (amount: string, toAddress: string) => {
+    if (!web3authPnPInstance.provider) {
+      throw new Error("Provider not initialized");
+    }
+
+    const provider = web3authPnPInstance.provider as EthereumPrivateKeyProvider;
+    const accounts = await provider.request({ method: "eth_requestAccounts", params: [] });
+    const fromAddress = (accounts as string[])[0];
+
+    if (withdrawType === "ETH") {
+      // Convert amount to wei
+      const amountInWei = (parseFloat(amount) * Math.pow(10, 18)).toString(16);
+
+      await provider.request({
+        method: "eth_sendTransaction",
+        params: [{
+          from: fromAddress,
+          to: toAddress,
+          value: "0x" + amountInWei,
+        }],
+      });
+    } else {
+      // Token transfer
+      const tokenAddress = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_CONTRACT_ADDRESS;
+      if (!tokenAddress) {
+        throw new Error("Token address not configured");
+      }
+
+      // Create the transfer function data
+      const amountInWei = (parseFloat(amount) * Math.pow(10, +(process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_DECIMALS || 18))).toString(16);
+      const data = `0xa9059cbb000000000000000000000000${toAddress.slice(2)}${amountInWei.padStart(64, '0')}`;
+
+      await provider.request({
+        method: "eth_sendTransaction",
+        params: [{
+          from: fromAddress,
+          to: tokenAddress,
+          data: data,
+        }],
+      });
+    }
+
+    // Refresh balances after withdrawal
+    await fetchBalances();
+  };
 
   const fetchBalances = useCallback(async () => {
     try {
@@ -56,7 +105,6 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
       const tokenAddress = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_CONTRACT_ADDRESS;
       if (tokenAddress) {
         const data = `0x70a08231000000000000000000000000${(accounts as string[])[0].slice(2)}`;
-        console.log("Call data:", data);
         const result = await provider.request({
           method: "eth_call",
           params: [
@@ -68,7 +116,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
           ],
         });
         const tokenBalanceInWei = parseInt(result as string, 16);
-        const tokenBalanceFormatted = (tokenBalanceInWei / Math.pow(10, 18)).toFixed(6);
+        const tokenBalanceFormatted = (tokenBalanceInWei / Math.pow(10, +(process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_DECIMALS || 18))).toFixed(6);
         setTokenBalance(tokenBalanceFormatted);
       }
     } catch (error) {
@@ -76,11 +124,15 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [web3authPnPInstance.status, web3authPnPInstance.provider]);
+  }, [isPnPInitialized]);
 
   useEffect(() => {
-    fetchBalances();
-  }, [web3authPnPInstance.status, web3authPnPInstance.provider]);
+    if (isPnPInitialized) {
+      fetchBalances();
+    } else {
+      initPnP();
+    }
+  }, [isPnPInitialized]);
 
   if (isLoading) {
     return <Loading />;
@@ -91,27 +143,55 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
       <div className="flex flex-col gap-[10px]">
         {userDetails.map((detail, i) => (
           <div key={i} className="flex items-center justify-between text-[13px] leading-[1.2em]">
-            <p className="w-[40%]  flex-shrink-0  font-normal text-tm-black-80">{detail.label}:</p>
-            <p className="flex-1 font-bold  text-tm-black-80">{detail.value}</p>
+            <p className="w-[40%] flex-shrink-0 font-normal text-tm-black-80">{detail.label}:</p>
+            <p className="flex-1 font-bold text-tm-black-80">{detail.value}</p>
           </div>
         ))}
-        {
-          balance && (
-            <div className="flex items-center justify-between text-[13px] leading-[1.2em]">
-              <p className="w-[40%]  flex-shrink-0  font-normal text-tm-black-80">Balance:</p>
-              <p className="flex-1 font-bold  text-tm-black-80">{balance} ETH</p>
+        {balance && (
+          <div className="flex items-center justify-between text-[13px] leading-[1.2em]">
+            <p className="w-[40%] flex-shrink-0 font-normal text-tm-black-80">Balance:</p>
+            <div className="flex flex-1 items-center gap-2">
+              <p className="font-bold text-tm-black-80">{balance} ETH</p>
+              <button
+                onClick={() => {
+                  setWithdrawType("ETH");
+                  setIsWithdrawModalOpen(true);
+                }}
+                className="px-2  text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Withdraw
+              </button>
             </div>
-          )
-        }
-        {
-          tokenBalance && (
-            <div className="flex items-center justify-between text-[13px] leading-[1.2em]">
-              <p className="w-[40%]  flex-shrink-0  font-normal text-tm-black-80">Token Balance:</p>
-              <p className="flex-1 font-bold  text-tm-black-80">{tokenBalance} {process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_SYMBOL || "TRU"}</p>
+          </div>
+        )}
+        {tokenBalance && (
+          <div className="flex items-center justify-between text-[13px] leading-[1.2em]">
+            <p className="w-[40%] flex-shrink-0 font-normal text-tm-black-80">Token Balance:</p>
+            <div className="flex flex-1 items-center gap-2">
+              <p className="font-bold text-tm-black-80">
+                {tokenBalance} {process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_SYMBOL || "TRU"}
+              </p>
+              <button
+                onClick={() => {
+                  setWithdrawType("TOKEN");
+                  setIsWithdrawModalOpen(true);
+                }}
+                className="px-2  text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Withdraw
+              </button>
             </div>
-          )
-        }
+          </div>
+        )}
       </div>
+
+      <WithdrawModal
+        isOpen={isWithdrawModalOpen}
+        onClose={() => setIsWithdrawModalOpen(false)}
+        onWithdraw={handleWithdraw}
+        maxAmount={withdrawType === "ETH" ? balance : tokenBalance}
+        tokenSymbol={withdrawType === "ETH" ? "ETH" : (process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_SYMBOL || "TRU")}
+      />
     </div>
   );
 };
