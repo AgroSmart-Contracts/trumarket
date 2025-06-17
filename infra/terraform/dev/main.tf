@@ -117,6 +117,10 @@ module "ecs_service_web" {
   name        = "${local.name}-web"
   cluster_arn = module.ecs_cluster.arn
 
+  # Add deployment configuration - kill all tasks first
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
+
   cpu    = 256
   memory = 512
 
@@ -196,6 +200,10 @@ module "ecs_service_api" {
   # Service
   name        = "${local.name}-${local.api_name}"
   cluster_arn = module.ecs_cluster.arn
+
+  # Add deployment configuration - kill all tasks first
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
 
   cpu    = 512
   memory = 512
