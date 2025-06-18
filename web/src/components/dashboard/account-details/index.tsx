@@ -51,7 +51,9 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
         const txHash = await ethereumRpc.sendEth(toAddress, amount);
         console.log('txHash', txHash)
         await ethereumRpc.waitForTransaction(txHash)
-      } catch (err) { }
+      } catch (err) {
+        console.log('failed to send eth', err)
+      }
     } else {
       // Token transfer
       const tokenAddress = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_CONTRACT_ADDRESS;
@@ -67,7 +69,9 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
         const txHash = await ethereumRpc.sendData(tokenAddress, data);
         console.log('txHash', txHash)
         await ethereumRpc.waitForTransaction(txHash)
-      } catch (err) { }
+      } catch (err) {
+        console.log('failed to send investing token', err)
+      }
     }
 
     // Refresh balances after withdrawal
