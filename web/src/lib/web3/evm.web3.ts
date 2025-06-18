@@ -19,6 +19,11 @@ export default class EthereumRpc {
     this.provider = EthereumRpc.globalProvider;
   }
 
+  async waitForTransaction(txHash: string): Promise<any> {
+    const web3 = new Web3(this.provider as IProvider);
+    return web3.eth.getTransactionReceipt(txHash);
+  }
+
   async getAccounts(): Promise<string[]> {
     try {
       const web3 = new Web3(this.provider as IProvider);
@@ -55,6 +60,94 @@ export default class EthereumRpc {
       return signedMessage;
     } catch (error) {
       return error as string;
+    }
+  }
+
+  async sendData(to: string, data: string): Promise<string> {
+    try {
+      const web3 = new Web3(this.provider as IProvider);
+      const accounts = await web3.eth.getAccounts();
+
+      // Get current gas price
+      const gasPrice = await web3.eth.getGasPrice();
+
+      // Estimate gas
+      const gas = await web3.eth.estimateGas({
+        from: accounts[0],
+        to: to,
+        data
+      });
+
+      console.log('Transaction details:', {
+        from: accounts[0],
+        to,
+        data,
+        gas,
+        gasPrice
+      });
+
+      const txRes = await web3.eth.sendTransaction({
+        from: accounts[0],
+        to: to,
+        data,
+        gas,
+        gasPrice
+      });
+
+      return txRes.transactionHash.toString();
+    } catch (error) {
+      console.error('Error sending data:', error);
+      throw error;
+    }
+  }
+
+  async sendEth(to: string, amount: string): Promise<string> {
+    try {
+      const web3 = new Web3(this.provider as IProvider);
+      const accounts = await web3.eth.getAccounts();
+
+      // Validate address
+      if (!web3.utils.isAddress(to)) {
+        throw new Error('Invalid recipient address');
+      }
+
+      // Validate amount
+      if (isNaN(Number(amount)) || Number(amount) <= 0) {
+        throw new Error('Invalid amount');
+      }
+
+      const weiAmount = web3.utils.toWei(amount, "ether");
+
+      // Get current gas price
+      const gasPrice = await web3.eth.getGasPrice();
+
+      // Estimate gas
+      const gas = await web3.eth.estimateGas({
+        from: accounts[0],
+        to: to,
+        value: weiAmount
+      });
+
+      console.log('Transaction details:', {
+        from: accounts[0],
+        to,
+        value: weiAmount,
+        gas,
+        gasPrice
+      });
+
+      const txRes = await web3.eth.sendTransaction({
+        from: accounts[0],
+        to: to,
+        value: weiAmount,
+        gas,
+        gasPrice
+      });
+
+      return txRes.transactionHash.toString();
+    } catch (error) {
+      console.error('Error sending ETH:', error);
+      throw error;
     }
   }
 
