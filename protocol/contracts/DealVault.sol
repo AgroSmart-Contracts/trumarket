@@ -62,7 +62,7 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
         _maxDeposit = maxDeposit_;
         _maxMint = maxMint_;
         _underlying = underlying_;
-        _minDeposit = 1e18; // Set a reasonable minimum deposit (e.g., 1 USDC if decimals=6)
+        _minDeposit = 1e6; // Set a reasonable minimum deposit (e.g., 1 USDC if decimals=6)
         IERC20(underlying_).approve(msg.sender, maxDeposit_);
 
         // Initialize with non-zero values to prevent first deposit attack
