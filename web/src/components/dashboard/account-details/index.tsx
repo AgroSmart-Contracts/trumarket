@@ -6,13 +6,14 @@ import Loading from "src/components/common/loading";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
 import { UserProfileInfo } from "src/interfaces/auth";
 import WithdrawModal from "./WithdrawModal";
+import EthereumRpc from "src/lib/web3/evm.web3";
 
 interface UserInfoProps {
   userProfileInfo?: UserProfileInfo;
 }
 
 const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
-  const { web3authPnPInstance, isPnPInitialized, initPnP } = useWeb3AuthContext();
+  const { web3authPnPInstance, isPnPInitialized, initPnP, web3authSfa } = useWeb3AuthContext();
   const [balance, setBalance] = useState<string>("");
   const [tokenBalance, setTokenBalance] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -39,22 +40,18 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
       throw new Error("Provider not initialized");
     }
 
+    const ethereumRpc = new EthereumRpc();
+
     const provider = web3authPnPInstance.provider as EthereumPrivateKeyProvider;
-    const accounts = await provider.request({ method: "eth_requestAccounts", params: [] });
+    const accounts = await ethereumRpc.getAccounts();
     const fromAddress = (accounts as string[])[0];
 
     if (withdrawType === "ETH") {
-      // Convert amount to wei
-      const amountInWei = (parseFloat(amount) * Math.pow(10, 18)).toString(16);
-
-      await provider.request({
-        method: "eth_sendTransaction",
-        params: [{
-          from: fromAddress,
-          to: toAddress,
-          value: "0x" + amountInWei,
-        }],
-      });
+      try {
+        const txHash = await ethereumRpc.sendEth(toAddress, amount);
+        console.log('txHash', txHash)
+        await ethereumRpc.waitForTransaction(txHash)
+      } catch (err) { }
     } else {
       // Token transfer
       const tokenAddress = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_CONTRACT_ADDRESS;
@@ -66,14 +63,11 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
       const amountInWei = (parseFloat(amount) * Math.pow(10, +(process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_DECIMALS || 18))).toString(16);
       const data = `0xa9059cbb000000000000000000000000${toAddress.slice(2)}${amountInWei.padStart(64, '0')}`;
 
-      await provider.request({
-        method: "eth_sendTransaction",
-        params: [{
-          from: fromAddress,
-          to: tokenAddress,
-          data: data,
-        }],
-      });
+      try {
+        const txHash = await ethereumRpc.sendData(tokenAddress, data);
+        console.log('txHash', txHash)
+        await ethereumRpc.waitForTransaction(txHash)
+      } catch (err) { }
     }
 
     // Refresh balances after withdrawal
@@ -83,23 +77,26 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
   const fetchBalances = useCallback(async () => {
     try {
       setIsLoading(true);
-      if (web3authPnPInstance.status !== ADAPTER_STATUS.READY && web3authPnPInstance.status !== ADAPTER_STATUS.CONNECTED) {
+      if (web3authSfa.status !== ADAPTER_STATUS.CONNECTED) {
         return;
       }
+
+      const ethereumRpc = new EthereumRpc();
+
+      const balance = await ethereumRpc.getBalance()
+      const balanceInEth = parseInt(balance as string, 10) / Math.pow(10, 18);
+      setBalance(balanceInEth.toFixed(6).toString());
+
+
 
       if (!web3authPnPInstance.provider) {
         return;
       }
 
       const provider = web3authPnPInstance.provider as EthereumPrivateKeyProvider;
-      const accounts = await provider.request({ method: "eth_requestAccounts", params: [] });
+      const accounts = await ethereumRpc.getAccounts();
 
-      const balance = await provider.request({
-        method: "eth_getBalance",
-        params: [(accounts as string[])[0], "latest"]
-      });
-      const balanceInEth = parseInt(balance as string, 16) / Math.pow(10, 18);
-      setBalance(balanceInEth.toFixed(6).toString());
+
 
       // Get ERC20 token balance
       const tokenAddress = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_CONTRACT_ADDRESS;
@@ -115,9 +112,13 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
             "latest",
           ],
         });
-        const tokenBalanceInWei = parseInt(result as string, 16);
-        const tokenBalanceFormatted = (tokenBalanceInWei / Math.pow(10, +(process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_DECIMALS || 18))).toFixed(6);
-        setTokenBalance(tokenBalanceFormatted);
+        if (result != '0x') {
+          const tokenBalanceInWei = parseInt(result as string, 16);
+          const tokenBalanceFormatted = (tokenBalanceInWei / Math.pow(10, +(process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_DECIMALS || 18))).toFixed(6);
+          setTokenBalance(tokenBalanceFormatted);
+        } else {
+          setTokenBalance("0.000000");
+        }
       }
     } catch (error) {
       console.error("Error fetching balances:", error);
