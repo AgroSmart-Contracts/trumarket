@@ -1,6 +1,7 @@
 import { ADAPTER_STATUS } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import React, { useCallback, useEffect, useState } from "react";
+import { Info, Warning } from "@phosphor-icons/react";
 
 import Loading from "src/components/common/loading";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
@@ -162,6 +163,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
                   setWithdrawType("ETH");
                   setIsWithdrawModalOpen(true);
                 }}
+                disabled={!balance || Number(balance) <= 0}
                 className="px-2  text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Withdraw
@@ -176,15 +178,30 @@ const UserInfo: React.FC<UserInfoProps> = ({ userProfileInfo }) => {
               <p className="font-bold text-tm-black-80">
                 {tokenBalance} {process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_SYMBOL || "TRU"}
               </p>
-              <button
-                onClick={() => {
-                  setWithdrawType("TOKEN");
-                  setIsWithdrawModalOpen(true);
-                }}
-                className="px-2  text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Withdraw
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    setWithdrawType("TOKEN");
+                    setIsWithdrawModalOpen(true);
+                  }}
+                  disabled={!balance || Number(balance) <= 0}
+                  className={`px-2 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 ${!balance || Number(balance) <= 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  Withdraw
+                </button>
+                <div className="relative group">
+                  {balance && Number(balance) > 0 ? (
+                    <Info size={16} className="text-blue-600" weight="fill" />
+                  ) : (
+                    <Warning size={16} className="text-yellow-500" weight="fill" />
+                  )}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity" style={{ backgroundColor: "white" }}>
+                    {balance && Number(balance) > 0
+                      ? "ETH is required for transaction fees"
+                      : "You need ETH in your wallet for transaction fees"}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
