@@ -5,7 +5,9 @@ import deployed from './addresses/deployed.json';
 
 // const wallet = '0x6bc9A4Cd646754f3bEd42b779F9b0C061D279e9D';
 // const wallet = '0x0b00Ef4025bE8067bf00A60d54Ca0e60607c1e8d'; // buyer
-const wallet = '0x970C5F910C119217F9e4808578552a45d4E6FEcb'; // investor
+// const wallet = '0x970C5F910C119217F9e4808578552a45d4E6FEcb'; // investor
+// const wallet = '0x68746887795659d5bD7D57Ef5398419AA15ff34b';
+const wallet = '0x180b6DdbC81e860BcF8d2cafFf6186e3c9C22a5a'
 
 async function main() {
   const [bobWallet, aliceWallet] = await hre.ethers.getSigners();

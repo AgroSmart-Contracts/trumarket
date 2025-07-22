@@ -9,8 +9,8 @@ const accounts: Accounts = {} as any;
 
 describe('DealsManager', function () {
   before(async () => {
-    const [wallet1, wallet2, wallet3, wallet4] =
-      await hre.ethers.getSigners();
+    // Ensure we're using Hardhat's provider
+    const [wallet1, wallet2, wallet3, wallet4] = await hre.ethers.getSigners();
 
     accounts.deployerAccount = wallet1;
     accounts.financialAccount = wallet2;
@@ -717,6 +717,79 @@ describe('DealsManager', function () {
     });
 
     describe('donateToDeal', () => {
+      it.only('should emit correct events when donation is successful', async () => {
+        const { dealsManager, erc20 } = await deploy(hre, accounts);
+        const milestones: [number, number, number, number, number, number, number] = [
+          0, 0, 100, 0, 0, 0, 0
+        ];
+        const vaultFunds = ethers.parseEther('100');
+        const donationAmount = ethers.parseEther('50');
+
+        // Create the deal
+        await dealsManager
+          .connect(accounts.dealsManagerAccount)
+          .mint(milestones, vaultFunds, accounts.financialAccount.address);
+
+        // Get vault address and contract
+        const vaultAddress = await dealsManager.vault(0);
+        const dealVault = await hre.ethers.getContractAt('DealVault', vaultAddress);
+
+        // Fund the borrower account
+        await erc20
+          .connect(accounts.deployerAccount)
+          .mint(accounts.financialAccount.address, donationAmount);
+
+        // Approve spending
+        await erc20
+          .connect(accounts.financialAccount)
+          .approve(await dealsManager.getAddress(), donationAmount);
+
+        // Make donation and check events
+        const tx = await dealsManager
+          .connect(accounts.financialAccount)
+          .donateToDeal(0, donationAmount);
+
+        const receipt = await tx.wait();
+        expect(receipt).to.not.be.null;
+        if (!receipt) return;
+
+        // Check DealsManager event
+        const parsedEvents = decodeDealManagerEvents(receipt, dealsManager.interface.formatJson());
+        const borrowerDonation = parsedEvents.find(
+          (e) => e && e.eventName === 'BorrowerDonation'
+        );
+        expect(borrowerDonation).to.not.be.null;
+        expect(borrowerDonation?.args).to.deep.equal({
+          dealId: BigInt(0),
+          borrower: accounts.financialAccount.address,
+          amount: donationAmount
+        });
+
+        // Check DealVault event
+        const vaultEvents = receipt.logs
+          .filter(log => log.address === vaultAddress)
+          .map(log => {
+            try {
+              return dealVault.interface.parseLog({
+                topics: [...log.topics],
+                data: log.data
+              });
+            } catch (e) {
+              return null;
+            }
+          })
+          .filter(Boolean);
+
+        const donationEvent = vaultEvents.find(event => event?.name === 'Donation');
+        expect(donationEvent).to.not.be.null;
+        expect(donationEvent?.args[0]).to.equal(await dealsManager.getAddress()); // donor
+        expect(donationEvent?.args[1]).to.equal(donationAmount); // amount
+
+        // Verify final balances
+        const vaultBalance = await erc20.balanceOf(vaultAddress);
+        expect(vaultBalance).to.equal(donationAmount);
+      });
+
       it('should fail to donate if not called by borrower', async () => {
         const { dealsManager, erc20 } = await deploy(hre, accounts);
         const milestones: [number, number, number, number, number, number, number] = [

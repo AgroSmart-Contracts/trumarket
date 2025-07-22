@@ -40,7 +40,12 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
+      chainId: 0x7a69, // This is 31337 in decimal
       allowUnlimitedContractSize: true,
+      mining: {
+        auto: true,
+        interval: 0
+      },
       forking: process.env.ALCHEMY_API_KEY ? {
         url: `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
         blockNumber: 4600000

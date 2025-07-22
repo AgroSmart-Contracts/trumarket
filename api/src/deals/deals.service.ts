@@ -39,7 +39,7 @@ export class DealsService {
     private readonly users: UsersService,
     private readonly notifications: NotificationsService,
     private readonly blockchain: BlockchainService,
-  ) {}
+  ) { }
 
   private async uploadFile(
     file: { path: string; originalname: string },
@@ -246,6 +246,7 @@ export class DealsService {
           buyer.walletAddress,
         );
         const nftID = await this.blockchain.getNftID(txHash);
+        console.log('nftID', nftID);
         const vault = await this.blockchain.vault(nftID);
 
         await SyncDealsLogsJob.create({
