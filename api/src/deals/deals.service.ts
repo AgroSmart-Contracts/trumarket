@@ -247,6 +247,8 @@ export class DealsService {
         );
         const nftID = await this.blockchain.getNftID(txHash);
         console.log('nftID', nftID);
+        // wait for 5 seconds to get the vault address
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         const vault = await this.blockchain.vault(nftID);
 
         await SyncDealsLogsJob.create({
