@@ -12,6 +12,7 @@ import { CheckBox } from "src/components/common/checkbox";
 import Input from "src/components/common/input";
 import VerificationInputComponent from "src/components/common/verification-input";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
+import { AuthService } from "src/controller/AuthAPI.service";
 import { checkWeb3AuthInstance, handleOTP, parseToken, uiConsole, handleRequestAuth0JWT } from "src/lib/helpers";
 import { EmailSteps } from "src/interfaces/global";
 import { useModal } from "src/context/modal-context";
@@ -21,7 +22,7 @@ import { selectIsTermsAndConditionsChecked, setTermsAndConditionsChecked } from 
 
 import OTPInputWrapper from "../../otp-input-wrapper";
 
-interface WithEmailProps {}
+interface WithEmailProps { }
 
 const WithEmail: React.FC<WithEmailProps> = () => {
   const { openModal } = useModal();
@@ -50,8 +51,23 @@ const WithEmail: React.FC<WithEmailProps> = () => {
 
   const handleSubmitForm = async (data: { terms: boolean; email: string }) => {
     setVerificationCodeLoading(true);
-    await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
-    setVerificationCodeLoading(false);
+    try {
+      // Check if user already exists before sending OTP
+      const userExists = await AuthService.checkUserExists({ email: data.email });
+
+      if (userExists.exists) {
+        toast.error("Account already exists! Please login instead.");
+        setVerificationCodeLoading(false);
+        return;
+      }
+
+      await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
+    } catch (error) {
+      console.error('Error checking user existence:', error);
+      toast.error("Error checking account. Please try again.");
+    } finally {
+      setVerificationCodeLoading(false);
+    }
   };
 
   const handleConfirm = async (OTPcode: string) => {

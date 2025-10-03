@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import Image from "next/image";
 
 import Button from "src/components/common/button";
@@ -10,6 +11,7 @@ import { CheckBox } from "src/components/common/checkbox";
 import Input from "src/components/common/input";
 import { useModal } from "src/context/modal-context";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
+import { AuthService } from "src/controller/AuthAPI.service";
 import { EmailSteps, WalletProviders } from "src/interfaces/global";
 import { handleOTP, handleRequestAuth0JWT, uiConsole } from "src/lib/helpers";
 import { useAppDispatch, useAppSelector } from "src/lib/hooks";
@@ -47,8 +49,23 @@ const WithWeb3Wallet: React.FC<WithWeb3WalletProps> = () => {
 
   const handleSubmitForm = async (data: { terms: boolean; email: string }) => {
     setVerificationCodeLoading(true);
-    await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
-    setVerificationCodeLoading(false);
+    try {
+      // Check if user already exists before sending OTP
+      const userExists = await AuthService.checkUserExists({ email: data.email });
+
+      if (userExists.exists) {
+        toast.error("Account already exists! Please login instead.");
+        setVerificationCodeLoading(false);
+        return;
+      }
+
+      await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
+    } catch (error) {
+      console.error('Error checking user existence:', error);
+      toast.error("Error checking account. Please try again.");
+    } finally {
+      setVerificationCodeLoading(false);
+    }
   };
 
   const handleAccountWithMetamask = async (auth0Jwt: string) => {

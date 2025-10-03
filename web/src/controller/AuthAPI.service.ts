@@ -74,4 +74,11 @@ export class AuthService {
     });
     return response.data;
   }
+
+  static async checkUserExists({ email }: { email: string }): Promise<{ exists: boolean }> {
+    const response = await axiosInstance.post("/auth/check-user-exists", {
+      email,
+    });
+    return response.data;
+  }
 }
