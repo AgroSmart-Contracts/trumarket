@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import InformationRow from "src/components/common/information-row";
 import InformationRowDivider from "src/components/common/information-row/information-row-divider";
 import { AccountTypeEnum, ITransportType } from "src/interfaces/global";
-import { CurrencyFormatter } from "src/lib/helpers";
+import { CurrencyFormatter, safeNumber, safeString } from "src/lib/helpers";
 import { useAppDispatch, useAppSelector } from "src/lib/hooks";
 import { useUserInfo } from "src/lib/hooks/useUserInfo";
 import {
@@ -21,7 +21,7 @@ import SubmitAgreement from "./submit-agreement";
 import CompanyData from "./company-data";
 import { ShipmentService } from "src/controller/ShipmentAPI.service";
 
-interface CreateShipment {}
+interface CreateShipment { }
 
 const CreateShipment: React.FC<CreateShipment> = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -43,13 +43,13 @@ const CreateShipment: React.FC<CreateShipment> = () => {
         nodeToRender: <ProductDetails setSelectedIndex={setSelectedIndex} selectedIndex={selectedIndex} />,
         filledValues: (
           <div className="flex">
-            <InformationRow label="Product:" underlined={false} value={shipmentFormData.name} />
+            <InformationRow label="Product:" underlined={false} value={safeString(shipmentFormData.name)} />
             <InformationRowDivider />
-            <InformationRow label="Variety:" underlined={false} value={shipmentFormData.variety} />
+            <InformationRow label="Variety:" underlined={false} value={safeString(shipmentFormData.variety)} />
             <InformationRowDivider />
-            <InformationRow label="Quality:" underlined={false} value={shipmentFormData.quality?.label} />
+            <InformationRow label="Quality:" underlined={false} value={safeString(shipmentFormData.quality?.label || shipmentFormData.quality)} />
             <InformationRowDivider />
-            <InformationRow label="Presentation:" underlined={false} value={shipmentFormData.presentation} />
+            <InformationRow label="Presentation:" underlined={false} value={safeString(shipmentFormData.presentation)} />
           </div>
         ),
       },
@@ -65,18 +65,18 @@ const CreateShipment: React.FC<CreateShipment> = () => {
         ),
         filledValues: (
           <div className="flex">
-            <InformationRow label="Amount:" underlined={false} value={shipmentFormData.quantity} />
+            <InformationRow label="Amount:" underlined={false} value={safeString(shipmentFormData.quantity)} />
             <InformationRowDivider />
             <InformationRow
               label="Price:"
               underlined={false}
-              value={CurrencyFormatter(shipmentFormData.offerUnitPrice)}
+              value={CurrencyFormatter(safeNumber(shipmentFormData.offerUnitPrice))}
             />
             <InformationRowDivider />
             <InformationRow
               label="Total:"
               underlined={false}
-              value={CurrencyFormatter(shipmentFormData.quantity * shipmentFormData.offerUnitPrice)}
+              value={CurrencyFormatter(safeNumber(shipmentFormData.quantity) * safeNumber(shipmentFormData.offerUnitPrice))}
             />
           </div>
         ),
@@ -94,16 +94,16 @@ const CreateShipment: React.FC<CreateShipment> = () => {
             <InformationRow
               label="From:"
               underlined={false}
-              value={`${shipmentFormData.port_origin},${shipmentFormData.origin?.label}`}
+              value={`${safeString(shipmentFormData.port_origin)},${safeString(shipmentFormData.origin?.label || shipmentFormData.origin)}`}
             />
             <InformationRowDivider />
             <InformationRow
               label="To:"
               underlined={false}
-              value={`${shipmentFormData.port_destination},${shipmentFormData.destination?.label}`}
+              value={`${safeString(shipmentFormData.port_destination)},${safeString(shipmentFormData.destination?.label || shipmentFormData.destination)}`}
             />
             <InformationRowDivider />
-            <InformationRow label="Date:" underlined={false} value={shipmentFormData.shippingStartDate} />
+            <InformationRow label="Date:" underlined={false} value={safeString(shipmentFormData.shippingStartDate)} />
             <InformationRowDivider />
             <InformationRow
               label="Transport:"
@@ -131,18 +131,18 @@ const CreateShipment: React.FC<CreateShipment> = () => {
         nodeToRender: <CompanyData setSelectedIndex={setSelectedIndex} selectedIndex={selectedIndex} />,
         filledValues: (
           <div className="flex">
-            <InformationRow label="Company Name:" underlined={false} value={`${shipmentFormData.companyName}`} />
+            <InformationRow label="Company Name:" underlined={false} value={safeString(shipmentFormData.companyName)} />
             <InformationRowDivider />
-            <InformationRow label="Country:" underlined={false} value={`${shipmentFormData.country?.label}`} />
+            <InformationRow label="Country:" underlined={false} value={safeString(shipmentFormData.country?.label || shipmentFormData.country)} />
             <InformationRowDivider />
-            <InformationRow label="Tax ID:" underlined={false} value={shipmentFormData.taxId} />
+            <InformationRow label="Tax ID:" underlined={false} value={safeString(shipmentFormData.taxId)} />
             <InformationRowDivider />
             <InformationRow
               label="Participants:"
               underlined={false}
               value={shipmentFormData?.participants
                 ?.map((participant: { label: string; value: string }) => participant.label)
-                ?.join(", ")}
+                ?.join(", ") || ""}
             />
           </div>
         ),
@@ -165,21 +165,21 @@ const CreateShipment: React.FC<CreateShipment> = () => {
               underlined={false}
               value={shipmentFormData?.addresseeParticipants
                 ?.map((participant: { label: string; value: string }) => participant.label)
-                ?.join(", ")}
+                ?.join(", ") || ""}
             />
             <InformationRowDivider />
             <InformationRow
               label="Company Name"
               underlined={false}
-              value={`${shipmentFormData.addresseeCompanyName}`}
+              value={safeString(shipmentFormData.addresseeCompanyName)}
             />
             <InformationRowDivider />
-            <InformationRow label="Tax ID:" underlined={false} value={`${shipmentFormData.addresseeTaxId}`} />
+            <InformationRow label="Tax ID:" underlined={false} value={safeString(shipmentFormData.addresseeTaxId)} />
             <InformationRowDivider />
             <InformationRow
               label="Country :"
               underlined={false}
-              value={`${shipmentFormData.addresseeCountry?.label || ""}`}
+              value={safeString(shipmentFormData.addresseeCountry?.label || shipmentFormData.addresseeCountry)}
             />
           </div>
         ),
@@ -196,6 +196,13 @@ const CreateShipment: React.FC<CreateShipment> = () => {
       },
     ]);
   };
+
+  // Re-render steps when Redux state changes
+  useEffect(() => {
+    if (steps.length > 0) {
+      loadSteps();
+    }
+  }, [shipmentFormData]);
 
   useEffect(() => {
     if (!accountType) {
