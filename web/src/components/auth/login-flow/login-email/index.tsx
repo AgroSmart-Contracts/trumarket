@@ -15,7 +15,7 @@ import { handleRequestAuth0JWT, handleOTP, checkWeb3AuthInstance, parseToken } f
 
 import OTPInputWrapper from "../../otp-input-wrapper";
 
-interface LoginEmailProps {}
+interface LoginEmailProps { }
 
 const LoginEmail: React.FC<LoginEmailProps> = () => {
   const router = useRouter();
@@ -39,8 +39,23 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
 
   const handleSubmitForm = async (data: { email: string }) => {
     setVerificationCodeLoading(true);
-    await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
-    setVerificationCodeLoading(false);
+    try {
+      // Check if user exists before sending OTP
+      const userExists = await AuthService.checkUserExists({ email: data.email });
+
+      if (!userExists.exists) {
+        toast.error("Account doesn't exist! Please register first.");
+        setVerificationCodeLoading(false);
+        return;
+      }
+
+      await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
+    } catch (error) {
+      console.error('Error checking user existence:', error);
+      toast.error("Error checking account. Please try again.");
+    } finally {
+      setVerificationCodeLoading(false);
+    }
   };
 
   const handleConfirm = async (OTPcode: string) => {
