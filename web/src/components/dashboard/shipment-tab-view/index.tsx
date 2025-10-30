@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Tab } from "@headlessui/react";
 import classNames from "classnames";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 
-import Input from "src/components/common/input";
-import Button, { ButtonVariants } from "src/components/common/button";
 import { ShipmentService } from "src/controller/ShipmentAPI.service";
 import { DealStatus } from "src/interfaces/shipment";
 import { useUserInfo } from "src/lib/hooks/useUserInfo";
@@ -17,8 +14,9 @@ import ActiveShipmentTabView from "./active-shipment-tab-view";
 import PendingShipmentTabView from "./pending-shipment-tab-view";
 import FinishedShipmentTabView from "./finished-shipment-tab-view";
 import AllShipments from "./all-shipments";
+import { Plus } from "@phosphor-icons/react";
 
-interface TabViewProps {}
+interface TabViewProps { }
 
 const ShipmentTabView: React.FC<TabViewProps> = () => {
   const router = useRouter();
@@ -55,53 +53,59 @@ const ShipmentTabView: React.FC<TabViewProps> = () => {
     Number(confirmedShipmentList?.length) + Number(pendingShipmentList?.length) + Number(finishedShipmentList?.length);
 
   return (
-    <Tab.Group defaultIndex={1} selectedIndex={selectedIndex} onChange={setSelectedIndex}>
-      <Tab.List>
+    <div className="space-y-6">
+      {/* Dashboard Header */}
+      <div className="bg-white rounded-lg shadow-sm py-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-[10px] px-[30px] pb-[30px]">
-            <ShipmentTabHeaders
-              all={dataLength || 0}
-              active={confirmedShipmentList?.length || 0}
-              pending={pendingShipmentList?.length || 0}
-              finished={finishedShipmentList?.length || 0}
-            />
+          <div>
+            <h1 className="text-3xl font-bold text-tm-black-80 mb-2">Shipments Dashboard</h1>
+            <p className="text-tm-black-60">Manage and track all your agricultural trade shipments</p>
           </div>
-          <div className="relative -top-[15px]">
-            <Button
-              classOverrides="!px-[20px]"
-              variant={ButtonVariants.FILLED_BLUE}
-              onClick={() => router.push("/dashboard/create-shipment")}
-            >
-              <div className="flex items-center justify-between gap-[6px]">
-                <p className="text-[13px] font-bold uppercase leading-[1.2em] tracking-normal !text-tm-white">
-                  New Shipment
-                </p>
-                <AddCircleIcon className="!h-[15px] !w-[15px] !fill-tm-white" />
-              </div>
-            </Button>
-          </div>
+          <button
+            onClick={() => router.push("/dashboard/create-shipment")}
+            className="bg-tm-primary hover:bg-tm-primary-dark text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg flex items-center gap-2"
+          >
+            <Plus size={20} weight="bold" />
+            <span className="text-[14px] uppercase tracking-wide">New Shipment</span>
+          </button>
         </div>
-      </Tab.List>
-      <Tab.Panels>
-        <Tab.Panel className={classNames("rounded-[4px]  rounded-br-[4px] bg-[#ffffff80]  p-[20px]")}>
-          <AllShipments
-            isBuyer={isBuyer}
-            shipmentData={[...confirmedShipmentList, ...pendingShipmentList, ...finishedShipmentList]}
-            status={DealStatus.All}
-            loading={isConfirmedShipmentListLoading || isPendingShipmentListLoading || isFinishedShipmentListLoading}
-          />
-        </Tab.Panel>
-        <Tab.Panel className={classNames("rounded-[4px]  rounded-br-[4px] bg-[#ffffff80]  p-[20px]")}>
-          <ActiveShipmentTabView isBuyer={isBuyer} shipmentData={confirmedShipmentList} status={DealStatus.Confirmed} />
-        </Tab.Panel>
-        <Tab.Panel className={classNames("rounded-[4px]  rounded-br-[4px]  bg-[#ffffff80]  p-[20px]")}>
-          <PendingShipmentTabView isBuyer={isBuyer} shipmentData={pendingShipmentList} status={DealStatus.Proposal} />
-        </Tab.Panel>
-        <Tab.Panel className={classNames("rounded-[4px]  rounded-br-[4px] bg-[#ffffff80]  p-[20px]")}>
-          <FinishedShipmentTabView isBuyer={isBuyer} shipmentData={finishedShipmentList} status={DealStatus.Finished} />
-        </Tab.Panel>
-      </Tab.Panels>
-    </Tab.Group>
+      </div>
+
+      {/* Shipments Tabs */}
+      <Tab.Group defaultIndex={1} selectedIndex={selectedIndex} onChange={setSelectedIndex}>
+        <Tab.List>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-[10px]">
+              <ShipmentTabHeaders
+                all={dataLength || 0}
+                active={confirmedShipmentList?.length || 0}
+                pending={pendingShipmentList?.length || 0}
+                finished={finishedShipmentList?.length || 0}
+              />
+            </div>
+          </div>
+        </Tab.List>
+        <Tab.Panels>
+          <Tab.Panel className={classNames("rounded-[4px]  rounded-br-[4px] bg-[#ffffff80]  p-[20px]")}>
+            <AllShipments
+              isBuyer={isBuyer}
+              shipmentData={[...confirmedShipmentList, ...pendingShipmentList, ...finishedShipmentList]}
+              status={DealStatus.All}
+              loading={isConfirmedShipmentListLoading || isPendingShipmentListLoading || isFinishedShipmentListLoading}
+            />
+          </Tab.Panel>
+          <Tab.Panel className={classNames("rounded-[4px]  rounded-br-[4px] bg-[#ffffff80]  p-[20px]")}>
+            <ActiveShipmentTabView isBuyer={isBuyer} shipmentData={confirmedShipmentList} status={DealStatus.Confirmed} />
+          </Tab.Panel>
+          <Tab.Panel className={classNames("rounded-[4px]  rounded-br-[4px]  bg-[#ffffff80]  p-[20px]")}>
+            <PendingShipmentTabView isBuyer={isBuyer} shipmentData={pendingShipmentList} status={DealStatus.Proposal} />
+          </Tab.Panel>
+          <Tab.Panel className={classNames("rounded-[4px]  rounded-br-[4px] bg-[#ffffff80]  p-[20px]")}>
+            <FinishedShipmentTabView isBuyer={isBuyer} shipmentData={finishedShipmentList} status={DealStatus.Finished} />
+          </Tab.Panel>
+        </Tab.Panels>
+      </Tab.Group>
+    </div>
   );
 };
 

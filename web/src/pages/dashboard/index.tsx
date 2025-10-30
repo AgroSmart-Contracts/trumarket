@@ -5,7 +5,7 @@ import Container from "src/components/common/container";
 import ShipmentTabView from "src/components/dashboard/shipment-tab-view";
 import { APP_NAME } from "src/constants";
 
-interface DashboardMainProps {}
+interface DashboardMainProps { }
 
 const DashboardMain: React.FC<DashboardMainProps> = () => {
   return (
@@ -13,11 +13,9 @@ const DashboardMain: React.FC<DashboardMainProps> = () => {
       <Head>
         <title>{APP_NAME} - Dashboard</title>
       </Head>
-      <div className="py-[50px]">
-        <Container>
-          <ShipmentTabView />
-        </Container>
-      </div>
+      <Container>
+        <ShipmentTabView />
+      </Container>
     </>
   );
 };

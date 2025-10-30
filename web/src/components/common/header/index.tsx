@@ -1,106 +1,103 @@
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import PersonIcon from "@mui/icons-material/Person";
-import Image from "next/image";
+import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { useCallback } from "react";
-import { Badge, IconButton, badgeClasses } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { Bell, User, SignOut } from "@phosphor-icons/react";
 
-import { useUserInfo } from "src/lib/hooks/useUserInfo";
 import NotificationMenu from "src/components/dashboard/notifications/notification-menu";
+import { useUserInfo } from "src/lib/hooks/useUserInfo";
+import { useWeb3AuthContext } from "src/context/web3-auth-context";
+import { useQuery } from "@tanstack/react-query";
 import { NotificationsService } from "src/controller/NotificationsAPI.service";
+import { INotification } from "src/interfaces/notifications";
 
-import Button, { ButtonVariants } from "../button";
-import Container from "../container";
+const Header: React.FC = () => {
+    const router = useRouter();
+    const { logout } = useWeb3AuthContext();
+    const { userInfo } = useUserInfo();
 
-interface HeaderProps {}
+    const { data: notifications, refetch: refetchNotifications } = useQuery({
+        queryKey: ["notifications"],
+        queryFn: () => NotificationsService.getNotificationsList(),
+        enabled: !!userInfo?.user?.email,
+        initialData: [],
+    });
 
-const Header: React.FC<HeaderProps> = () => {
-  const { userInfo } = useUserInfo();
-  const router = useRouter();
+    const unreadCount = notifications?.filter((n: INotification) => !n.read).length || 0;
 
-  const renderAuthButtons = useCallback(() => {
-    if (!userInfo?.jwt) {
-      const buttonText = router.asPath === "/sign-in" ? "Create Account" : "Sign in";
-      const buttonAction = router.asPath === "/sign-in" ? () => router.push("/") : () => router.push("/sign-in");
-      return (
-        <Button onClick={buttonAction} variant={ButtonVariants.FILLED_BLUE}>
-          <p className="text-[13px] font-bold leading-[1.2em] text-tm-white">{buttonText}</p>
-        </Button>
-      );
-    }
-    return null;
-  }, [userInfo, router.asPath]);
+    return (
+        <header className="sticky top-0 z-50 bg-gradient-to-r from-tm-primary to-tm-primary-dark shadow-lg">
+            <div className="container mx-auto px-4">
+                <div className="flex items-center justify-between py-4">
+                    {/* Logo */}
+                    <Link href="/dashboard">
+                        <Image src="/assets/logo.svg" alt="trumarket logo" width={160}
+                            height={60} />
+                    </Link>
 
-  const {
-    data: notifications,
-    isLoading: isNotificationsLoading,
-    refetch,
-    isSuccess,
-  } = useQuery({
-    queryKey: ["get-user-notifications"],
-    queryFn: () => NotificationsService.getNotificationsList(),
-    select: (data) => {
-      const unseenMessageCount = data.filter(
-        (notification) => !notification.read && notification.subject !== "Account created",
-      );
+                    {/* Navigation */}
+                    <nav className="hidden md:flex items-center gap-8">
+                        <Link
+                            href="/dashboard"
+                            className={`text-tm-white hover:text-white/80 transition-colors font-medium ${router.pathname === "/dashboard" ? "text-white font-bold" : ""
+                                }`}
+                        >
+                            Dashboard
+                        </Link>
+                        <Link
+                            href="/dashboard/account-details"
+                            className={`text-tm-white hover:text-white/80 transition-colors font-medium ${router.pathname === "/dashboard/account-details" ? "text-white font-bold" : ""
+                                }`}
+                        >
+                            Account
+                        </Link>
+                    </nav>
 
-      return {
-        unseenCount: unseenMessageCount.length,
-        data,
-      };
-    },
-    enabled: Boolean(userInfo?.jwt),
-  });
+                    {/* Actions */}
+                    <div className="flex items-center gap-4">
+                        {/* Notifications */}
+                        {userInfo?.user?.email && (
+                            <NotificationMenu notifications={notifications || []} refetch={refetchNotifications}>
+                                <button className="relative p-2 text-tm-white hover:bg-white/20 rounded-full transition-colors">
+                                    <Bell size={24} weight="bold" />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute top-0 right-0 bg-tm-accent text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                            {unreadCount > 9 ? "9+" : unreadCount}
+                                        </span>
+                                    )}
+                                </button>
+                            </NotificationMenu>
+                        )}
 
-  return (
-    <div className="fixed left-0 z-[999] min-h-[60px] w-full  bg-tm-charcoal-blue  py-[12px] ">
-      <Container>
-        <div className="flex w-full items-center justify-between px-[30px]">
-          <div className="flex items-center">
-            <Link href="/dashboard">
-              <Image src="/assets/logo.svg" alt="trumarket logo" width={115} height={44} />
-            </Link>
-            {userInfo?.jwt ? (
-              <nav className="pl-[98px]">
-                <Link href="/dashboard" passHref>
-                  <li className="list-none text-[12px] font-bold capitalize leading-[1em] tracking-[0.02em] text-tm-white">
-                    Dashboard
-                  </li>
-                </Link>
-              </nav>
-            ) : null}
-          </div>
+                        {/* User Menu */}
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href="/dashboard/account-details"
+                                className="flex items-center gap-2 text-tm-white hover:bg-white/20 rounded-full px-3 py-2 transition-colors"
+                            >
+                                <User size={24} weight="bold" />
+                                {userInfo?.user?.email && (
+                                    <span className="hidden lg:block text-sm font-medium max-w-[150px] truncate">
+                                        {userInfo.user.email}
+                                    </span>
+                                )}
+                            </Link>
 
-          <div>
-            {renderAuthButtons()}
-            {userInfo?.jwt && (
-              <div className="flex items-center gap-[5px]">
-                <NotificationMenu notifications={notifications?.data || []} refetch={refetch}>
-                  <Badge
-                    badgeContent={notifications?.unseenCount}
-                    max={19}
-                    sx={{
-                      "& .MuiBadge-badge": {
-                        color: "#ffffff",
-                        backgroundColor: "#D9486E",
-                      },
-                    }}
-                  >
-                    <NotificationsIcon className="!h-[24px] !w-[24px] !text-tm-white" />
-                  </Badge>
-                </NotificationMenu>
-                <Link href="/dashboard/account-details">
-                  <PersonIcon className="!h-[26px] !w-[26px] !text-tm-white" />
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </Container>
-    </div>
-  );
+                            {/* Logout */}
+                            <button
+                                onClick={logout}
+                                className="p-2 text-tm-white hover:bg-tm-danger hover:text-white rounded-full transition-colors"
+                                title="Logout"
+                            >
+                                <SignOut size={24} weight="bold" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
 };
 
 export default Header;
+
