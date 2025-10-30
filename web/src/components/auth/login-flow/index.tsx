@@ -1,36 +1,45 @@
 import React from "react";
+import Link from "next/link";
 
-import Container from "src/components/common/container";
-import StepCounter from "src/components/common/step-counter";
-
+import AuthLayout from "../auth-layout";
 import LoginEmail from "./login-email";
 import AllProviders from "./all-providers";
 
-interface LoginFlowProps {}
+interface LoginFlowProps { }
 
 const LoginFlow: React.FC<LoginFlowProps> = () => {
   return (
-    <div className="flex w-full justify-center pt-[60px] md:pt-[108px]">
-      <div className="flex w-full flex-col items-center  overflow-x-hidden">
-        <div className="pb-[40px]">
-          <h1 className="text-[26px] font-bold leading-[1.2em] tracking-normal text-tm-black-80">Sign In</h1>
+    <AuthLayout title="Sign In">
+      <div className="space-y-6">
+        {/* Email Login Form */}
+        <div className="bg-tm-white rounded-tm-lg p-8 shadow-tm-md">
+          <LoginEmail />
         </div>
-        <Container>
-          <div className="mx-auto w-full max-w-[480px]">
-            <div className="rounded-tl-[4px] rounded-tr-[4px]  bg-tm-gray-light p-[30px]">
-              <LoginEmail />
-            </div>
-            <div className="h-[1px] w-full rounded-[4px] bg-tm-black-20"></div>
-            <div className="rounded-bl-[4px] rounded-br-[4px] bg-tm-gray-light px-[30px] pb-[30px] pt-[20px]">
-              <p className="pb-[14px] text-center text-[13px] leading-[1.2em] text-tm-black-80 opacity-80">
-                Or Sign in with
-              </p>
-              <AllProviders />
-            </div>
+
+        {/* Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-tm-neutral-dark"></div>
           </div>
-        </Container>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-tm-neutral-light text-tm-text-light">Or sign in with</span>
+          </div>
+        </div>
+
+        {/* Social Login */}
+        <div className="bg-tm-white rounded-tm-lg p-8 shadow-tm-md">
+          <AllProviders />
+        </div>
+
+        {/* Register Link */}
+        <div className="text-center text-sm text-tm-text-light">
+          Don&apos;t have an account?{" "}
+          <Link href="/" className="font-semibold text-tm-primary hover:text-tm-primary-dark transition-colors">
+            Create Account
+          </Link>
+        </div>
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 

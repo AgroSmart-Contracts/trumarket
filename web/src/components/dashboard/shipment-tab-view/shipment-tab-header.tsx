@@ -13,78 +13,98 @@ interface ShipmentTabHeadersProps {
 const ShipmentTabHeaders: React.FC<ShipmentTabHeadersProps> = ({ pending, active, finished, all }) => {
   return (
     <>
-      <div className="rounded-[4px]">
+      <div className="bg-white rounded-lg shadow-sm p-1 inline-flex gap-1">
         <Tab
           className={({ selected }) =>
             classNames(
-              "rounded-bl-[4px] rounded-tl-[4px]  border-y border-l border-tm-black-20  px-[20px] py-[10px] text-[16px] uppercase leading-[1.2em] outline-none",
+              "rounded-md px-5 py-2.5 text-sm font-medium leading-[1.2em] outline-none transition-all duration-200",
               {
-                " !border-tm-black-80 bg-tm-black-80  font-bold   tracking-normal   text-tm-white": selected,
+                "bg-tm-primary text-white shadow-md": selected,
+                "text-tm-black-60 hover:bg-tm-neutral-light hover:text-tm-black-80": !selected,
               },
             )
           }
         >
-          <div className="flex items-center gap-[10px]">
-            <div className="flex items-center gap-[5px]">
-              {/* <Badge background="bg-tm-purple" /> */}
-              <p className="text-[12px] font-bold uppercase leading-[1.3em] tracking-normal">All</p>
+          {({ selected }) => (
+            <div className="flex items-center gap-2">
+              <span className="font-bold uppercase">All</span>
+              <span className={classNames("text-xs font-semibold px-2 py-0.5 rounded-full min-w-[24px] text-center", {
+                "bg-white/20 text-white": selected,
+                "bg-gray-100 text-gray-700": !selected,
+              })}>
+                {all}
+              </span>
             </div>
-            <span className="text-[12px] font-semibold leading-[1.3em] tracking-normal">{all}</span>
-          </div>
+          )}
         </Tab>
         <Tab
           className={({ selected }) =>
             classNames(
-              " border border-tm-black-20  px-[20px] py-[10px] text-[16px] uppercase leading-[1.2em] outline-none",
+              "rounded-md px-5 py-2.5 text-sm font-medium leading-[1.2em] outline-none transition-all duration-200",
               {
-                " !border-tm-black-80 bg-tm-black-80  font-bold   tracking-normal   text-tm-white": selected,
+                "bg-tm-primary text-white shadow-md": selected,
+                "text-tm-black-60 hover:bg-tm-neutral-light hover:text-tm-black-80": !selected,
               },
             )
           }
         >
-          <div className="flex items-center gap-[10px]">
-            <div className="flex items-center gap-[5px]">
-              {/* <Badge background="bg-tm-purple" /> */}
-              <p className="text-[12px] font-bold uppercase leading-[1.3em] tracking-normal">Active Shipments</p>
+          {({ selected }) => (
+            <div className="flex items-center gap-2">
+              <span className="font-bold uppercase">Active</span>
+              <span className={classNames("text-xs font-semibold px-2 py-0.5 rounded-full min-w-[24px] text-center", {
+                "bg-white/20 text-white": selected,
+                "bg-gray-100 text-gray-700": !selected,
+              })}>
+                {active}
+              </span>
             </div>
-            <span className="text-[12px] font-semibold leading-[1.3em] tracking-normal">{active}</span>
-          </div>
+          )}
         </Tab>
         <Tab
           className={({ selected }) =>
             classNames(
-              "border-b border-r border-t border-tm-black-20 px-[20px] py-[10px] text-[16px] uppercase leading-[1.2em] outline-none",
+              "rounded-md px-5 py-2.5 text-sm font-medium leading-[1.2em] outline-none transition-all duration-200",
               {
-                " !border-tm-black-80 bg-tm-black-80  font-bold tracking-normal   text-tm-white": selected,
+                "bg-tm-primary text-white shadow-md": selected,
+                "text-tm-black-60 hover:bg-tm-neutral-light hover:text-tm-black-80": !selected,
               },
             )
           }
         >
-          <div className="flex items-center gap-[16px]">
-            <div className="flex items-center gap-[5px]">
-              {/* <Badge /> */}
-              <p className="text-[12px] font-bold leading-[1.3em] tracking-normal">Pending</p>
+          {({ selected }) => (
+            <div className="flex items-center gap-2">
+              <span className="font-bold uppercase">Pending</span>
+              <span className={classNames("text-xs font-semibold px-2 py-0.5 rounded-full min-w-[24px] text-center", {
+                "bg-white/20 text-white": selected,
+                "bg-orange-100 text-tm-accent": !selected,
+              })}>
+                {pending}
+              </span>
             </div>
-            <span className="text-[12px] font-semibold leading-[1.3em] tracking-normal">{pending}</span>
-          </div>
+          )}
         </Tab>
         <Tab
           className={({ selected }) =>
             classNames(
-              "rounded-br-[4px] rounded-tr-[4px] border-y border-r border-tm-black-20 px-[20px] py-[10px] text-[16px] uppercase leading-[1.2em] outline-none",
+              "rounded-md px-5 py-2.5 text-sm font-medium leading-[1.2em] outline-none transition-all duration-200",
               {
-                "bg-tm-black-80 font-bold  leading-[1.2em] tracking-normal   text-tm-white": selected,
+                "bg-tm-primary text-white shadow-md": selected,
+                "text-tm-black-60 hover:bg-tm-neutral-light hover:text-tm-black-80": !selected,
               },
             )
           }
         >
-          <div className="flex items-center gap-[16px]">
-            <div className="flex items-center gap-[5px]">
-              {/* <Badge /> */}
-              <p className="text-[12px] font-bold leading-[1.3em] tracking-normal">Finished</p>
+          {({ selected }) => (
+            <div className="flex items-center gap-2">
+              <span className="font-bold uppercase">Finished</span>
+              <span className={classNames("text-xs font-semibold px-2 py-0.5 rounded-full min-w-[24px] text-center", {
+                "bg-white/20 text-white": selected,
+                "bg-gray-100 text-gray-700": !selected,
+              })}>
+                {finished}
+              </span>
             </div>
-            <span className="text-[12px]  font-semibold leading-[1.3em] tracking-normal">{finished}</span>
-          </div>
+          )}
         </Tab>
       </div>
     </>

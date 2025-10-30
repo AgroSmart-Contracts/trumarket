@@ -1,15 +1,17 @@
 import React, { useEffect } from "react";
+import { useRouter } from "next/router";
 
-import Footer from "src/components/common/footer";
-import Header from "src/components/common/header";
-import { useUserInfo } from "src/lib/hooks/useUserInfo";
 import { register } from "src/lib/push-notification-register";
+import Header from "src/components/common/header";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const router = useRouter();
+  const isDashboard = router.pathname.startsWith("/dashboard");
+
   useEffect(() => {
     const initializePushNotifications = async () => {
       try {
@@ -21,11 +23,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     initializePushNotifications();
   }, []);
+
   return (
-    <div className=" flex min-h-screen flex-col">
-      <Header />
-      <div className="flex-1 py-[80px]">{children}</div>
-      <Footer />
+    <div className="flex min-h-screen flex-col bg-tm-neutral-light">
+      {isDashboard && <Header />}
+      <div className="flex-1">{children}</div>
     </div>
   );
 };

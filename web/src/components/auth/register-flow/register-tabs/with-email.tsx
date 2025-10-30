@@ -123,22 +123,25 @@ const WithEmail: React.FC<WithEmailProps> = () => {
   return (
     <div>
       {emailRegisterStep === EmailSteps.STEP_1 ? (
-        <form onSubmit={handleSubmit(handleSubmitForm)}>
-          <p className="text-tm-theme-text mb-[5px] text-[13px] leading-[1.2em] tracking-normal">Email address</p>
-          <Input
-            name="email"
-            placeholder="Please provide email"
-            register={register("email", {
-              required: "Email field is required!",
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: "Email format is invalid!",
-              },
-            })}
-            errorMessageClass="!relative !left-0"
-            hasError={Boolean(errors.email)}
-            errors={errors}
-          />
+        <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-5">
+          <div>
+            <label className="block text-sm font-semibold text-tm-text mb-2">Email Address</label>
+            <Input
+              name="email"
+              placeholder="Please provide email"
+              register={register("email", {
+                required: "Email field is required!",
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: "Email format is invalid!",
+                },
+              })}
+              errorMessageClass="!relative !left-0"
+              hasError={Boolean(errors.email)}
+              errors={errors}
+              classOverrides="tm-input"
+            />
+          </div>
           <Controller
             control={control}
             rules={{
@@ -146,14 +149,14 @@ const WithEmail: React.FC<WithEmailProps> = () => {
             }}
             name="terms"
             render={({ field: { onChange, onBlur, value } }) => (
-              <div className="mb-[20px] mt-[14px] flex items-center gap-[8px]">
+              <div className="flex items-start gap-3 p-4 rounded-tm-md border border-tm-neutral-dark bg-tm-neutral-light">
                 <CheckBox
                   id="terms"
                   checkBoxName="terms"
                   checkBoxValue={isTermsAndConditionChecked}
-                  classes={classNames({
-                    "text-tm-danger ": errors.terms,
-                    "border-black": !errors.terms,
+                  classes={classNames("mt-1 !w-5 !h-5", {
+                    "!border-tm-danger": errors.terms,
+                    "!border-tm-primary": !errors.terms,
                   })}
                   setChecked={(checked) => {
                     dispatch(setTermsAndConditionsChecked({ state: checked }));
@@ -161,21 +164,21 @@ const WithEmail: React.FC<WithEmailProps> = () => {
                   }}
                 />
                 <p
-                  className={classNames("text-[13px]", {
-                    "text-tm-danger ": errors.terms,
-                    "text-tm-theme-text": !errors.terms,
+                  className={classNames("text-sm flex-1", {
+                    "text-tm-danger": errors.terms,
+                    "text-tm-text": !errors.terms,
                   })}
                 >
                   I accept{" "}
                   <span
-                    className="mr-[4px] cursor-pointer underline"
+                    className="font-semibold cursor-pointer hover:text-tm-primary transition-colors underline"
                     onClick={() => openModal(AuthTMModalView.TERMS_AND_CONDITIONS)}
                   >
                     Terms and Conditions
                   </span>
-                  and
+                  {" "}and{" "}
                   <span
-                    className="ml-[4px] cursor-pointer underline"
+                    className="font-semibold cursor-pointer hover:text-tm-primary transition-colors underline"
                     onClick={() => openModal(AuthTMModalView.PRIVACY_POLICY)}
                   >
                     Privacy Policy
@@ -184,12 +187,16 @@ const WithEmail: React.FC<WithEmailProps> = () => {
               </div>
             )}
           />
-          <Button loading={verificationCodeLoading} disabled={verificationCodeLoading}>
+          <Button
+            loading={verificationCodeLoading}
+            disabled={verificationCodeLoading}
+            classOverrides="w-full tm-btn tm-btn-primary tm-btn-lg"
+          >
             <p>Send me an email with code</p>
           </Button>
         </form>
       ) : (
-        <div className="flex flex-col items-center gap-[14px]">
+        <div className="flex flex-col items-center gap-6">
           <OTPInputWrapper
             email={getValues("email")}
             setVerificationCode={setVerificationCode}
@@ -198,18 +205,16 @@ const WithEmail: React.FC<WithEmailProps> = () => {
             resendLoading={verificationCodeLoading}
             setEmailRegisterStep={setEmailRegisterStep}
           />
-          <div className="mt-[11px] w-full">
-            <Button
-              loading={isLoggingIn || confirmationLoading}
-              onClick={() => handleConfirm(verificationCode)}
-              disabled={verificationCode?.length !== 6 || isLoggingIn || confirmationLoading}
-            >
-              <p>Confirm</p>
-            </Button>
-          </div>
+          <Button
+            loading={isLoggingIn || confirmationLoading}
+            onClick={() => handleConfirm(verificationCode)}
+            disabled={verificationCode?.length !== 6 || isLoggingIn || confirmationLoading}
+            classOverrides="w-full tm-btn tm-btn-primary tm-btn-lg"
+          >
+            <p>Confirm</p>
+          </Button>
         </div>
       )}
-      {/* <button onClick={() => router.push("/test2")}>sss</button> */}
     </div>
   );
 };

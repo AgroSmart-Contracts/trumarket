@@ -116,30 +116,35 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
   return (
     <>
       {emailRegisterStep === EmailSteps.STEP_1 ? (
-        <form onSubmit={handleSubmit(handleSubmitForm)}>
-          <p className="mb-[5px] text-[13px] leading-[1.2em] tracking-normal text-[#00000099]">Email address</p>
-          <Input
-            name="email"
-            placeholder="Please provide email"
-            register={register("email", {
-              required: "Email field is required!",
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: "Email format is invalid!",
-              },
-            })}
-            hasError={Boolean(errors.email)}
-            errorMessageClass="!relative !left-0"
-            errors={errors}
-          />
-          <div className="mt-[10px]">
-            <Button disabled={verificationCodeLoading} loading={verificationCodeLoading}>
-              <p>Send me an email with code</p>
-            </Button>
+        <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-5">
+          <div>
+            <label className="block text-sm font-semibold text-tm-text mb-2">Email Address</label>
+            <Input
+              name="email"
+              placeholder="Enter your email"
+              register={register("email", {
+                required: "Email field is required!",
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: "Email format is invalid!",
+                },
+              })}
+              hasError={Boolean(errors.email)}
+              errorMessageClass="!relative !left-0"
+              errors={errors}
+              classOverrides="tm-input"
+            />
           </div>
+          <Button
+            disabled={verificationCodeLoading}
+            loading={verificationCodeLoading}
+            classOverrides="w-full tm-btn tm-btn-primary tm-btn-lg"
+          >
+            <p>Send me an email with code</p>
+          </Button>
         </form>
       ) : (
-        <div className="flex flex-col items-center gap-[14px]">
+        <div className="flex flex-col items-center gap-6">
           <OTPInputWrapper
             email={getValues("email")}
             setVerificationCode={setVerificationCode}
@@ -148,15 +153,14 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
             resendLoading={verificationCodeLoading}
             setEmailRegisterStep={setEmailRegisterStep}
           />
-          <div className="mt-[11px] w-full">
-            <Button
-              onClick={() => handleConfirm(verificationCode)}
-              loading={isLoggingIn || confirmationLoading}
-              disabled={verificationCode?.length !== 6 || isLoggingIn || confirmationLoading}
-            >
-              <p>Confirm</p>
-            </Button>
-          </div>
+          <Button
+            onClick={() => handleConfirm(verificationCode)}
+            loading={isLoggingIn || confirmationLoading}
+            disabled={verificationCode?.length !== 6 || isLoggingIn || confirmationLoading}
+            classOverrides="w-full tm-btn tm-btn-primary tm-btn-lg"
+          >
+            <p>Confirm</p>
+          </Button>
         </div>
       )}
     </>
