@@ -16,6 +16,7 @@ export class AuthService {
   }
 
   static async requestJWTtoAccount({ email, otp }: { email: string; otp: string }): Promise<{ id_token: string }> {
+    console.log("before requestJWTtoAccount");
     const response = await axios.post(`${process.env.NEXT_PUBLIC_AUTH0_API_URL}/oauth/token`, {
       client_id: process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID,
       client_secret: process.env.NEXT_PUBLIC_AUTH0_CLIENT_SECRET,
