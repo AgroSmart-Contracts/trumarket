@@ -74,12 +74,12 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
 
       const { email } = parseToken(auth0Jwt);
 
-      const subVerifierInfoArray = [
-        {
-          verifier: "auth0-passwordless",
-          idToken: auth0Jwt!,
-        },
-      ];
+      // const subVerifierInfoArray = [
+      //   {
+      //     verifier: "auth0-passwordless",
+      //     idToken: auth0Jwt!,
+      //   },
+      // ];
 
       if (!process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID) {
         throw new Error("Web3Auth connection ID is not set");
@@ -89,8 +89,8 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
         verifier: process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID,
         verifierId: email,
         idToken: auth0Jwt,
-        subVerifierInfoArray,
-      });
+        // subVerifierInfoArray,
+      } as any);
 
       const jwt = await web3authSfa.authenticateUser();
 
