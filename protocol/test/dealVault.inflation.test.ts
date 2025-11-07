@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { DealVault, ERC20Mock } from "../typechain-types";
+import { DealVault, ERC20Mock } from "../typechain-types/contracts";
 
 describe("DealVault Inflation Attack", function () {
   let vault: DealVault;
