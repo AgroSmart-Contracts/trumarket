@@ -26,10 +26,8 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
     /// @notice Minimum deposit amount to prevent inflation attacks
     uint256 private _minDeposit;
-    /// @notice Tracks the actual accounting balance of assets to protect against direct transfers
-    uint256 private _accountingBalance;
-    /// @notice Initial deposit amount
-    uint256 private _initialDeposit;
+    /// @notice Virtual offset for ERC4626 inflation attack protection
+    uint8 private constant _DECIMALS_OFFSET = 6;
 
     /// @notice Emitted when deposits are blocked
     event DepositsBlocked();
@@ -64,22 +62,10 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
         _underlying = underlying_;
         _minDeposit = 1e6; // Set a reasonable minimum deposit (e.g., 1 USDC if decimals=6)
         IERC20(underlying_).approve(msg.sender, maxDeposit_);
-
-        // Initialize with non-zero values to prevent first deposit attack
-        _mint(address(1), 1); // Mint a minimal share to a burned address
-        _accountingBalance = 1; // Initialize with minimal balance
     }
 
     /**
-     * @notice Returns the total amount of the underlying asset held by the vault
-     * @return Amount of assets
-     */
-    function totalAssets() public view virtual override returns (uint256) {
-        return _accountingBalance;
-    }
-
-    /**
-     * @notice Override asset to update accounting when direct transfers occur
+     * @notice Override asset to return the underlying token address
      * @return The address of the asset token
      */
     function asset() public view virtual override returns (address) {
@@ -87,19 +73,11 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Sync the accounting balance with the actual token balance
-     * @dev This function is called before any deposit or withdrawal operation
+     * @notice Override decimals offset to enable virtual shares/assets for inflation attack protection
+     * @return The decimals offset (6 for USDC-like tokens)
      */
-    function _syncAccounting() internal {
-        uint256 currentBalance = IERC20(asset()).balanceOf(address(this));
-        if (currentBalance > _accountingBalance) {
-            // If there was a direct transfer to the contract, we don't increase the accounting balance
-            // This effectively dilutes the donation across all share holders
-            // We don't need to do anything here
-        } else if (currentBalance < _accountingBalance) {
-            // This should not happen under normal circumstances, but we adjust if needed
-            _accountingBalance = currentBalance;
-        }
+    function _decimalsOffset() internal pure override returns (uint8) {
+        return _DECIMALS_OFFSET;
     }
 
     /**
@@ -110,7 +88,8 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
     function maxDeposit(
         address account
     ) public view override returns (uint256) {
-        return _maxDeposit - _accountingBalance + 1;
+        uint256 currentAssets = totalAssets();
+        return _maxDeposit > currentAssets ? _maxDeposit - currentAssets : 0;
     }
 
     /**
@@ -119,7 +98,12 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @return Maximum amount of shares that can be minted
      */
     function maxMint(address account) public view override returns (uint256) {
-        return _maxMint - _accountingBalance + 1;
+        uint256 currentAssets = totalAssets();
+        uint256 maxAssets = _maxDeposit > currentAssets
+            ? _maxDeposit - currentAssets
+            : 0;
+        if (maxAssets == 0) return 0;
+        return convertToShares(maxAssets);
     }
 
     /**
@@ -154,27 +138,13 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
         require(receiver != address(0), "Invalid receiver address");
         require(assets >= _minDeposit, "Deposit amount below minimum");
 
-        // Sync accounting before calculating shares
-        _syncAccounting();
+        // Enforce max deposit limit
+        uint256 currentAssets = totalAssets();
+        require(currentAssets + assets <= _maxDeposit, "Exceeds max deposit");
 
-        // Calculate shares based on our accounting balance, not actual token balance
-        uint256 supply = super.totalSupply();
-        uint256 shares;
-
-        if (supply == 1) {
-            // Only the burned share exists
-            // For first deposit, use 1:1 ratio
-            shares = assets;
-        } else {
-            // For subsequent deposits, calculate based on current ratio
-            shares = (assets * supply) / _accountingBalance;
-        }
-
-        // Ensure minimum share amount to prevent dust attacks
+        // Calculate shares using ERC4626 standard conversion (includes virtual offset)
+        uint256 shares = convertToShares(assets);
         require(shares > 0, "Share amount too small");
-
-        // Update accounting balance
-        _accountingBalance += assets;
 
         // Transfer tokens and mint shares
         IERC20(asset()).transferFrom(msg.sender, address(this), assets);
@@ -201,26 +171,13 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
         require(receiver != address(0), "Invalid receiver address");
         require(shares > 0, "Share amount must be positive");
 
-        // Sync accounting before calculating assets
-        _syncAccounting();
-
-        // Calculate assets based on our accounting balance, not actual token balance
-        uint256 supply = super.totalSupply();
-        uint256 assets;
-
-        if (supply == 1) {
-            // Only the burned share exists
-            // For first mint, use 1:1 ratio
-            assets = shares;
-        } else {
-            // For subsequent mints, calculate based on current ratio
-            assets = (shares * _accountingBalance) / supply;
-        }
-
+        // Calculate assets using ERC4626 standard conversion (includes virtual offset)
+        uint256 assets = convertToAssets(shares);
         require(assets >= _minDeposit, "Equivalent asset amount below minimum");
 
-        // Update accounting balance
-        _accountingBalance += assets;
+        // Enforce max deposit limit
+        uint256 currentAssets = totalAssets();
+        require(currentAssets + assets <= _maxDeposit, "Exceeds max deposit");
 
         // Transfer tokens and mint shares
         IERC20(asset()).transferFrom(msg.sender, address(this), assets);
@@ -247,20 +204,15 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
         require(paused() == false, "Unfinished Deal");
         require(receiver != address(0), "Invalid receiver address");
         require(owner != address(0), "Invalid owner address");
-
-        // Sync accounting before calculating assets
-        _syncAccounting();
+        require(shares > 0, "Shares must be positive");
 
         if (msg.sender != owner) {
             _spendAllowance(owner, msg.sender, shares);
         }
 
-        // Calculate assets based on our accounting balance, not actual token balance
-        uint256 supply = super.totalSupply();
-        uint256 assets = (shares * _accountingBalance) / supply;
-
-        // Update accounting balance
-        _accountingBalance -= assets;
+        // Calculate assets using ERC4626 standard conversion (includes virtual offset)
+        uint256 assets = convertToAssets(shares);
+        require(assets > 0, "Insufficient assets for redemption");
 
         // Burn shares and transfer tokens
         _burn(owner, shares);
@@ -287,20 +239,15 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
         require(paused() == false, "Unfinished Deal");
         require(receiver != address(0), "Invalid receiver address");
         require(owner != address(0), "Invalid owner address");
+        require(assets > 0, "Assets must be positive");
 
-        // Sync accounting before calculating shares
-        _syncAccounting();
-
-        // Calculate shares based on our accounting balance, not actual token balance
-        uint256 supply = super.totalSupply();
-        uint256 shares = (assets * supply) / _accountingBalance;
+        // Calculate shares using ERC4626 standard conversion (includes virtual offset)
+        uint256 shares = convertToShares(assets);
+        require(shares > 0, "Insufficient shares for withdrawal");
 
         if (msg.sender != owner) {
             _spendAllowance(owner, msg.sender, shares);
         }
-
-        // Update accounting balance
-        _accountingBalance -= assets;
 
         // Burn shares and transfer tokens
         _burn(owner, shares);
@@ -334,7 +281,7 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @dev Only callable by the owner and includes reentrancy protection
      */
     function complete() public onlyOwner nonReentrant {
-        require(_accountingBalance > _maxDeposit, "Waiting for borrower funds");
+        require(totalAssets() > _maxDeposit, "Waiting for borrower funds");
         unpause();
         emit DealCompleted();
     }
@@ -351,10 +298,7 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
     ) public onlyOwner nonReentrant {
         require(borrower != address(0), "Invalid borrower address");
         require(amount > 0, "Amount must be positive");
-        require(amount <= _accountingBalance, "Insufficient funds");
-
-        // Update accounting balance
-        _accountingBalance -= amount;
+        require(amount <= totalAssets(), "Insufficient funds");
 
         IERC20(_underlying).transfer(borrower, amount);
         emit TransferToBorrower(borrower, amount);
@@ -380,9 +324,6 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
         // Transfer tokens from owner to vault
         IERC20(_underlying).transferFrom(msg.sender, address(this), amount);
-
-        // Update accounting balance
-        _accountingBalance += amount;
 
         emit Donation(msg.sender, amount);
     }
