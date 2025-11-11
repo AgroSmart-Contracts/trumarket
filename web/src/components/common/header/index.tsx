@@ -26,9 +26,9 @@ const Header: React.FC = () => {
     const unreadCount = notifications?.filter((n: INotification) => !n.read).length || 0;
 
     return (
-        <header className="sticky top-0 z-50 bg-gradient-to-r from-tm-primary to-tm-primary-dark shadow-lg">
+        <header className="fixed top-0 w-full z-[100] bg-gradient-to-r from-tm-primary to-tm-primary-dark shadow-lg">
             <div className="container mx-auto px-4">
-                <div className="flex items-center justify-between py-4">
+                <div className="flex items-center justify-between py-3 sm:py-4 h-16">
                     {/* Logo */}
                     <Link href="/dashboard">
                         <Image src="/assets/logo.svg" alt="trumarket logo" width={160}

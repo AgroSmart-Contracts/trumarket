@@ -39,7 +39,7 @@ export function CheckBox({
           checked={checkBoxValue}
           onChange={(e) => setChecked(e.target.checked)}
         />
-        <div className="text-white pointer-events-none absolute top-[49%] size-[16px] -translate-y-1/2 opacity-0 transition-opacity peer-checked:opacity-100">
+        <div className="text-white pointer-events-none absolute left-1/2 top-1/2 size-[16px] -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity peer-checked:opacity-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="flex  h-full w-full items-center justify-center"

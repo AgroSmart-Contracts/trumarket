@@ -12,7 +12,7 @@ interface TabViewProps {
 const TabView: React.FC<TabViewProps> = ({ tabHeaders, tabContent }) => {
   return (
     <Tab.Group>
-      <Tab.List className="flex gap-2 mb-6">
+      <Tab.List className="flex gap-2">
         {tabHeaders.map((category, i) => (
           <Tab
             key={category}
@@ -35,7 +35,7 @@ const TabView: React.FC<TabViewProps> = ({ tabHeaders, tabContent }) => {
           <Tab.Panel
             key={i}
             className={classNames(
-              "rounded-tm-lg p-8",
+              "rounded-tm-lg pt-8 pb-4",
             )}
           >
             {view}

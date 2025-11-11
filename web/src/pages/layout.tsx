@@ -27,7 +27,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex min-h-screen flex-col bg-tm-neutral-light">
       {isDashboard && <Header />}
-      <div className="flex-1">{children}</div>
+      <div className={`flex-1 ${isDashboard ? 'pt-16 sm:pt-20' : ''}`}>{children}</div>
     </div>
   );
 };

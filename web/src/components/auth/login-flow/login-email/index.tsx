@@ -6,7 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 
 import Button from "src/components/common/button";
-import Input from "src/components/common/input";
+import EmailInput from "src/components/common/email-input";
 import VerificationInputComponent from "src/components/common/verification-input";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
 import { AuthService } from "src/controller/AuthAPI.service";
@@ -117,24 +117,11 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
     <>
       {emailRegisterStep === EmailSteps.STEP_1 ? (
         <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-5">
-          <div>
-            <label className="block text-sm font-semibold text-tm-text mb-2">Email Address</label>
-            <Input
-              name="email"
-              placeholder="Enter your email"
-              register={register("email", {
-                required: "Email field is required!",
-                pattern: {
-                  value: /\S+@\S+\.\S+/,
-                  message: "Email format is invalid!",
-                },
-              })}
-              hasError={Boolean(errors.email)}
-              errorMessageClass="!relative !left-0"
-              errors={errors}
-              classOverrides="tm-input"
-            />
-          </div>
+          <EmailInput
+            register={register}
+            errors={errors}
+            placeholder="Enter your email"
+          />
           <Button
             disabled={verificationCodeLoading}
             loading={verificationCodeLoading}

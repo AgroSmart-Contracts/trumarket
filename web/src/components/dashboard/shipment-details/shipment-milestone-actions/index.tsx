@@ -38,21 +38,19 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
     return (
       <MilestoneApprovalBox
         buttonPlaceholderText={<span>Milestone approval</span>}
-        childContainerClasses="!py-[5px] mt-[1px] !px-[4px]"
+        childContainerClasses="!py-2 sm:!py-[5px]"
         milestoneBgColor="bg-tm-dark-secondary"
         toolTipText="Submit the approval request to ask the buyer to close the milestone."
         withOverlay={false}
       >
-        <div className="flex gap-[6px] text-[12px] font-bold  text-tm-white">
-          <MilestoneActionButton
-            action={() =>
-              handleMilestoneAction({ submitToReview: true }, "Milestone submitted successfully!", setLoading)
-            }
-            loading={loading}
-          >
-            <p>Submit Request</p>
-          </MilestoneActionButton>
-        </div>
+        <MilestoneActionButton
+          action={() =>
+            handleMilestoneAction({ submitToReview: true }, "Milestone submitted successfully!", setLoading)
+          }
+          loading={loading}
+        >
+          <span className="text-xs sm:text-[12px]">Submit Request</span>
+        </MilestoneActionButton>
       </MilestoneApprovalBox>
     );
   }
@@ -64,9 +62,9 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
         milestoneBgColor="bg-tm-blue"
         toolTipText="Buyer has been notified about your approval request. You will be notified when he confirms or denies the request."
       >
-        <div className="mt-[3px] flex items-center gap-[6px] text-[12px] font-bold uppercase  text-tm-white">
-          <p>Pending</p>
-          <PendingIcon className="!h-[15px] !w-[15px]" />
+        <div className="flex items-center gap-2 sm:gap-[6px] text-xs sm:text-[12px] font-bold uppercase text-tm-white">
+          <span>Pending</span>
+          <PendingIcon className="!h-4 !w-4 sm:!h-[15px] sm:!w-[15px]" />
         </div>
       </MilestoneApprovalBox>
     );
@@ -79,11 +77,11 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
         milestoneBgColor="bg-tm-dark-secondary"
         toolTipText="You will be able to approve the milestone after the Supplier submits the approval request."
         withOverlay={false}
-        childContainerClasses="bg-[#2D3E57]/30 rounded-[4px]"
+        childContainerClasses="bg-[#2D3E57]/30 rounded-md"
       >
-        <div className="flex items-center gap-[6px]  text-[12px]  font-bold text-tm-white">
-          <p>Wait for supplier request</p>
-          <PendingIcon className="!h-[15px] !w-[15px]" />
+        <div className="flex items-center gap-2 sm:gap-[6px] text-xs sm:text-[12px] font-bold text-tm-white">
+          <span className="truncate">Wait for supplier request</span>
+          <PendingIcon className="!h-4 !w-4 sm:!h-[15px] sm:!w-[15px] flex-shrink-0" />
         </div>
       </MilestoneApprovalBox>
     );
@@ -93,20 +91,20 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
     return (
       <MilestoneApprovalBox
         buttonPlaceholderText={<span>Milestone approval</span>}
-        childContainerClasses="!py-[5px] mt-[1px]"
+        childContainerClasses="!py-2 sm:!py-[5px]"
         milestoneBgColor="bg-tm-yellow"
         withOverlay={false}
-        toolTipText="Supplier asked you to approve this milestone. Approval will close it permanently and set it as done.After the denial, the supplier will be able to correct the submitted documents/media."
+        toolTipText="Supplier asked you to approve this milestone. Approval will close it permanently and set it as done. After the denial, the supplier will be able to correct the submitted documents/media."
       >
-        <div className="flex gap-[6px] text-[12px] font-bold  text-tm-white">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-[6px] w-full sm:w-auto">
           <MilestoneActionButton
-            action={() => handleMilestoneAction({ deny: true }, "Milestone  denied!", setRejectActionLoading)}
+            action={() => handleMilestoneAction({ deny: true }, "Milestone denied!", setRejectActionLoading)}
             loading={rejectActionLoading}
             variant={ButtonVariants.FILLED_RED}
           >
-            <div className="flex items-center gap-[6px]">
-              <p className="text-tm-white">Deny</p>
-              <CancelIcon className="!h-[18px] !w-[18px] text-tm-white" />
+            <div className="flex items-center justify-center gap-1.5 sm:gap-[6px]">
+              <span className="text-tm-white text-xs sm:text-[12px] font-semibold">Deny</span>
+              <CancelIcon className="!h-4 !w-4 sm:!h-[18px] sm:!w-[18px] text-tm-white flex-shrink-0" />
             </div>
           </MilestoneActionButton>
           <MilestoneActionButton
@@ -114,9 +112,11 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
             loading={loading}
             variant={ButtonVariants.FILLED_GREEN}
           >
-            <div className="flex items-center gap-[6px]">
-              <p className="text-tm-white">Approve</p>
-              {!loading ? <CheckCircleIcon className="!h-[18px] !w-[18px] text-tm-white" /> : null}
+            <div className="flex items-center justify-center gap-1.5 sm:gap-[6px]">
+              <span className="text-tm-white text-xs sm:text-[12px] font-semibold">Approve</span>
+              {!loading ? (
+                <CheckCircleIcon className="!h-4 !w-4 sm:!h-[18px] sm:!w-[18px] text-tm-white flex-shrink-0" />
+              ) : null}
             </div>
           </MilestoneActionButton>
         </div>
@@ -128,24 +128,23 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
     return (
       <MilestoneApprovalBox
         buttonPlaceholderText={<span>Milestone approval</span>}
-        childContainerClasses="!py-[5px] mt-[1px]"
+        childContainerClasses="!py-2 sm:!py-[5px]"
         milestoneBgColor="bg-tm-red"
-        toolTipText="Buyer denied to approve this milestone. Contact him about the reasons.After correcting the documents/media resubmit the request."
+        toolTipText="Buyer denied to approve this milestone. Contact him about the reasons. After correcting the documents/media resubmit the request."
       >
-        <div className="flex gap-[10px] text-[12px] font-bold  text-tm-white">
-          <div className="flex items-center gap-[6px]">
-            <p className="uppercase text-tm-white">Denied</p>
+        <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-[10px] w-full sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-[6px] text-xs sm:text-[12px] font-bold uppercase text-tm-white">
+            <span>Denied</span>
+            <CancelIcon className="!h-4 !w-4 sm:!h-[15px] sm:!w-[15px] flex-shrink-0" />
           </div>
-          <div className="flex gap-[6px] text-[12px] font-bold  text-tm-white">
-            <MilestoneActionButton
-              action={() =>
-                handleMilestoneAction({ submitToReview: true }, "Milestone resubmitted successfully!", setLoading)
-              }
-              loading={loading}
-            >
-              <p>Resubmit Request</p>
-            </MilestoneActionButton>
-          </div>
+          <MilestoneActionButton
+            action={() =>
+              handleMilestoneAction({ submitToReview: true }, "Milestone resubmitted successfully!", setLoading)
+            }
+            loading={loading}
+          >
+            <span className="text-xs sm:text-[12px]">Resubmit Request</span>
+          </MilestoneActionButton>
         </div>
       </MilestoneApprovalBox>
     );
@@ -158,11 +157,11 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
         milestoneBgColor="bg-tm-dark-secondary"
         toolTipText="You denied to approve this milestone. Contact the supplier about the reasons. You will be notified when he corrects the submitted documents/media."
         withOverlay={false}
-        childContainerClasses="bg-[#2D3E57]/30 rounded-[4px]"
+        childContainerClasses="bg-[#2D3E57]/30 rounded-md"
       >
-        <div className="flex items-center gap-[6px]  text-[12px]  font-bold text-tm-white">
-          <p>Wait for supplier request</p>
-          <PendingIcon className="!h-[15px] !w-[15px]" />
+        <div className="flex items-center gap-2 sm:gap-[6px] text-xs sm:text-[12px] font-bold text-tm-white">
+          <span className="truncate">Wait for supplier request</span>
+          <PendingIcon className="!h-4 !w-4 sm:!h-[15px] sm:!w-[15px] flex-shrink-0" />
         </div>
       </MilestoneApprovalBox>
     );
@@ -175,13 +174,15 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
         milestoneBgColor="bg-tm-green"
         toolTipText={`This milestone has been approved by the ${isBuyer ? "buyer" : "supplier"}`}
       >
-        <div className="mt-[3px] flex items-center gap-[6px] text-[12px] font-bold  text-tm-white">
-          <p>Approved</p>
-          <CheckCircleIcon className="!h-[15px] !w-[15px]" />
+        <div className="flex items-center gap-2 sm:gap-[6px] text-xs sm:text-[12px] font-bold text-tm-white">
+          <span>Approved</span>
+          <CheckCircleIcon className="!h-4 !w-4 sm:!h-[15px] sm:!w-[15px] flex-shrink-0" />
         </div>
       </MilestoneApprovalBox>
     );
   }
+
+  return null;
 };
 
 export default MilestoneActionRenderer;
