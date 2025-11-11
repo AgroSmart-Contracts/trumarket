@@ -8,8 +8,7 @@ import axios from "axios";
 import { ADAPTER_STATUS } from "@web3auth/single-factor-auth";
 
 import Button from "src/components/common/button";
-import { CheckBox } from "src/components/common/checkbox";
-import Input from "src/components/common/input";
+import SharedRegisterForm from "./shared-register-form";
 import VerificationInputComponent from "src/components/common/verification-input";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
 import { AuthService } from "src/controller/AuthAPI.service";
@@ -17,17 +16,15 @@ import { checkWeb3AuthInstance, handleOTP, parseToken, uiConsole, handleRequestA
 import { EmailSteps } from "src/interfaces/global";
 import { useModal } from "src/context/modal-context";
 import { AuthTMModalView } from "src/pages";
-import { useAppDispatch, useAppSelector } from "src/lib/hooks";
-import { selectIsTermsAndConditionsChecked, setTermsAndConditionsChecked } from "src/store/UiSlice";
+import { useAppSelector } from "src/lib/hooks";
+import { selectIsTermsAndConditionsChecked } from "src/store/UiSlice";
 
 import OTPInputWrapper from "../../otp-input-wrapper";
 
 interface WithEmailProps { }
 
 const WithEmail: React.FC<WithEmailProps> = () => {
-  const { openModal } = useModal();
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const isTermsAndConditionChecked = useAppSelector(selectIsTermsAndConditionsChecked);
   const { web3authSfa, setIsLoggingIn, setIsLoggedIn, getUserInfo, isLoggingIn, setJWT, init } = useWeb3AuthContext();
   const { getIdTokenClaims, loginWithRedirect } = useAuth0();
@@ -123,78 +120,22 @@ const WithEmail: React.FC<WithEmailProps> = () => {
   return (
     <div>
       {emailRegisterStep === EmailSteps.STEP_1 ? (
-        <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-5">
-          <div>
-            <label className="block text-sm font-semibold text-tm-text mb-2">Email Address</label>
-            <Input
-              name="email"
-              placeholder="Please provide email"
-              register={register("email", {
-                required: "Email field is required!",
-                pattern: {
-                  value: /\S+@\S+\.\S+/,
-                  message: "Email format is invalid!",
-                },
-              })}
-              errorMessageClass="!relative !left-0"
-              hasError={Boolean(errors.email)}
-              errors={errors}
-              classOverrides="tm-input"
-            />
-          </div>
-          <Controller
-            control={control}
-            rules={{
-              required: true,
-            }}
-            name="terms"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <div className="flex items-start gap-3 p-4 rounded-tm-md border border-tm-neutral-dark bg-tm-neutral-light">
-                <CheckBox
-                  id="terms"
-                  checkBoxName="terms"
-                  checkBoxValue={isTermsAndConditionChecked}
-                  classes={classNames("mt-1 !w-5 !h-5", {
-                    "!border-tm-danger": errors.terms,
-                    "!border-tm-primary": !errors.terms,
-                  })}
-                  setChecked={(checked) => {
-                    dispatch(setTermsAndConditionsChecked({ state: checked }));
-                    setValue("terms", checked, { shouldValidate: true });
-                  }}
-                />
-                <p
-                  className={classNames("text-sm flex-1", {
-                    "text-tm-danger": errors.terms,
-                    "text-tm-text": !errors.terms,
-                  })}
-                >
-                  I accept{" "}
-                  <span
-                    className="font-semibold cursor-pointer hover:text-tm-primary transition-colors underline"
-                    onClick={() => openModal(AuthTMModalView.TERMS_AND_CONDITIONS)}
-                  >
-                    Terms and Conditions
-                  </span>
-                  {" "}and{" "}
-                  <span
-                    className="font-semibold cursor-pointer hover:text-tm-primary transition-colors underline"
-                    onClick={() => openModal(AuthTMModalView.PRIVACY_POLICY)}
-                  >
-                    Privacy Policy
-                  </span>
-                </p>
-              </div>
-            )}
-          />
+        <SharedRegisterForm
+          register={register}
+          control={control}
+          errors={errors}
+          setValue={setValue}
+          onSubmit={handleSubmit(handleSubmitForm)}
+        >
           <Button
+            type="submit"
             loading={verificationCodeLoading}
             disabled={verificationCodeLoading}
             classOverrides="w-full tm-btn tm-btn-primary tm-btn-lg"
           >
             <p>Send me an email with code</p>
           </Button>
-        </form>
+        </SharedRegisterForm>
       ) : (
         <div className="flex flex-col items-center gap-6">
           <OTPInputWrapper

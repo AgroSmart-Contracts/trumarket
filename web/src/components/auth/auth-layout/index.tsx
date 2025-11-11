@@ -12,7 +12,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, showSignInLink
     return (
         <div className="min-h-screen flex">
             {/* Left Side - Brand Section */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-tm-primary to-tm-primary-dark items-center justify-center p-12 relative">
+            <div className="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-tm-primary to-tm-primary-dark items-center justify-center p-12 relative">
                 <div className="absolute top-8 left-8">
                     <Link href="/dashboard">
                         <Image src="/assets/logo.svg" alt="trumarket logo" width={115} height={44} />
@@ -38,8 +38,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, showSignInLink
             </div>
 
             {/* Right Side - Form Section */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-tm-neutral-light">
-                <div className="w-full max-w-md">
+            <div className="w-full lg:w-3/5 flex flex-col items-center justify-center p-8 bg-tm-neutral-light">
+                <div className="w-full max-w-xl flex-1 flex flex-col">
                     {/* Mobile Logo */}
                     <div className="lg:hidden mb-8 flex justify-center">
                         <Link href="/dashboard">
@@ -47,24 +47,20 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, showSignInLink
                         </Link>
                     </div>
 
-                    {/* Sign In Link (for register page) */}
-                    {showSignInLink && (
-                        <div className="flex justify-end mb-6">
-                            <Link href="/sign-in">
-                                <button className="tm-btn tm-btn-outline tm-btn-sm bg-tm-danger text-tm-white border-tm-danger hover:bg-tm-danger-dark">
-                                    Sign In
-                                </button>
-                            </Link>
-                        </div>
-                    )}
-
                     {/* Title */}
                     <h1 className="text-4xl font-bold text-tm-primary mb-8 text-center">
                         {title}
                     </h1>
 
                     {/* Form Content */}
-                    {children}
+                    <div className="flex-1">
+                        {children}
+                    </div>
+
+                    {/* Copyright Notice */}
+                    <div className="mt-8 text-center text-sm text-tm-text-light">
+                        © 2025 Tru Market
+                    </div>
                 </div>
             </div>
         </div>

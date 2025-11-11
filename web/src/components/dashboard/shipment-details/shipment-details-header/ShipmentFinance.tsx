@@ -113,19 +113,19 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
   const progressPercentage = (+amountFunded / +requestFundAmount) * 100;
 
   return (
-    <Card className="bg-white  w-full p-6">
-      <div className="mb-8 space-y-4 border-b pb-4">
+    <Card className="bg-white w-full p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8 space-y-3 sm:space-y-4 border-b pb-4">
         <div className="text-gray-600 flex items-center gap-2">
-          <span className="text-sm">Total pool assets</span>
+          <span className="text-xs sm:text-sm">Total pool assets</span>
         </div>
-        <div className="text-gray-900 text-3xl font-semibold">
+        <div className="text-gray-900 text-2xl sm:text-3xl font-semibold">
           {erc20Symbol} {(+amountFunded).toFixed(2)}
         </div>
         {/* Progress bar */}
         <div>
-          <div className="text-gray-600 mb-1 flex justify-between text-sm">
+          <div className="text-gray-600 mb-1 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 text-xs sm:text-sm">
             <span>{progressPercentage.toFixed(1)}% filled</span>
-            <span>
+            <span className="sm:text-right">
               Target: {erc20Symbol} {requestFundAmount.toFixed(2)}
             </span>
           </div>
@@ -139,17 +139,19 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
       </div>
 
       {/* Vault Address */}
-      <div className="bg-gray-50 mb-4 flex items-center justify-between rounded-lg p-3">
+      <div className="bg-gray-50 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 rounded-lg p-3">
         <div className="flex items-center gap-2">
-          <span className="text-gray-700 font-medium">Vault Address</span>
+          <span className="text-gray-700 font-medium text-sm sm:text-base">Vault Address</span>
         </div>
         <a
           href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER}/token/${vaultAddress}`}
           target="_blank"
           rel="noreferrer"
-          className="bg-gray-100 rounded px-3 py-1 font-mono text-sm"
+          className="bg-gray-100 rounded px-2 sm:px-3 py-1 font-mono text-xs sm:text-sm break-all sm:break-normal text-center sm:text-left hover:bg-gray-200 transition-colors"
+          title={vaultAddress}
         >
-          {truncateAddress(vaultAddress)}
+          <span className="hidden sm:inline">{truncateAddress(vaultAddress)}</span>
+          <span className="sm:hidden">{`${vaultAddress.slice(0, 10)}...${vaultAddress.slice(-4)}`}</span>
         </a>
       </div>
 
@@ -160,48 +162,50 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
         borrowerAddress.toLowerCase() === userInfo.user.walletAddress.toLowerCase() && (
           <>
             {/* User Address */}
-            <div className="bg-gray-50 mb-4 flex items-center justify-between rounded-lg p-3">
+            <div className="bg-gray-50 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 rounded-lg p-3">
               <div className="flex items-center gap-2">
-                <span className="text-gray-700 font-medium">Borrower</span>
+                <span className="text-gray-700 font-medium text-sm sm:text-base">Borrower</span>
               </div>
               <a
                 href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER}/address/${userInfo.user.walletAddress}`}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-gray-100 rounded px-3 py-1 font-mono text-sm"
+                className="bg-gray-100 rounded px-2 sm:px-3 py-1 font-mono text-xs sm:text-sm break-all sm:break-normal text-center sm:text-left hover:bg-gray-200 transition-colors"
+                title={userInfo.user.walletAddress}
               >
-                {truncateAddress(userInfo.user.walletAddress)}
+                <span className="hidden sm:inline">{truncateAddress(userInfo.user.walletAddress)}</span>
+                <span className="sm:hidden">{`${userInfo.user.walletAddress.slice(0, 10)}...${userInfo.user.walletAddress.slice(-4)}`}</span>
               </a>
             </div>
 
             {/* Balance */}
-            <div className="bg-gray-50 mb-4 flex items-center justify-between rounded-lg p-3">
+            <div className="bg-gray-50 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 rounded-lg p-3">
               <div className="flex items-center gap-2">
-                <span className="text-gray-700 font-medium">Borrower Balance</span>
+                <span className="text-gray-700 font-medium text-sm sm:text-base">Borrower Balance</span>
               </div>
-              <span className="text-blue-600 font-mono font-medium">
+              <span className="text-blue-600 font-mono font-medium text-sm sm:text-base text-center sm:text-right">
                 {balance} {erc20Symbol}
               </span>
             </div>
 
             {shipmentStatus === DealStatus.Finished && vault !== null && (
               <div className="bg-tm-green-light">
-                <div className="bg-blue-100 border-blue-500 text-blue-700 mb-4 border-l-4 p-4" role="alert">
-                  <Info size={16} />
+                <div className="bg-blue-100 border-blue-500 text-blue-700 mb-4 border-l-4 p-3 sm:p-4" role="alert">
+                  <Info size={16} className="mb-1" />
                   {+amountFunded < repayFunds && (
-                    <p>
+                    <p className="text-xs sm:text-sm">
                       Shipment is completed. You can repay the funds. {repayFunds.toFixed(2)} {erc20Symbol} should be
                       deposited in the pool before the shipment is completed.
                     </p>
                   )}
                   {+amountFunded >= repayFunds && (
-                    <p>
+                    <p className="text-xs sm:text-sm">
                       Shipment is completed. The required funds have been successfully repaid. Click
                       &quot;Complete&quot; to unlock the funds to be reclaimed by the investors.
                     </p>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   {currentMilestone === 7 && +amountFunded < repayFunds && (
                     <Deposit
                       walletBalance={+balance}
@@ -216,7 +220,7 @@ const ShipmentFinance: React.FC<ShipmentFinanceProps> = ({
                       <button
                         disabled={completing}
                         onClick={handleComplete}
-                        className="my-8 rounded bg-tm-green px-4 py-2 text-tm-white"
+                        className="my-4 sm:my-8 rounded bg-tm-green px-4 sm:px-6 py-2 sm:py-3 text-tm-white text-sm sm:text-base font-medium w-full sm:w-auto"
                       >
                         {completing ? "Processing..." : "Complete"}
                       </button>

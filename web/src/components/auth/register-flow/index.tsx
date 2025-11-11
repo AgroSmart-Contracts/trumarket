@@ -33,7 +33,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = () => {
   }, [checkSocial, query]);
 
   return (
-    <AuthLayout title="Create Account" showSignInLink>
+    <AuthLayout title="Create Account">
       <div className="space-y-6">
         {/* Step Counter */}
         <div className="flex items-center justify-center">
@@ -43,15 +43,8 @@ const RegisterFlow: React.FC<RegisterFlowProps> = () => {
           </div>
         </div>
 
-        {/* Authentication Method Selection */}
-        <div className="text-center">
-          <h3 className="text-xl font-semibold text-tm-text mb-6">
-            Select authentication method
-          </h3>
-        </div>
-
         {/* Register Tabs */}
-        <div className="bg-tm-white rounded-tm-lg p-8 shadow-tm-md">
+        <div className="bg-tm-white rounded-tm-lg pt-8 px-8 pb-4 shadow-tm-md">
           <RegisterTabs />
         </div>
 
