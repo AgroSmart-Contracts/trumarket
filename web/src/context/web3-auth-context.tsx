@@ -10,8 +10,6 @@ import {
   ADAPTER_STATUS,
 } from "@web3auth/base";
 import { EthereumPrivateKeyProvider, WalletConnectV2Provider } from "@web3auth/ethereum-provider";
-
-//from web3auth PnP
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 import { WalletConnectModal } from "@walletconnect/modal";
@@ -20,7 +18,6 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 
 import { chainConfigEth } from "src/lib/web3/chain-configs";
-
 import { parseToken, uiConsole } from "../lib/helpers";
 import EthereumRpc from "../lib/web3/evm.web3";
 

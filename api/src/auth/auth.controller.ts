@@ -25,7 +25,7 @@ export class AuthController {
     private userService: UsersService,
     private dealsService: DealsService,
     private notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   @Get('')
   @AuthenticatedRestricted()
@@ -76,6 +76,17 @@ export class AuthController {
     const token = await this.authService.login(web3authToken);
 
     return new LoginResponseDto({ token });
+  }
+
+  @Post('check-user-exists')
+  @ApiResponse({
+    status: 200,
+    description: 'Check if user exists by email',
+  })
+  async checkUserExists(@Body() body: { email: string }): Promise<{ exists: boolean }> {
+    const { email } = body;
+    const user = await this.userService.findByEmail(email);
+    return { exists: !!user };
   }
 
   @Post('signup')

@@ -5,10 +5,17 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 env:
   ENV: dev
-  COMMIT_HASH: ${{ github.sha }}
+  COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   build-and-deploy-docker-image:
@@ -22,6 +29,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Cache Docker images
         uses: actions/cache@v4

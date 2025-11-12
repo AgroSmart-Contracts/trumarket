@@ -224,3 +224,14 @@ export const openInNewTab = (url: string) => {
   const newWindow = window.open(url, "_blank", "noopener,noreferrer");
   if (newWindow) newWindow.opener = null;
 };
+
+// Helper function to safely convert to number
+export const safeNumber = (value: any): number => {
+  const num = Number(value);
+  return isNaN(num) ? 0 : num;
+};
+
+// Helper function to safely get string value
+export const safeString = (value: any): string => {
+  return value ? String(value) : "";
+};

@@ -5,7 +5,7 @@ import React from "react";
 import { AdminService } from "src/controller/AdminAPI.service";
 import EnhancedTableHead from "../base-table/table-head";
 
-interface UsersProps {}
+interface UsersProps { }
 
 const headCells = [
   { id: "email", numeric: false, disablePadding: false, label: "Email" },
@@ -41,7 +41,7 @@ const Users: React.FC<UsersProps> = () => {
               numSelected={0}
               order={"asc"}
               orderBy={"email"}
-              onRequestSort={() => {}}
+              onRequestSort={() => { }}
               rowCount={users?.length || 0}
               headCells={headCells}
             />

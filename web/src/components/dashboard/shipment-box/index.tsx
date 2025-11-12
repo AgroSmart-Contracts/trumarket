@@ -37,7 +37,7 @@ const ShipmentBox: React.FC<ShipmentBoxProps> = ({
   const { accountType, userInfo } = useUserInfo();
   const isBuyer = accountType === AccountTypeEnum.BUYER;
   const [active, setActive] = useState<boolean>(false);
-  const actionButtonText = status === DealStatus.Proposal ? "Review the agreement" : "Details";
+  const actionButtonText = status === DealStatus.Proposal ? "Review" : "Details";
 
   const link =
     status === DealStatus.Confirmed || status === DealStatus.Finished
@@ -67,14 +67,9 @@ const ShipmentBox: React.FC<ShipmentBoxProps> = ({
   };
 
   return (
-    <div className="rounded-[5px] bg-tm-white">
-      <div className="flex">
-        {/* <div className="max-w-[190px]">
-          <div className="p-[10px]">
-            <ShipmentBoxImage />
-          </div>
-        </div> */}
-        <div className="flex-1 flex-col">
+    <div className="rounded-[12px] bg-tm-white shadow-md transition-shadow duration-200 hover:shadow-lg">
+      <div className="flex flex-col">
+        <div className="flex flex-1 flex-col">
           <Link href={link}>
             <ShipmentBoxHeader
               entityTitle={shipment.name}
@@ -91,9 +86,9 @@ const ShipmentBox: React.FC<ShipmentBoxProps> = ({
               milestones={shipment.milestones}
               currentMilestone={shipment.currentMilestone}
             />
-            <div className="px-[20px] py-[28px]">
-              <div className="flex items-center px-[40px]">
-                <div className="flex  justify-end text-right">
+            <div className="px-4 sm:px-[20px] py-4 sm:py-[28px]">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6 lg:gap-8 px-2 sm:px-6 lg:px-[40px]">
+                <div className="w-full lg:w-auto flex justify-start lg:justify-end text-left lg:text-right">
                   <ShipmentInfo
                     title={`${shipment.portOfOrigin}, ${shipment.origin}`}
                     value={`${moment(shipment.shippingStartDate).format("DD.MM.YYYY")}`}
@@ -103,25 +98,31 @@ const ShipmentBox: React.FC<ShipmentBoxProps> = ({
                     showFlag
                   />
                 </div>
-                <div className="flex-1">
-                  <HorizontalMilestones
-                    status={generateMilestoneStatus()}
-                    milestones={shipment.milestones}
-                    isBuyer={isBuyer}
-                    hasNewDocuments={shipment.newDocuments!}
-                    transport={shipment.transport!}
-                    setActive={setActive}
+                <div className="w-full">
+                  <div className="overflow-x-auto -mx-2 sm:mx-0">
+                    <div className="min-w-0 px-2 sm:px-0">
+                      <HorizontalMilestones
+                        status={generateMilestoneStatus()}
+                        milestones={shipment.milestones}
+                        isBuyer={isBuyer}
+                        hasNewDocuments={shipment.newDocuments!}
+                        transport={shipment.transport!}
+                        setActive={setActive}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="w-full lg:w-auto flex justify-start lg:justify-end text-left lg:text-right">
+                  <ShipmentInfo
+                    title={`${shipment.portOfDestination}, ${shipment.destination}`}
+                    value={`${moment(shipment.expectedShippingEndDate).format("DD.MM.YYYY")}`}
+                    countryCode={getCountryCode(shipment.destination)}
+                    valueClassOverrides="flex-row lg:flex-row-reverse"
+                    titleClassOverrides="text-left lg:text-right"
+                    subValue="ETA"
+                    showFlag
                   />
                 </div>
-                <ShipmentInfo
-                  title={`${shipment.portOfDestination}, ${shipment.destination}`}
-                  value={`${moment(shipment.expectedShippingEndDate).format("DD.MM.YYYY")}`}
-                  countryCode={getCountryCode(shipment.destination)}
-                  valueClassOverrides="flex-row-reverse"
-                  titleClassOverrides="text-right"
-                  subValue="ETA"
-                  showFlag
-                />
               </div>
             </div>
           </Link>

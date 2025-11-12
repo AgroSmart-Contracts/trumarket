@@ -16,6 +16,7 @@ export class AuthService {
   }
 
   static async requestJWTtoAccount({ email, otp }: { email: string; otp: string }): Promise<{ id_token: string }> {
+    console.log("before requestJWTtoAccount");
     const response = await axios.post(`${process.env.NEXT_PUBLIC_AUTH0_API_URL}/oauth/token`, {
       client_id: process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID,
       client_secret: process.env.NEXT_PUBLIC_AUTH0_CLIENT_SECRET,
@@ -71,6 +72,13 @@ export class AuthService {
     const response = await axiosInstance.put("/auth/notifications-settings", {
       desktopNotifications,
       emailNotifications,
+    });
+    return response.data;
+  }
+
+  static async checkUserExists({ email }: { email: string }): Promise<{ exists: boolean }> {
+    const response = await axiosInstance.post("/auth/check-user-exists", {
+      email,
     });
     return response.data;
   }

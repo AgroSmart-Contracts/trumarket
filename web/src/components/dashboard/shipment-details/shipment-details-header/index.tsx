@@ -1,5 +1,6 @@
-import { CheckCircle } from "@phosphor-icons/react";
 import React, { useEffect } from "react";
+import { CheckCircle } from "@phosphor-icons/react";
+
 import { AccountTypeEnum } from "src/interfaces/global";
 
 interface ShipmentDetailsHeaderProps {

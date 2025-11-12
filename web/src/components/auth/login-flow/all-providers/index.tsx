@@ -12,7 +12,7 @@ import { useWeb3AuthContext } from "src/context/web3-auth-context";
 import { AuthService } from "src/controller/AuthAPI.service";
 import { checkMetaMaskExtension, uiConsole } from "src/lib/helpers";
 
-interface AllProvidersProps {}
+interface AllProvidersProps { }
 
 const AllProviders: React.FC<AllProvidersProps> = () => {
   const router = useRouter();
@@ -77,11 +77,12 @@ const AllProviders: React.FC<AllProvidersProps> = () => {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-[10px] lg:flex-nowrap">
+      <div className="flex flex-wrap items-center gap-4 lg:flex-nowrap">
         <Button
           onClick={() => loginWithSocialProvider()}
           loading={socialProviderLoading}
           disabled={socialProviderLoading}
+          classOverrides="flex-1"
         >
           <div className="flex w-full items-center justify-between">
             <p className="text-[13px] font-semibold leading-[1.2em]">Google</p>
@@ -92,6 +93,7 @@ const AllProviders: React.FC<AllProvidersProps> = () => {
           loading={externalWalletProviderLoading && chosenExternalWalletProvider === WALLET_ADAPTERS.METAMASK}
           disabled={externalWalletProviderLoading && chosenExternalWalletProvider === WALLET_ADAPTERS.METAMASK}
           onClick={() => loginWithExternalWallet(WALLET_ADAPTERS.METAMASK)}
+          classOverrides="flex-1"
         >
           <div className="flex w-full items-center justify-between">
             <p className="text-[13px] font-semibold leading-[1.2em]">MetaMask</p>
@@ -102,9 +104,10 @@ const AllProviders: React.FC<AllProvidersProps> = () => {
           loading={externalWalletProviderLoading && chosenExternalWalletProvider === WALLET_ADAPTERS.WALLET_CONNECT_V2}
           disabled={externalWalletProviderLoading && chosenExternalWalletProvider === WALLET_ADAPTERS.WALLET_CONNECT_V2}
           onClick={() => loginWithExternalWallet(WALLET_ADAPTERS.WALLET_CONNECT_V2)}
+          classOverrides="flex-1"
         >
-          <div className="flex w-full items-center justify-between gap-[5px]">
-            <p className="whitespace-nowrap text-[11px] font-semibold leading-[1.2em]">Wallet Connect</p>
+          <div className="flex w-full items-center justify-between">
+            <p className="text-[13px] font-semibold leading-[1.2em]">Wallet Connect</p>
             <Image height={25} width={25} src="/assets/walletconnect.png" alt="wallet-connect" />
           </div>
         </Button>

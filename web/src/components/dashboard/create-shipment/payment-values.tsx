@@ -168,8 +168,8 @@ const PaymentValues: React.FC<PaymentValueProps> = ({ setSelectedIndex, selected
               <span className="notranslate font-bold text-tm-black-80">
                 {CurrencyFormatter(
                   Number(watch("quantity") || 0) *
-                    Number(watch("offerUnitPrice") || 0) *
-                    (Number(watch("investmentAmountPercentage") || 0) / 100),
+                  Number(watch("offerUnitPrice") || 0) *
+                  (Number(watch("investmentAmountPercentage") || 0) / 100),
                 ) || "-"}
               </span>{" "}
             </p>
@@ -193,9 +193,12 @@ const PaymentValues: React.FC<PaymentValueProps> = ({ setSelectedIndex, selected
           </div>
         </div>
       </div>
-      <div className="mt-[30px] flex gap-[10px]">
+      <div className="mt-[30px] flex gap-[10px] items-center">
         <div className="!w-auto">
-          <Button onClick={() => setSelectedIndex((prev) => prev - 1)}>
+          <Button
+            onClick={() => setSelectedIndex((prev) => prev - 1)}
+            classOverrides="!h-[40px] !min-h-[40px] !py-2 sm:!py-2.5"
+          >
             <ChevronLeftIcon />
           </Button>
         </div>

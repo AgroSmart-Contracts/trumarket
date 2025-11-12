@@ -6,7 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 
 import Button from "src/components/common/button";
-import Input from "src/components/common/input";
+import EmailInput from "src/components/common/email-input";
 import VerificationInputComponent from "src/components/common/verification-input";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
 import { AuthService } from "src/controller/AuthAPI.service";
@@ -15,7 +15,7 @@ import { handleRequestAuth0JWT, handleOTP, checkWeb3AuthInstance, parseToken } f
 
 import OTPInputWrapper from "../../otp-input-wrapper";
 
-interface LoginEmailProps {}
+interface LoginEmailProps { }
 
 const LoginEmail: React.FC<LoginEmailProps> = () => {
   const router = useRouter();
@@ -39,8 +39,23 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
 
   const handleSubmitForm = async (data: { email: string }) => {
     setVerificationCodeLoading(true);
-    await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
-    setVerificationCodeLoading(false);
+    try {
+      // Check if user exists before sending OTP
+      const userExists = await AuthService.checkUserExists({ email: data.email });
+
+      if (!userExists.exists) {
+        toast.error("Account doesn't exist! Please register first.");
+        setVerificationCodeLoading(false);
+        return;
+      }
+
+      await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
+    } catch (error) {
+      console.error('Error checking user existence:', error);
+      toast.error("Error checking account. Please try again.");
+    } finally {
+      setVerificationCodeLoading(false);
+    }
   };
 
   const handleConfirm = async (OTPcode: string) => {
@@ -59,19 +74,23 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
 
       const { email } = parseToken(auth0Jwt);
 
-      const subVerifierInfoArray = [
-        {
-          verifier: "auth0-passwordless",
-          idToken: auth0Jwt!,
-        },
-      ];
+      // const subVerifierInfoArray = [
+      //   {
+      //     verifier: "auth0-passwordless",
+      //     idToken: auth0Jwt!,
+      //   },
+      // ];
+
+      if (!process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID) {
+        throw new Error("Web3Auth connection ID is not set");
+      }
 
       await web3authSfa.connect({
-        verifier: "trumarket-w3a-auth0-2",
+        verifier: process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID,
         verifierId: email,
         idToken: auth0Jwt,
-        subVerifierInfoArray,
-      });
+        // subVerifierInfoArray,
+      } as any);
 
       const jwt = await web3authSfa.authenticateUser();
 
@@ -97,30 +116,22 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
   return (
     <>
       {emailRegisterStep === EmailSteps.STEP_1 ? (
-        <form onSubmit={handleSubmit(handleSubmitForm)}>
-          <p className="mb-[5px] text-[13px] leading-[1.2em] tracking-normal text-[#00000099]">Email address</p>
-          <Input
-            name="email"
-            placeholder="Please provide email"
-            register={register("email", {
-              required: "Email field is required!",
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: "Email format is invalid!",
-              },
-            })}
-            hasError={Boolean(errors.email)}
-            errorMessageClass="!relative !left-0"
+        <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-5">
+          <EmailInput
+            register={register}
             errors={errors}
+            placeholder="Enter your email"
           />
-          <div className="mt-[10px]">
-            <Button disabled={verificationCodeLoading} loading={verificationCodeLoading}>
-              <p>Send me an email with code</p>
-            </Button>
-          </div>
+          <Button
+            disabled={verificationCodeLoading}
+            loading={verificationCodeLoading}
+            classOverrides="w-full tm-btn tm-btn-primary tm-btn-lg"
+          >
+            <p>Send me an email with code</p>
+          </Button>
         </form>
       ) : (
-        <div className="flex flex-col items-center gap-[14px]">
+        <div className="flex flex-col items-center gap-6">
           <OTPInputWrapper
             email={getValues("email")}
             setVerificationCode={setVerificationCode}
@@ -129,15 +140,14 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
             resendLoading={verificationCodeLoading}
             setEmailRegisterStep={setEmailRegisterStep}
           />
-          <div className="mt-[11px] w-full">
-            <Button
-              onClick={() => handleConfirm(verificationCode)}
-              loading={isLoggingIn || confirmationLoading}
-              disabled={verificationCode?.length !== 6 || isLoggingIn || confirmationLoading}
-            >
-              <p>Confirm</p>
-            </Button>
-          </div>
+          <Button
+            onClick={() => handleConfirm(verificationCode)}
+            loading={isLoggingIn || confirmationLoading}
+            disabled={verificationCode?.length !== 6 || isLoggingIn || confirmationLoading}
+            classOverrides="w-full tm-btn tm-btn-primary tm-btn-lg"
+          >
+            <p>Confirm</p>
+          </Button>
         </div>
       )}
     </>

@@ -157,13 +157,20 @@ const SubmitAgreement: React.FC<SubmitAgreementProps> = ({ setSelectedIndex, sel
         </div>
       </div>
 
-      <div className="mt-[30px] flex gap-[10px]">
+      <div className="mt-[30px] flex gap-[10px] items-center">
         <div className="!w-auto">
-          <Button onClick={() => setSelectedIndex((prev) => prev - 1)}>
+          <Button
+            onClick={() => setSelectedIndex((prev) => prev - 1)}
+            classOverrides="!h-[40px] !min-h-[40px] !py-2 sm:!py-2.5"
+          >
             <ChevronLeftIcon />
           </Button>
         </div>
-        <Button loading={loading} disabled={loading}>
+        <Button
+          loading={loading}
+          disabled={loading}
+          classOverrides="!h-[40px] !min-h-[40px] !py-2 sm:!py-2.5"
+        >
           <p className="text-[14px] font-bold leading-[1.2em] text-tm-white">Confirm agreement</p>
         </Button>
       </div>

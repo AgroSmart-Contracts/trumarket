@@ -66,7 +66,7 @@ export default function DropZone({
 
   return (
     <section
-      className="container relative h-full "
+      className="container relative h-full p-0"
       draggable
       onDragEnter={() => setDropZoneActive(true)}
       onDragEnd={() => setDropZoneActive(false)}

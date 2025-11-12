@@ -699,8 +699,8 @@ describe('DealVault', function () {
   });
 
   describe('Complete', () => {
-    it('should fail to complete if vault is not funded', async () => {
-      const { dealsManager } = await deploy(hre, accounts);
+    it('should allow completing deal even if vault is not fully funded', async () => {
+      const { dealsManager, erc20 } = await deploy(hre, accounts);
       const milestones: [number, number, number, number, number, number, number] = [
         0, 0, 100, 0, 0, 0, 0
       ];
@@ -713,10 +713,17 @@ describe('DealVault', function () {
       const vaultAddress = await dealsManager.vault(0);
       const dealVault = await hre.ethers.getContractAt('DealVault', vaultAddress) as DealVault;
 
-      // Use DealsManager to try completing through proceed
-      await expect(
-        dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 1)
-      ).to.be.rejectedWith('Vault not funded completely');
+      // Complete all milestones without funding
+      for (let i = 1; i <= 7; i++) {
+        await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, i);
+      }
+
+      // Should succeed even without funding
+      await dealsManager.connect(accounts.dealsManagerAccount).setDealCompleted(0);
+
+      const status = await dealsManager.status(0);
+      expect(status).to.equal(8);
+      expect(await dealVault.paused()).to.be.false;
     });
 
     it('should fail to complete if not called by owner', async () => {
