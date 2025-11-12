@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import DirectionsBoatIcon from "@mui/icons-material/DirectionsBoat";
-import FlightIcon from "@mui/icons-material/Flight";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 
-import DateTimePicker from "src/components/common/date-time-picker";
-import Input from "src/components/common/input";
-import { useAppDispatch, useAppSelector } from "src/lib/hooks";
-import { selectShipmentAgreementState, setShipmentAgreementState } from "src/store/createShipmentAgreementSlice";
-import SelectDropDown from "src/components/common/select";
-import { ICompanyInfo, ValidationStates } from "src/interfaces/global";
-import { countryOrigins } from "src/lib/static";
+import { AuthService } from "src/controller/AuthAPI.service";
 import Button from "src/components/common/button";
 import CreatableInput from "src/components/common/select/creatable";
+import DateTimePicker from "src/components/common/date-time-picker";
 import FieldTitle from "src/components/common/input/field-title";
+import Input from "src/components/common/input";
+import SelectDropDown from "src/components/common/select";
+import { ICompanyInfo, ValidationStates } from "src/interfaces/global";
+import { useAppDispatch, useAppSelector } from "src/lib/hooks";
+import { countryOrigins } from "src/lib/static";
+import { selectShipmentAgreementState, setShipmentAgreementState } from "src/store/createShipmentAgreementSlice";
 
 import ExtendedNextButton from "./extended-next-button";
-import { AuthService } from "src/controller/AuthAPI.service";
 
 interface CompanyDataProps {
   setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;

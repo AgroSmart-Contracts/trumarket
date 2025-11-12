@@ -1,15 +1,15 @@
 import React from "react";
+import { useRouter } from "next/router";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 import Button, { ButtonVariants } from "src/components/common/button";
-import { CurrencyFormatter } from "src/lib/helpers";
-import { AccountTypeEnum } from "src/interfaces/global";
 import InformationRow from "src/components/common/information-row";
 import InformationRowDivider from "src/components/common/information-row/information-row-divider";
-import { AgreementPartyInfo } from "src/interfaces/shipment";
 import MuiTooltip from "src/components/common/mui-tooltip";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import { useRouter } from "next/router";
+import { AccountTypeEnum } from "src/interfaces/global";
+import { AgreementPartyInfo } from "src/interfaces/shipment";
+import { CurrencyFormatter } from "src/lib/helpers";
 
 interface ShipmentBoxFooterProps {
   accountType: AccountTypeEnum;

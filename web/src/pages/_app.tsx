@@ -6,20 +6,12 @@ import { Inter } from "next/font/google";
 import "src/styles/globals.css";
 import type { AppProps } from "next/app";
 import { ToastContainer } from "react-toastify";
-import { SessionProvider } from "next-auth/react";
-import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Auth0Provider } from "@auth0/auth0-react";
-import { useEffect, useLayoutEffect } from "react";
-import Cookies from "js-cookie";
-import { useRouter } from "next/router";
 
 import { Web3AuthContextProvider } from "src/context/web3-auth-context";
-import Header from "src/components/common/header";
 import { wrapper } from "src/lib/store";
 import { ModalProvider } from "src/context/modal-context";
-import Footer from "src/components/common/footer";
-import { NotificationsService } from "src/controller/NotificationsAPI.service";
-import { register } from "src/lib/push-notification-register";
 
 import Layout from "./layout";
 

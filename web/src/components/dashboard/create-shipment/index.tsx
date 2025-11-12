@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import { ShipmentService } from "src/controller/ShipmentAPI.service";
 import InformationRow from "src/components/common/information-row";
 import InformationRowDivider from "src/components/common/information-row/information-row-divider";
 import { AccountTypeEnum, ITransportType } from "src/interfaces/global";
@@ -12,14 +13,13 @@ import {
   selectShipmentAgreementState,
 } from "src/store/createShipmentAgreementSlice";
 
+import CompanyData from "./company-data";
 import EnterAddressee from "./enter-addressee";
 import OriginAndDestination from "./origin-and-destination";
 import PaymentValues from "./payment-values";
 import ProductDetails from "./product-details";
-import VerticalLinearStepper from "./stepper/stepper";
 import SubmitAgreement from "./submit-agreement";
-import CompanyData from "./company-data";
-import { ShipmentService } from "src/controller/ShipmentAPI.service";
+import VerticalLinearStepper from "./stepper/stepper";
 
 interface CreateShipment { }
 

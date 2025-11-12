@@ -7,15 +7,14 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 
 import Button from "src/components/common/button";
-import SharedRegisterForm from "./shared-register-form";
-import { useModal } from "src/context/modal-context";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
 import { AuthService } from "src/controller/AuthAPI.service";
 import { EmailSteps, WalletProviders } from "src/interfaces/global";
 import { handleOTP, handleRequestAuth0JWT, uiConsole } from "src/lib/helpers";
-import { AuthTMModalView } from "src/pages";
 import { useAppSelector } from "src/lib/hooks";
 import { selectIsTermsAndConditionsChecked } from "src/store/UiSlice";
+
+import SharedRegisterForm from "./shared-register-form";
 
 import OTPInputWrapper from "../../otp-input-wrapper";
 

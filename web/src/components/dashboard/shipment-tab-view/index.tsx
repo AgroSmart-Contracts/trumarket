@@ -2,19 +2,19 @@ import React, { useEffect, useState } from "react";
 import { Tab } from "@headlessui/react";
 import classNames from "classnames";
 import { useRouter } from "next/router";
+import { Plus } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 
 import { ShipmentService } from "src/controller/ShipmentAPI.service";
+import { AccountTypeEnum } from "src/interfaces/global";
 import { DealStatus } from "src/interfaces/shipment";
 import { useUserInfo } from "src/lib/hooks/useUserInfo";
-import { AccountTypeEnum } from "src/interfaces/global";
 
-import ShipmentTabHeaders from "./shipment-tab-header";
 import ActiveShipmentTabView from "./active-shipment-tab-view";
-import PendingShipmentTabView from "./pending-shipment-tab-view";
-import FinishedShipmentTabView from "./finished-shipment-tab-view";
 import AllShipments from "./all-shipments";
-import { Plus } from "@phosphor-icons/react";
+import FinishedShipmentTabView from "./finished-shipment-tab-view";
+import PendingShipmentTabView from "./pending-shipment-tab-view";
+import ShipmentTabHeaders from "./shipment-tab-header";
 
 interface TabViewProps { }
 
