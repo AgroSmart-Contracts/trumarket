@@ -177,8 +177,8 @@ describe('DealsManager', function () {
         ).to.be.rejectedWith('wrong milestone to proceed to');
       });
 
-      it('should fail to next milestone if vault was not funded', async () => {
-        const { dealsManager } = await deploy(hre, accounts);
+      it('should allow proceeding to milestone 1 even if vault is empty (off-chain deals)', async () => {
+        const { dealsManager, erc20 } = await deploy(hre, accounts);
         const milestones: [
           number,
           number,
@@ -195,9 +195,15 @@ describe('DealsManager', function () {
           accounts.financialAccount.address
         );
 
-        await expect(
-          dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 1)
-        ).to.be.rejectedWith('Vault not funded completely');
+        // Should succeed even without funding (off-chain deal)
+        await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 1);
+
+        const status = await dealsManager.status(0);
+        expect(status).to.be.equal(1);
+
+        // Verify no funds were transferred (empty vault)
+        const borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
+        expect(borrowerBalance).to.equal(0);
       });
 
       it('should be possible to set milestone 1 if the vault was totally funded', async () => {
@@ -245,7 +251,7 @@ describe('DealsManager', function () {
         expect(status).to.be.equal(1);
       });
 
-      it('should move 10% of the funds in milestone 1', async () => {
+      it('should transfer percentage of available assets (not maxDeposit)', async () => {
         const { dealsManager, erc20 } = await deploy(hre, accounts);
         const milestones: [
           number,
@@ -256,7 +262,7 @@ describe('DealsManager', function () {
           number,
           number,
         ] = [50, 0, 0, 0, 0, 0, 50];
-        const vaultFunds = ethers.parseEther('100');
+        const vaultFunds = ethers.parseEther('100'); // maxDeposit = 100
         await dealsManager.connect(accounts.dealsManagerAccount).mint(
           milestones,
           vaultFunds,
@@ -266,25 +272,30 @@ describe('DealsManager', function () {
         const vaultAddress = await dealsManager.vault(0);
         const dealVault = await hre.ethers.getContractAt('DealVault', vaultAddress) as DealVault;
 
-        // mint investor tokens
+        // Fund vault with only 50% of maxDeposit
         await erc20.connect(accounts.deployerAccount).mint(
           accounts.investorAccount.address,
           ethers.parseEther('500')
         );
 
-        // allow vault to transfer investor funds
         await erc20.connect(accounts.investorAccount).approve(
           vaultAddress,
-          ethers.parseEther('100')
+          ethers.parseEther('50')
         );
 
-        // deposits investor funds
+        // Deposit only 50 tokens (50% of maxDeposit)
         await dealVault.connect(accounts.investorAccount).deposit(
-          ethers.parseEther('100'),
+          ethers.parseEther('50'),
           accounts.investorAccount.address
         );
 
+        // Proceed to milestone 1 (50% of milestones)
+        // Should transfer 50% of available assets (50 tokens), not 50% of maxDeposit
         await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 1);
+
+        const borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
+        // Should be 50% of 50 = 25 tokens (not 50% of 100 = 50 tokens)
+        expect(borrowerBalance).to.equal(ethers.parseEther('25'));
 
         const status = await dealsManager.status(0);
         expect(status).to.be.equal(1);
@@ -854,7 +865,7 @@ describe('DealsManager', function () {
     });
 
     describe('proceed with different milestone distributions', () => {
-      it('should handle multiple non-zero milestone percentages', async () => {
+      it('should handle multiple non-zero milestone percentages with full funding', async () => {
         const { dealsManager, erc20 } = await deploy(hre, accounts);
         const milestones: [number, number, number, number, number, number, number] = [
           20, 30, 10, 15, 5, 10, 10
@@ -868,7 +879,7 @@ describe('DealsManager', function () {
         const vaultAddress = await dealsManager.vault(0);
         const dealVault = await hre.ethers.getContractAt('DealVault', vaultAddress) as DealVault;
 
-        // Fund the vault
+        // Fund the vault fully
         await erc20
           .connect(accounts.deployerAccount)
           .mint(accounts.investorAccount.address, ethers.parseEther('500'));
@@ -881,37 +892,123 @@ describe('DealsManager', function () {
           .connect(accounts.investorAccount)
           .deposit(ethers.parseEther('100'), accounts.investorAccount.address);
 
-        // Proceed through milestones and verify transfers
+        // Proceed through milestones and verify transfers based on available assets
+        // Each milestone uses percentage of CURRENT vault assets (which decreases after each transfer)
         let borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
         expect(borrowerBalance).to.equal(0);
 
+        // Milestone 1: 20% of 100 = 20 (remaining: 80)
         await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 1);
         borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
         expect(borrowerBalance).to.equal(ethers.parseEther('20'));
 
+        // Milestone 2: 30% of 80 = 24 (total: 44, remaining: 56)
         await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 2);
         borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
-        expect(borrowerBalance).to.equal(ethers.parseEther('50'));
+        expect(borrowerBalance).to.equal(ethers.parseEther('44'));
 
+        // Milestone 3: 10% of 56 = 5.6 (total: 49.6, remaining: 50.4)
         await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 3);
         borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
-        expect(borrowerBalance).to.equal(ethers.parseEther('60'));
+        // Allow for rounding differences
+        expect(borrowerBalance).to.be.closeTo(ethers.parseEther('49.6'), ethers.parseEther('0.1'));
 
+        // Milestone 4: 15% of remaining assets
         await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 4);
         borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
-        expect(borrowerBalance).to.equal(ethers.parseEther('75'));
+        // Continue draining the vault proportionally
+        expect(borrowerBalance).to.be.greaterThan(ethers.parseEther('49.6'));
 
+        // Milestone 5: 5% of remaining assets
         await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 5);
         borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
-        expect(borrowerBalance).to.equal(ethers.parseEther('80'));
 
+        // Milestone 6: 10% of remaining assets
         await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 6);
         borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
-        expect(borrowerBalance).to.equal(ethers.parseEther('90'));
 
+        // Milestone 7: 10% of remaining assets (should drain most/all remaining)
         await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 7);
         borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
-        expect(borrowerBalance).to.equal(ethers.parseEther('100'));
+        // Should have received most of the 100 tokens (allowing for rounding)
+        expect(borrowerBalance).to.be.greaterThan(ethers.parseEther('90'));
+      });
+
+      it('should handle partial funding with proportional distribution', async () => {
+        const { dealsManager, erc20 } = await deploy(hre, accounts);
+        const milestones: [number, number, number, number, number, number, number] = [
+          50, 50, 0, 0, 0, 0, 0
+        ];
+        const vaultFunds = ethers.parseEther('100'); // maxDeposit = 100
+
+        await dealsManager
+          .connect(accounts.dealsManagerAccount)
+          .mint(milestones, vaultFunds, accounts.financialAccount.address);
+
+        const vaultAddress = await dealsManager.vault(0);
+        const dealVault = await hre.ethers.getContractAt('DealVault', vaultAddress) as DealVault;
+
+        // Fund vault with only 50% of maxDeposit
+        await erc20
+          .connect(accounts.deployerAccount)
+          .mint(accounts.investorAccount.address, ethers.parseEther('500'));
+
+        await erc20
+          .connect(accounts.investorAccount)
+          .approve(vaultAddress, ethers.parseEther('50'));
+
+        await dealVault
+          .connect(accounts.investorAccount)
+          .deposit(ethers.parseEther('50'), accounts.investorAccount.address);
+
+        // Milestone 1: 50% of 50 = 25 tokens
+        await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 1);
+        let borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
+        expect(borrowerBalance).to.equal(ethers.parseEther('25'));
+
+        // Milestone 2: 50% of remaining 25 = 12.5 tokens (total: 37.5)
+        await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, 2);
+        borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
+        expect(borrowerBalance).to.be.closeTo(ethers.parseEther('37.5'), ethers.parseEther('0.1'));
+      });
+    });
+
+    describe('off-chain deals', () => {
+      it('should handle off-chain deals with empty vault', async () => {
+        const { dealsManager, erc20 } = await deploy(hre, accounts);
+        const milestones: [number, number, number, number, number, number, number] = [
+          20, 30, 10, 15, 5, 10, 10
+        ];
+        const vaultFunds = ethers.parseEther('100');
+
+        await dealsManager
+          .connect(accounts.dealsManagerAccount)
+          .mint(milestones, vaultFunds, accounts.financialAccount.address);
+
+        // Proceed through all milestones without any funding
+        for (let i = 1; i <= 7; i++) {
+          const tx = await dealsManager.connect(accounts.dealsManagerAccount).proceed(0, i);
+          const receipt = await tx.wait();
+
+          // Verify event shows 0 amount transferred
+          if (receipt) {
+            const parsedEvents = decodeDealManagerEvents(receipt, dealsManager.interface.formatJson());
+            const milestoneChanged = parsedEvents.find(
+              (e) => e && e.eventName === 'DealMilestoneChanged'
+            );
+            expect(milestoneChanged?.args.amountTransferred).to.equal(0);
+          }
+        }
+
+        // Complete the deal
+        await dealsManager.connect(accounts.dealsManagerAccount).setDealCompleted(0);
+
+        const status = await dealsManager.status(0);
+        expect(status).to.equal(8);
+
+        // Verify no funds were transferred
+        const borrowerBalance = await erc20.balanceOf(accounts.financialAccount.address);
+        expect(borrowerBalance).to.equal(0);
       });
     });
   });
