@@ -99,6 +99,7 @@ const CompanyData: React.FC<CompanyDataProps> = ({ setSelectedIndex, selectedInd
           id="country"
           placeHolder="Country"
           state={errors.country ? ValidationStates.ERROR : ""}
+          inputHeight="40px"
           // value={inputDefaultValues.job_category?.value}
           options={countryOrigins}
           rules={{
@@ -145,9 +146,12 @@ const CompanyData: React.FC<CompanyDataProps> = ({ setSelectedIndex, selectedInd
         />
       </div>
 
-      <div className="mt-[30px] flex gap-[5px]">
+      <div className="mt-[30px] flex gap-[10px] items-center">
         <div className="!w-auto">
-          <Button onClick={() => setSelectedIndex((prev) => prev - 1)}>
+          <Button
+            onClick={() => setSelectedIndex((prev) => prev - 1)}
+            classOverrides="!h-[40px] !min-h-[40px] !py-2 sm:!py-2.5"
+          >
             <ChevronLeftIcon />
           </Button>
         </div>

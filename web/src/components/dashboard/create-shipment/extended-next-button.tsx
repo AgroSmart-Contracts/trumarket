@@ -11,7 +11,10 @@ interface ExtendedNextButtonProps {
 
 const ExtendedNextButton: React.FC<ExtendedNextButtonProps> = ({ classnames = "!w-auto", disabled }) => {
   return (
-    <Button classOverrides={classNames(classNames)} disabled={disabled}>
+    <Button
+      classOverrides={classNames("!h-[40px] !min-h-[40px] !py-2 sm:!py-2.5", classnames)}
+      disabled={disabled}
+    >
       <div className="flex items-center">
         <p>Next step</p>
         <ChevronRightIcon className="!w-[25px]" />

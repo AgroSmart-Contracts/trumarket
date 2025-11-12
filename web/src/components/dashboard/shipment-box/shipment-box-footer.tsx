@@ -37,7 +37,7 @@ const ShipmentBoxFooter: React.FC<ShipmentBoxFooterProps> = ({
     <div>
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 sm:gap-0">
         <div className="flex flex-col sm:flex-row w-full sm:w-[70%] items-start sm:items-center px-4 sm:px-[20px] py-4 sm:py-[19px] gap-3 sm:gap-0">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 w-full sm:w-auto sm:max-w-[40%]">
             <InformationRow
               label={isBuyer ? "Supplier:" : "Buyer:"}
               underlined={false}
@@ -49,14 +49,14 @@ const ShipmentBoxFooter: React.FC<ShipmentBoxFooterProps> = ({
                     ?.map((user) => user.email)
                     ?.join("\n")}
                 >
-                  <p className="text-xs sm:text-sm truncate">{`${emailInfo?.[0]?.email} ${emailInfo.length > 1 ? `and ${emailInfo.length - 1} other` : ""} `}</p>
+                  <p className="text-xs sm:text-sm truncate block max-w-full">{`${emailInfo?.[0]?.email} ${emailInfo.length > 1 ? `and ${emailInfo.length - 1} other` : ""} `}</p>
                 </MuiTooltip>
               }
             />
           </div>
 
           <InformationRowDivider classOverrides="hidden sm:block" />
-          <div className="w-full sm:w-auto pt-3 sm:pt-0">
+          <div className="w-full sm:w-auto pt-3 sm:pt-0 flex-shrink-0 sm:min-w-[120px]">
             <InformationRow
               label="Value:"
               value={CurrencyFormatter(value)}
@@ -66,10 +66,10 @@ const ShipmentBoxFooter: React.FC<ShipmentBoxFooterProps> = ({
             />
           </div>
           <InformationRowDivider classOverrides="hidden sm:block" />
-          <div className="w-full sm:w-auto pt-3 sm:pt-0">
+          <div className="w-full sm:w-auto pt-3 sm:pt-0 flex-shrink-0 sm:min-w-[140px]">
             <InformationRow
               label="Identifier:"
-              value={`#${entityId}` || "-"}
+              value={<span className="truncate block max-w-full">{`#${entityId}` || "-"}</span>}
               showBoldValue={false}
               underlined={false}
               labelClassOverrides="opacity-80"

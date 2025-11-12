@@ -62,7 +62,7 @@ const OriginAndDestination: React.FC<OriginAndDestinationProps> = ({ setSelected
   };
 
   return (
-    <form onSubmit={handleSubmit(handleNextStep)} className="flex flex-col gap-[12px]">
+    <form onSubmit={handleSubmit(handleNextStep)} className="flex flex-col gap-[12px] px-0">
       <div className="flex flex-col gap-[5px]">
         <FieldTitle>What mode of transport are you using?</FieldTitle>
         <div className="flex items-center gap-[10px]">
@@ -100,13 +100,14 @@ const OriginAndDestination: React.FC<OriginAndDestinationProps> = ({ setSelected
           </div>
         </div>
       </div>
-      <div className="flex items-center">
+      <div className="flex items-start">
         <div className="flex w-1/2 flex-col gap-[5px]">
           <FieldTitle>Name the Port of Origin</FieldTitle>
           <SelectDropDown
             id="origin"
             placeHolder="Country"
             state={errors.origin ? ValidationStates.ERROR : ""}
+            inputHeight="40px"
             // value={inputDefaultValues.job_category?.value}
             options={countryOrigins}
             rules={{
@@ -123,7 +124,8 @@ const OriginAndDestination: React.FC<OriginAndDestinationProps> = ({ setSelected
             isRequired
           />
         </div>
-        <div className="mt-[20.5px] w-1/2">
+        <div className="flex w-1/2 flex-col gap-[5px]">
+          <FieldTitle classOverrides="opacity-0 pointer-events-none">Port</FieldTitle>
           <Input
             name="port_origin"
             type="text"
@@ -138,13 +140,14 @@ const OriginAndDestination: React.FC<OriginAndDestinationProps> = ({ setSelected
         </div>
       </div>
 
-      <div className="flex items-center ">
+      <div className="flex items-start">
         <div className="flex w-1/2 flex-col gap-[5px]">
           <FieldTitle>Name the Port of Destination</FieldTitle>
           <SelectDropDown
             id="destination"
             placeHolder="Country"
             state={errors.destination ? ValidationStates.ERROR : ""}
+            inputHeight="40px"
             // value={inputDefaultValues.job_category?.value}
             options={countryOrigins}
             disableBorderRight
@@ -161,7 +164,8 @@ const OriginAndDestination: React.FC<OriginAndDestinationProps> = ({ setSelected
             isRequired
           />
         </div>
-        <div className="mt-[20.5px] w-1/2">
+        <div className="flex w-1/2 flex-col gap-[5px]">
+          <FieldTitle classOverrides="opacity-0 pointer-events-none">Port</FieldTitle>
           <Input
             name="port_destination"
             type="text"
@@ -199,9 +203,12 @@ const OriginAndDestination: React.FC<OriginAndDestinationProps> = ({ setSelected
           errors={errors}
         />
       </div>
-      <div className="mt-[30px] flex gap-[10px]">
+      <div className="mt-[30px] flex gap-[10px] items-center">
         <div className="!w-auto">
-          <Button onClick={() => setSelectedIndex((prev) => prev - 1)}>
+          <Button
+            onClick={() => setSelectedIndex((prev) => prev - 1)}
+            classOverrides="!h-[40px] !min-h-[40px] !py-2 sm:!py-2.5"
+          >
             <ChevronLeftIcon />
           </Button>
         </div>
