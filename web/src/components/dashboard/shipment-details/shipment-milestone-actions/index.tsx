@@ -77,7 +77,7 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
         milestoneBgColor="bg-tm-dark-secondary"
         toolTipText="You will be able to approve the milestone after the Supplier submits the approval request."
         withOverlay={false}
-        childContainerClasses="bg-[#2D3E57]/30 rounded-md"
+        childContainerClasses="bg-tm-dark-secondary/50 rounded-md"
       >
         <div className="flex items-center gap-2 sm:gap-[6px] text-xs sm:text-[12px] font-bold text-tm-white">
           <span className="truncate">Wait for supplier request</span>
@@ -157,7 +157,7 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
         milestoneBgColor="bg-tm-dark-secondary"
         toolTipText="You denied to approve this milestone. Contact the supplier about the reasons. You will be notified when he corrects the submitted documents/media."
         withOverlay={false}
-        childContainerClasses="bg-[#2D3E57]/30 rounded-md"
+        childContainerClasses="bg-tm-dark-secondary/50 rounded-md"
       >
         <div className="flex items-center gap-2 sm:gap-[6px] text-xs sm:text-[12px] font-bold text-tm-white">
           <span className="truncate">Wait for supplier request</span>
