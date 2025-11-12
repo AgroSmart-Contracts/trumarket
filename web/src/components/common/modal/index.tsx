@@ -46,7 +46,7 @@ const TMModal: React.FC<TMModalProps> = ({
       <Fade in={open}>
         <div
           className={classNames(
-            "absolute left-1/2 top-1/2  -translate-x-1/2 -translate-y-1/2  rounded-[4px] bg-tm-white font-sans outline-none",
+            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl sm:rounded-2xl bg-tm-white font-sans outline-none shadow-2xl",
             classOverrides,
             fullScreen ? "h-full w-[90vw]" : "h-auto w-full max-w-[400px]",
           )}
@@ -54,21 +54,21 @@ const TMModal: React.FC<TMModalProps> = ({
           <div className="relative">
             <div
               className={classNames({
-                "fixed z-10  w-full border-b border-b-tm-black-20 bg-tm-white": showHeader,
+                "fixed z-10 w-full border-b border-b-tm-black-20 bg-tm-white rounded-t-xl sm:rounded-t-2xl": showHeader,
               })}
             >
               {showHeader && headerText ? (
-                <p className="px-[30px] py-[20px] text-[18px] font-bold leading-[1.1em] text-tm-black-80">
+                <p className="px-6 sm:px-[30px] py-4 sm:py-[20px] text-base sm:text-[18px] font-bold leading-[1.1em] text-tm-black-80">
                   {headerText}
                 </p>
               ) : null}
               {showCloseIcon && (
-                <div className="absolute right-[18px] top-[14px] z-[999]">
+                <div className="absolute right-4 sm:right-[18px] top-3 sm:top-[14px] z-[999]">
                   <div
                     onClick={handleClose}
-                    className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full text-tm-black-80 opacity-80 "
+                    className="flex h-8 w-8 sm:h-[30px] sm:w-[30px] cursor-pointer items-center justify-center rounded-full text-tm-black-80 opacity-80 hover:bg-gray-100 transition-colors"
                   >
-                    <CloseIcon />
+                    <CloseIcon className="!h-5 !w-5 sm:!h-6 sm:!w-6" />
                   </div>
                 </div>
               )}

@@ -30,9 +30,13 @@ export default function SocialGoogle() {
           idToken: auth0JwtToken,
         },
       ];
+      
+      if (!process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID) {
+        throw new Error("Web3Auth connection ID is not set");
+      }
 
       await web3authSfa.connect({
-        verifier: "trumarket-w3a-auth0-2",
+        verifier: process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID,
         verifierId: email,
         idToken: auth0JwtToken,
         subVerifierInfoArray,

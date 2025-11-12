@@ -3,18 +3,18 @@ import classNames from "classnames";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import Image from "next/image";
 
 import Button from "src/components/common/button";
-import { CheckBox } from "src/components/common/checkbox";
-import Input from "src/components/common/input";
-import { useModal } from "src/context/modal-context";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
+import { AuthService } from "src/controller/AuthAPI.service";
 import { EmailSteps, WalletProviders } from "src/interfaces/global";
 import { handleOTP, handleRequestAuth0JWT, uiConsole } from "src/lib/helpers";
-import { useAppDispatch, useAppSelector } from "src/lib/hooks";
-import { AuthTMModalView } from "src/pages";
-import { selectIsTermsAndConditionsChecked, setTermsAndConditionsChecked } from "src/store/UiSlice";
+import { useAppSelector } from "src/lib/hooks";
+import { selectIsTermsAndConditionsChecked } from "src/store/UiSlice";
+
+import SharedRegisterForm from "./shared-register-form";
 
 import OTPInputWrapper from "../../otp-input-wrapper";
 
@@ -22,8 +22,6 @@ interface WithWeb3WalletProps { }
 
 const WithWeb3Wallet: React.FC<WithWeb3WalletProps> = () => {
   const router = useRouter();
-  const { openModal } = useModal();
-  const dispatch = useAppDispatch();
   const isTermsAndConditionChecked = useAppSelector(selectIsTermsAndConditionsChecked);
   const { web3authPnPInstance, setJWT, initPnP } = useWeb3AuthContext();
   const [emailRegisterStep, setEmailRegisterStep] = useState<EmailSteps>(EmailSteps.STEP_1);
@@ -47,8 +45,23 @@ const WithWeb3Wallet: React.FC<WithWeb3WalletProps> = () => {
 
   const handleSubmitForm = async (data: { terms: boolean; email: string }) => {
     setVerificationCodeLoading(true);
-    await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
-    setVerificationCodeLoading(false);
+    try {
+      // Check if user already exists before sending OTP
+      const userExists = await AuthService.checkUserExists({ email: data.email });
+
+      if (userExists.exists) {
+        toast.error("Account already exists! Please login instead.");
+        setVerificationCodeLoading(false);
+        return;
+      }
+
+      await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
+    } catch (error) {
+      console.error('Error checking user existence:', error);
+      toast.error("Error checking account. Please try again.");
+    } finally {
+      setVerificationCodeLoading(false);
+    }
   };
 
   const handleAccountWithMetamask = async (auth0Jwt: string) => {
@@ -120,74 +133,21 @@ const WithWeb3Wallet: React.FC<WithWeb3WalletProps> = () => {
   return (
     <div>
       {emailRegisterStep === EmailSteps.STEP_1 ? (
-        <form onSubmit={handleSubmit(handleSubmitForm)}>
-          <p className="mb-[5px] text-[13px] leading-[1.2em] tracking-normal text-[#00000099]">Email address</p>
-          <Input
-            name="email"
-            placeholder="Please provide email"
-            register={register("email", {
-              required: "Email field is required!",
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: "Email format is invalid!",
-              },
-            })}
-            errorMessageClass="!relative !left-0"
-            hasError={Boolean(errors.email)}
-            errors={errors}
-          />
-          <Controller
-            control={control}
-            rules={{
-              required: true,
-            }}
-            name="terms"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <div className="mb-[20px] mt-[14px] flex items-center gap-[8px]">
-                <CheckBox
-                  id="terms"
-                  checkBoxName="terms"
-                  checkBoxValue={isTermsAndConditionChecked}
-                  classes={classNames({
-                    "text-tm-danger ": errors.terms,
-                    "border-black": !errors.terms,
-                  })}
-                  setChecked={(checked) => {
-                    dispatch(setTermsAndConditionsChecked({ state: checked }));
-                    setValue("terms", checked, { shouldValidate: true });
-                  }}
-                />
-                <p
-                  className={classNames("text-[13px]", {
-                    "text-tm-danger ": errors.terms,
-                    "text-tm-black-80": !errors.terms,
-                  })}
-                >
-                  I accept{" "}
-                  <span
-                    className="mr-[4px] cursor-pointer underline"
-                    onClick={() => openModal(AuthTMModalView.TERMS_AND_CONDITIONS)}
-                  >
-                    Terms and Conditions
-                  </span>
-                  and
-                  <span
-                    className="ml-[4px] cursor-pointer underline"
-                    onClick={() => openModal(AuthTMModalView.PRIVACY_POLICY)}
-                  >
-                    Privacy Policy
-                  </span>
-                </p>
-              </div>
-            )}
-          />
-          <div className="flex flex-wrap justify-between gap-[14px] md:flex-nowrap">
+        <SharedRegisterForm
+          register={register}
+          control={control}
+          errors={errors}
+          setValue={setValue}
+          onSubmit={handleSubmit(handleSubmitForm)}
+        >
+          <div className="flex flex-wrap gap-4 md:flex-nowrap">
             <Button
               loading={walletProvider === WalletProviders.METAMASK && verificationCodeLoading}
               disabled={walletProvider === WalletProviders.METAMASK && verificationCodeLoading}
               onClick={() => setWalletProvider(WalletProviders.METAMASK)}
+              classOverrides="flex-1"
             >
-              <div className="flex w-full items-center justify-between">
+              <div className="flex w-full items-center justify-center gap-3">
                 <p className="text-[13px] font-semibold leading-[1.2em]">MetaMask</p>
                 <Image height={25} width={25} src="/assets/metamask.png" alt="MetaMask" />
               </div>
@@ -196,14 +156,15 @@ const WithWeb3Wallet: React.FC<WithWeb3WalletProps> = () => {
               loading={walletProvider === WalletProviders.WALLET_CONNECT && verificationCodeLoading}
               disabled={walletProvider === WalletProviders.WALLET_CONNECT && verificationCodeLoading}
               onClick={() => setWalletProvider(WalletProviders.WALLET_CONNECT)}
+              classOverrides="flex-1"
             >
-              <div className="flex w-full items-center justify-between">
+              <div className="flex w-full items-center justify-center gap-3">
                 <p className="text-[13px] font-semibold leading-[1.2em]">Wallet Connect</p>
                 <Image height={25} width={25} src="/assets/walletconnect.png" alt="wallet-connect" />
               </div>
             </Button>
           </div>
-        </form>
+        </SharedRegisterForm>
       ) : (
         <div className="flex flex-col items-center gap-[14px]">
           <OTPInputWrapper

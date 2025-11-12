@@ -60,7 +60,7 @@ const EnterAddressee: React.FC<EnterAddresseeProps> = ({ setSelectedIndex, accou
   };
 
   return (
-    <form onSubmit={handleSubmit(handleNextStep)} className="flex flex-col gap-[10px]">
+    <form onSubmit={handleSubmit(handleNextStep)} className="flex flex-col gap-[12px]">
       <div className="flex flex-col gap-[5px]">
         <FieldTitle>E-mail address(es)</FieldTitle>
         <CreatableInput
@@ -103,6 +103,7 @@ const EnterAddressee: React.FC<EnterAddresseeProps> = ({ setSelectedIndex, accou
           id="addresseeCountry"
           placeHolder={`The Country where your ${isBuyer ? "Supplier's" : "Buyer's"} company is located`}
           state={errors.addresseeCountry ? ValidationStates.ERROR : ""}
+          inputHeight="40px"
           // value={inputDefaultValues.job_category?.value}
           options={countryOrigins}
           rules={{
@@ -135,9 +136,12 @@ const EnterAddressee: React.FC<EnterAddresseeProps> = ({ setSelectedIndex, accou
           errors={errors}
         />
       </div>
-      <div className="mt-[30px] flex gap-[10px]">
+      <div className="mt-[30px] flex gap-[10px] items-center">
         <div className="!w-auto">
-          <Button onClick={() => setSelectedIndex((prev) => prev - 1)}>
+          <Button
+            onClick={() => setSelectedIndex((prev) => prev - 1)}
+            classOverrides="!h-[40px] !min-h-[40px] !py-2 sm:!py-2.5"
+          >
             <ChevronLeftIcon />
           </Button>
         </div>

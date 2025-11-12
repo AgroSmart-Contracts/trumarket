@@ -189,88 +189,95 @@ export class DealsService {
   }
 
   async confirmDeal(dealId: string, user: User): Promise<Deal> {
-    const deal = await this.findById(dealId);
+    try {
 
-    if (deal.status !== DealStatus.Proposal) {
-      throw new BadRequestError('Deal is not in proposal status');
-    }
+      const deal = await this.findById(dealId);
 
-    await this.checkAuthorizedToUpdateDeal(deal, user);
+      if (deal.status !== DealStatus.Proposal) {
+        throw new BadRequestError('Deal is not in proposal status');
+      }
 
-    const dealUpdate: Partial<Deal> = {};
+      await this.checkAuthorizedToUpdateDeal(deal, user);
 
-    dealUpdate.buyers = deal.buyers.map((buyer) => {
-      if (buyer.id === user.id) {
+      const dealUpdate: Partial<Deal> = {};
+
+      dealUpdate.buyers = deal.buyers.map((buyer) => {
+        if (buyer.id === user.id) {
+          return {
+            ...buyer,
+            approved: true,
+            new: false,
+          };
+        }
+
         return {
           ...buyer,
-          approved: true,
-          new: false,
         };
-      }
+      });
 
-      return {
-        ...buyer,
-      };
-    });
+      dealUpdate.suppliers = deal.suppliers.map((supplier) => {
+        if (supplier.id === user.id) {
+          return {
+            ...supplier,
+            approved: true,
+            new: false,
+          };
+        }
 
-    dealUpdate.suppliers = deal.suppliers.map((supplier) => {
-      if (supplier.id === user.id) {
         return {
           ...supplier,
-          approved: true,
-          new: false,
         };
+      });
+
+      if (
+        dealUpdate.buyers
+          .concat(dealUpdate.suppliers)
+          .every((participant) => participant.approved)
+      ) {
+        dealUpdate.status = DealStatus.Confirmed;
+
+        if (config.automaticDealsAcceptance && deal.buyers.length > 0) {
+          logger.debug('Automatic deal acceptance enabled! Minting NFT...');
+          const buyer = await this.users.findByEmail(deal.buyers[0].email);
+
+          const lastBlock = await this.blockchain.getLastBlock();
+
+          const txHash = await this.blockchain.mintNFT(
+            deal.milestones.map((m) => m.fundsDistribution),
+            deal.investmentAmount,
+            buyer.walletAddress,
+          );
+          const nftID = await this.blockchain.getNftID(txHash);
+          console.log('nftID', nftID);
+          // wait for 5 seconds to get the vault address
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          const vault = await this.blockchain.vault(nftID);
+
+          await SyncDealsLogsJob.create({
+            type: DealsLogsJobType.Vault,
+            contract: vault,
+            lastBlock,
+            active: true,
+            dealId: nftID,
+          });
+
+          dealUpdate.nftID = nftID;
+          dealUpdate.mintTxHash = txHash;
+          dealUpdate.vaultAddress = vault;
+        }
       }
 
-      return {
-        ...supplier,
-      };
-    });
+      await this.notifications.sendDealConfirmedNotification(
+        this.selectParticipantsEmailsBasedOnUser(user, deal),
+        deal,
+      );
 
-    if (
-      dealUpdate.buyers
-        .concat(dealUpdate.suppliers)
-        .every((participant) => participant.approved)
-    ) {
-      dealUpdate.status = DealStatus.Confirmed;
-
-      if (config.automaticDealsAcceptance && deal.buyers.length > 0) {
-        logger.debug('Automatic deal acceptance enabled! Minting NFT...');
-        const buyer = await this.users.findByEmail(deal.buyers[0].email);
-
-        const lastBlock = await this.blockchain.getLastBlock();
-
-        const txHash = await this.blockchain.mintNFT(
-          deal.milestones.map((m) => m.fundsDistribution),
-          deal.investmentAmount,
-          buyer.walletAddress,
-        );
-        const nftID = await this.blockchain.getNftID(txHash);
-        console.log('nftID', nftID);
-        // wait for 5 seconds to get the vault address
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        const vault = await this.blockchain.vault(nftID);
-
-        await SyncDealsLogsJob.create({
-          type: DealsLogsJobType.Vault,
-          contract: vault,
-          lastBlock,
-          active: true,
-          dealId: nftID,
-        });
-
-        dealUpdate.nftID = nftID;
-        dealUpdate.mintTxHash = txHash;
-        dealUpdate.vaultAddress = vault;
-      }
+      return this.dealsRepository.updateById(dealId, dealUpdate);
+    } catch (error) {
+      logger.error(error);
+      console.error(error);
+      throw new BadRequestError('Failed to confirm deal');
     }
-
-    await this.notifications.sendDealConfirmedNotification(
-      this.selectParticipantsEmailsBasedOnUser(user, deal),
-      deal,
-    );
-
-    return this.dealsRepository.updateById(dealId, dealUpdate);
   }
 
   checkAuthorizedToUpdateDeal(deal: Deal, user: User): void {

@@ -204,10 +204,10 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
       <Head>
         <title>{APP_NAME} - Details</title>
       </Head>
-      <div className="py-[30px] ">
+      <div className="py-4 sm:py-[30px]">
         <Container>
-          <div className="mb-[30px] flex items-start justify-between gap-[10px]">
-            <div className="w-[35%]">
+          <div className="mb-4 sm:mb-[30px] flex flex-col lg:flex-row items-stretch lg:items-start justify-between gap-4 sm:gap-[10px]">
+            <div className="w-full lg:w-[35%]">
               <ShipmentDetailsHeader
                 productName={shipmentDetails?.name}
                 userAccountType={accountType}
@@ -217,7 +217,7 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
                 }}
               />
             </div>
-            <div className="w-[65%]">
+            <div className="w-full lg:w-[65%] space-y-4">
               <ShipmentBaseInfo
                 accountType={accountType}
                 emailInfo={isBuyer ? shipmentDetails?.suppliers : shipmentDetails?.buyers}
@@ -247,17 +247,16 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
               )}
             </div>
           </div>
-          <div className="flex items-start gap-[10px]">
-            <div className="w-[35%] ">
-              <div className="rounded-tl-[4px] rounded-tr-[4px] border-b border-b-tm-black-20 bg-tm-white  px-[30px] py-[25px]">
-                <p className="text-[17px] font-bold leading-[1em] text-tm-black-80">Milestone timeline</p>
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-start gap-4 sm:gap-[10px]">
+            <div className="w-full lg:w-[35%]">
+              <div className="rounded-tl-[4px] rounded-tr-[4px] border-b border-b-tm-black-20 bg-tm-white px-4 sm:px-[30px] py-4 sm:py-[25px]">
+                <p className="text-base sm:text-[17px] font-bold leading-[1em] text-tm-black-80">Milestone timeline</p>
               </div>
               <div
-                className="rounded-bl-[4px] rounded-br-[4px] bg-tm-white px-[30px] pb-[44px] pt-[30px]"
-                style={{ minHeight: `${windowHeight - 295}px` }}
+                className="rounded-bl-[4px] rounded-br-[4px] bg-tm-white px-4 sm:px-[30px] pb-6 sm:pb-[44px] pt-4 sm:pt-[30px] lg:min-h-[calc(100vh-295px)]"
               >
-                <div className="flex items-start gap-[10px]">
-                  <div className="h-[20px] w-[20px]">
+                <div className="flex items-start gap-2 sm:gap-[10px]">
+                  <div className="h-[20px] w-[20px] flex-shrink-0">
                     <Flag code={getCountryCode(shipmentDetails?.origin as string)} />
                   </div>
                   <ShipmentInfo
@@ -265,7 +264,7 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
                     value={`${moment(shipmentDetails?.shippingStartDate).format("DD.MM.YYYY")} | ${moment(shipmentDetails?.shippingStartDate).endOf("day").fromNow()}`}
                   />
                 </div>
-                <div className="py-[8px]">
+                <div className="py-2 sm:py-[8px]">
                   <ShipmentMilestoneStatus
                     step={shipmentDetailsCurrentMilestone || 0}
                     milestoneInfo={shipmentDetails?.milestones || []}
@@ -275,8 +274,8 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
                     transport={shipmentDetails?.transport}
                   />
                 </div>
-                <div className="flex items-start gap-[10px]">
-                  <div className="h-[20px] w-[20px]">
+                <div className="flex items-start gap-2 sm:gap-[10px]">
+                  <div className="h-[20px] w-[20px] flex-shrink-0">
                     <Flag code={getCountryCode(shipmentDetails?.destination as string)} />
                   </div>
                   <ShipmentInfo
@@ -286,7 +285,7 @@ const ShipmentDetails: React.FC<ShipmentDetailsProps> = () => {
                 </div>
               </div>
             </div>
-            <div className="w-[65%] rounded-[4px]">
+            <div className="w-full lg:w-[65%] rounded-[4px]">
               <DocumentBoxHeader dealId={query.id as string} refetchShipmentData={refetch} />
               <AttachedDocumentsView
                 currentMilestone={shipmentDetailsCurrentMilestone || 0}

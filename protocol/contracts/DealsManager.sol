@@ -3,7 +3,6 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -16,7 +15,7 @@ import {DealVault} from "./DealVault.sol";
  * @dev Manages the creation and progression of deals with milestone-based fund releases
  * @notice This contract handles deal creation, milestone progression, and fund management
  */
-contract DealsManager is ERC721, ERC721Burnable, Ownable2Step, ReentrancyGuard {
+contract DealsManager is ERC721, Ownable2Step, ReentrancyGuard {
     /// @notice Emitted when a new deal is created
     event DealCreated(
         uint256 indexed dealId,
@@ -115,11 +114,11 @@ contract DealsManager is ERC721, ERC721Burnable, Ownable2Step, ReentrancyGuard {
 
         require(sum == 100, "Milestones distribution should be 100");
 
-        address vault = address(
+        address vaultAddress = address(
             new DealVault(_underlying, maxDeposit_, maxDeposit_, address(this))
         );
 
-        Deal memory deal = Deal(0, milestones_, vault, maxDeposit_, borrower_);
+        Deal memory deal = Deal(0, milestones_, vaultAddress, maxDeposit_, borrower_);
 
         _deals.push(deal);
 
@@ -188,32 +187,44 @@ contract DealsManager is ERC721, ERC721Burnable, Ownable2Step, ReentrancyGuard {
         require(milestone_ > 0 && milestone_ < 8, "Invalid milestone");
 
         if (milestone_ == 1) {
-            uint256 funded = DealVault(_deals[tokenId_].vault).totalAssets();
-            require(
-                funded >= _deals[tokenId_].maxDeposit,
-                "Vault not funded completely"
-            );
+            // Deals can start regardless of funding level
+            // Pause and block deposits when starting the deal
             DealVault(_deals[tokenId_].vault).pause();
             DealVault(_deals[tokenId_].vault).blockDeposits();
         }
 
-        // transfer % of funds
+        // Transfer funds based on milestone percentage of available assets
+        // For partially funded deals, transfers percentage of what's actually available
+        // This allows partially filled vaults to be fully drained through milestones
+        // For off-chain deals with empty vaults, no transfer occurs (amountTransferred = 0)
+        uint256 amountTransferred = 0;
         if (_deals[tokenId_].milestones[milestone_ - 1] != 0) {
-            uint256 amountToTransfer = Math.mulDiv(
-                _deals[tokenId_].maxDeposit,
-                _deals[tokenId_].milestones[milestone_ - 1],
-                100
-            );
-            DealVault(_deals[tokenId_].vault).transferToBorrower(
-                _deals[tokenId_].borrower,
-                amountToTransfer
-            );
-            emit DealMilestoneChanged(tokenId_, milestone_, amountToTransfer);
-        } else {
-            emit DealMilestoneChanged(tokenId_, milestone_, 0);
+            uint256 vaultAssets = DealVault(_deals[tokenId_].vault)
+                .totalAssets();
+
+            if (vaultAssets > 0) {
+                // Calculate transfer amount as percentage of available assets
+                // This ensures proportional distribution for partially funded deals
+                uint256 amountToTransfer = Math.mulDiv(
+                    vaultAssets,
+                    _deals[tokenId_].milestones[milestone_ - 1],
+                    100
+                );
+
+                // Transfer funds if amount is positive
+                if (amountToTransfer > 0) {
+                    DealVault(_deals[tokenId_].vault).transferToBorrower(
+                        _deals[tokenId_].borrower,
+                        amountToTransfer
+                    );
+                    amountTransferred = amountToTransfer;
+                }
+            }
+            // If vault is empty (off-chain deal), amountTransferred remains 0
         }
 
         _deals[tokenId_].status++;
+        emit DealMilestoneChanged(tokenId_, milestone_, amountTransferred);
     }
 
     /**

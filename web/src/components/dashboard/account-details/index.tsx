@@ -6,8 +6,9 @@ import { Info, Warning } from "@phosphor-icons/react";
 import Loading from "src/components/common/loading";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
 import { UserProfileInfo } from "src/interfaces/auth";
-import WithdrawModal from "./WithdrawModal";
 import EthereumRpc from "src/lib/web3/evm.web3";
+
+import WithdrawModal from "./WithdrawModal";
 
 interface UserInfoProps {
   userProfileInfo?: UserProfileInfo;

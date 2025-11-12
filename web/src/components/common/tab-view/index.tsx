@@ -12,18 +12,16 @@ interface TabViewProps {
 const TabView: React.FC<TabViewProps> = ({ tabHeaders, tabContent }) => {
   return (
     <Tab.Group>
-      <Tab.List className="relative  flex justify-between">
-        <div className="absolute bottom-0 right-[142px] h-[1px] w-[33px] bg-tm-black-20"></div>
-        <div className="absolute bottom-0 left-[133px] h-[1px] w-[33px] bg-tm-black-20"></div>
+      <Tab.List className="flex gap-2">
         {tabHeaders.map((category, i) => (
           <Tab
             key={category}
             className={({ selected }) =>
               classNames(
-                "rounded-tl-[4px] rounded-tr-[4px] border-x   border-t border-tm-black-20 px-[10px] py-[11px] text-[13px] outline-none md:px-[30px]",
+                "flex-1 px-6 py-3 text-sm font-semibold rounded-tm-md transition-all duration-200 outline-none",
                 {
-                  "bg-[#2D3E57]/5 font-bold  leading-[1.2em]  tracking-normal text-tm-black-80": selected,
-                  "text-tm-theme-text border-b bg-tm-white font-bold": !selected,
+                  "bg-tm-primary text-tm-white shadow-tm-primary": selected,
+                  "bg-tm-neutral text-tm-text hover:bg-tm-neutral-dark": !selected,
                 },
               )
             }
@@ -37,7 +35,7 @@ const TabView: React.FC<TabViewProps> = ({ tabHeaders, tabContent }) => {
           <Tab.Panel
             key={i}
             className={classNames(
-              "rounded-bl-[4px] rounded-br-[4px] border-x border-b  border-tm-black-20 bg-[#2D3E57]/5 p-[30px]",
+              "rounded-tm-lg pt-8 pb-4",
             )}
           >
             {view}

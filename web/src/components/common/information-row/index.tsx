@@ -21,12 +21,12 @@ const InformationRow: React.FC<InformationRowProps> = ({
   showBoldValue = true,
 }) => {
   return (
-    <div className={classNames("flex cursor-pointer items-center gap-[6px]", containerClassOverrides)}>
-      <p className={classNames("text-[12px] font-medium leading-[1em] text-tm-black-80", labelClassOverrides)}>
+    <div className={classNames("flex cursor-pointer items-center gap-[6px] min-w-0", containerClassOverrides)}>
+      <p className={classNames("text-[12px] font-medium leading-[1em] text-tm-black-80 flex-shrink-0", labelClassOverrides)}>
         {label}
       </p>
       <span
-        className={classNames("text-[12px]  leading-[1em] text-tm-black-80", underlined ? "underline" : "", {
+        className={classNames("text-[12px] leading-[1em] text-tm-black-80 min-w-0 flex-1", underlined ? "underline" : "", {
           "font-bold": showBoldValue,
           "font-medium": !showBoldValue,
         })}

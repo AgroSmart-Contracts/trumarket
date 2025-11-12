@@ -1,32 +1,26 @@
 import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import classNames from "classnames";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import { useAuth0 } from "@auth0/auth0-react";
-import axios from "axios";
 import { ADAPTER_STATUS } from "@web3auth/single-factor-auth";
 
 import Button from "src/components/common/button";
-import { CheckBox } from "src/components/common/checkbox";
-import Input from "src/components/common/input";
-import VerificationInputComponent from "src/components/common/verification-input";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
+import { AuthService } from "src/controller/AuthAPI.service";
 import { checkWeb3AuthInstance, handleOTP, parseToken, uiConsole, handleRequestAuth0JWT } from "src/lib/helpers";
 import { EmailSteps } from "src/interfaces/global";
-import { useModal } from "src/context/modal-context";
-import { AuthTMModalView } from "src/pages";
-import { useAppDispatch, useAppSelector } from "src/lib/hooks";
-import { selectIsTermsAndConditionsChecked, setTermsAndConditionsChecked } from "src/store/UiSlice";
+import { useAppSelector } from "src/lib/hooks";
+import { selectIsTermsAndConditionsChecked } from "src/store/UiSlice";
+
+import SharedRegisterForm from "./shared-register-form";
 
 import OTPInputWrapper from "../../otp-input-wrapper";
 
-interface WithEmailProps {}
+interface WithEmailProps { }
 
 const WithEmail: React.FC<WithEmailProps> = () => {
-  const { openModal } = useModal();
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const isTermsAndConditionChecked = useAppSelector(selectIsTermsAndConditionsChecked);
   const { web3authSfa, setIsLoggingIn, setIsLoggedIn, getUserInfo, isLoggingIn, setJWT, init } = useWeb3AuthContext();
   const { getIdTokenClaims, loginWithRedirect } = useAuth0();
@@ -50,8 +44,23 @@ const WithEmail: React.FC<WithEmailProps> = () => {
 
   const handleSubmitForm = async (data: { terms: boolean; email: string }) => {
     setVerificationCodeLoading(true);
-    await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
-    setVerificationCodeLoading(false);
+    try {
+      // Check if user already exists before sending OTP
+      const userExists = await AuthService.checkUserExists({ email: data.email });
+
+      if (userExists.exists) {
+        toast.error("Account already exists! Please login instead.");
+        setVerificationCodeLoading(false);
+        return;
+      }
+
+      await handleOTP(data.email, () => setEmailRegisterStep(EmailSteps.STEP_2));
+    } catch (error) {
+      console.error('Error checking user existence:', error);
+      toast.error("Error checking account. Please try again.");
+    } finally {
+      setVerificationCodeLoading(false);
+    }
   };
 
   const handleConfirm = async (OTPcode: string) => {
@@ -70,19 +79,23 @@ const WithEmail: React.FC<WithEmailProps> = () => {
 
       const { email } = parseToken(auth0Jwt);
 
-      const subVerifierInfoArray = [
-        {
-          verifier: "auth0-passwordless",
-          idToken: auth0Jwt!,
-        },
-      ];
+      // const subVerifierInfoArray = [
+      //   {
+      //     verifier: "auth0-passwordless",
+      //     idToken: auth0Jwt!,
+      //   },
+      // ];
 
+      if (!process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID) {
+        console.error('❌ [REGISTER] Web3Auth connection ID is not set');
+        throw new Error("Web3Auth connection ID is not set");
+      }
       await web3authSfa.connect({
-        verifier: "trumarket-w3a-auth0-2",
+        verifier: process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID,
         verifierId: email,
         idToken: auth0Jwt,
-        subVerifierInfoArray,
-      });
+        // subVerifierInfoArray,
+      } as any);
 
       const jwt = await web3authSfa.authenticateUser();
 
@@ -103,73 +116,24 @@ const WithEmail: React.FC<WithEmailProps> = () => {
   return (
     <div>
       {emailRegisterStep === EmailSteps.STEP_1 ? (
-        <form onSubmit={handleSubmit(handleSubmitForm)}>
-          <p className="text-tm-theme-text mb-[5px] text-[13px] leading-[1.2em] tracking-normal">Email address</p>
-          <Input
-            name="email"
-            placeholder="Please provide email"
-            register={register("email", {
-              required: "Email field is required!",
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: "Email format is invalid!",
-              },
-            })}
-            errorMessageClass="!relative !left-0"
-            hasError={Boolean(errors.email)}
-            errors={errors}
-          />
-          <Controller
-            control={control}
-            rules={{
-              required: true,
-            }}
-            name="terms"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <div className="mb-[20px] mt-[14px] flex items-center gap-[8px]">
-                <CheckBox
-                  id="terms"
-                  checkBoxName="terms"
-                  checkBoxValue={isTermsAndConditionChecked}
-                  classes={classNames({
-                    "text-tm-danger ": errors.terms,
-                    "border-black": !errors.terms,
-                  })}
-                  setChecked={(checked) => {
-                    dispatch(setTermsAndConditionsChecked({ state: checked }));
-                    setValue("terms", checked, { shouldValidate: true });
-                  }}
-                />
-                <p
-                  className={classNames("text-[13px]", {
-                    "text-tm-danger ": errors.terms,
-                    "text-tm-theme-text": !errors.terms,
-                  })}
-                >
-                  I accept{" "}
-                  <span
-                    className="mr-[4px] cursor-pointer underline"
-                    onClick={() => openModal(AuthTMModalView.TERMS_AND_CONDITIONS)}
-                  >
-                    Terms and Conditions
-                  </span>
-                  and
-                  <span
-                    className="ml-[4px] cursor-pointer underline"
-                    onClick={() => openModal(AuthTMModalView.PRIVACY_POLICY)}
-                  >
-                    Privacy Policy
-                  </span>
-                </p>
-              </div>
-            )}
-          />
-          <Button loading={verificationCodeLoading} disabled={verificationCodeLoading}>
+        <SharedRegisterForm
+          register={register}
+          control={control}
+          errors={errors}
+          setValue={setValue}
+          onSubmit={handleSubmit(handleSubmitForm)}
+        >
+          <Button
+            type="submit"
+            loading={verificationCodeLoading}
+            disabled={verificationCodeLoading}
+            classOverrides="w-full tm-btn tm-btn-primary tm-btn-lg"
+          >
             <p>Send me an email with code</p>
           </Button>
-        </form>
+        </SharedRegisterForm>
       ) : (
-        <div className="flex flex-col items-center gap-[14px]">
+        <div className="flex flex-col items-center gap-6">
           <OTPInputWrapper
             email={getValues("email")}
             setVerificationCode={setVerificationCode}
@@ -178,18 +142,16 @@ const WithEmail: React.FC<WithEmailProps> = () => {
             resendLoading={verificationCodeLoading}
             setEmailRegisterStep={setEmailRegisterStep}
           />
-          <div className="mt-[11px] w-full">
-            <Button
-              loading={isLoggingIn || confirmationLoading}
-              onClick={() => handleConfirm(verificationCode)}
-              disabled={verificationCode?.length !== 6 || isLoggingIn || confirmationLoading}
-            >
-              <p>Confirm</p>
-            </Button>
-          </div>
+          <Button
+            loading={isLoggingIn || confirmationLoading}
+            onClick={() => handleConfirm(verificationCode)}
+            disabled={verificationCode?.length !== 6 || isLoggingIn || confirmationLoading}
+            classOverrides="w-full tm-btn tm-btn-primary tm-btn-lg"
+          >
+            <p>Confirm</p>
+          </Button>
         </div>
       )}
-      {/* <button onClick={() => router.push("/test2")}>sss</button> */}
     </div>
   );
 };
