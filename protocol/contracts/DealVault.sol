@@ -82,11 +82,10 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
     /**
      * @notice Returns the maximum amount that can be deposited
-     * @param account Address of the account (unused)
      * @return Maximum amount that can be deposited
      */
     function maxDeposit(
-        address account
+        address
     ) public view override returns (uint256) {
         uint256 currentAssets = totalAssets();
         return _maxDeposit > currentAssets ? _maxDeposit - currentAssets : 0;
@@ -94,10 +93,9 @@ contract DealVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
     /**
      * @notice Returns the maximum amount of shares that can be minted
-     * @param account Address of the account (unused)
      * @return Maximum amount of shares that can be minted
      */
-    function maxMint(address account) public view override returns (uint256) {
+    function maxMint(address ) public view override returns (uint256) {
         uint256 currentAssets = totalAssets();
         uint256 maxAssets = _maxDeposit > currentAssets
             ? _maxDeposit - currentAssets
