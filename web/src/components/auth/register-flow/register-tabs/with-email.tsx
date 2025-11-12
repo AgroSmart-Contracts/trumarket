@@ -1,23 +1,19 @@
 import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import classNames from "classnames";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import { useAuth0 } from "@auth0/auth0-react";
-import axios from "axios";
 import { ADAPTER_STATUS } from "@web3auth/single-factor-auth";
 
 import Button from "src/components/common/button";
-import SharedRegisterForm from "./shared-register-form";
-import VerificationInputComponent from "src/components/common/verification-input";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
 import { AuthService } from "src/controller/AuthAPI.service";
 import { checkWeb3AuthInstance, handleOTP, parseToken, uiConsole, handleRequestAuth0JWT } from "src/lib/helpers";
 import { EmailSteps } from "src/interfaces/global";
-import { useModal } from "src/context/modal-context";
-import { AuthTMModalView } from "src/pages";
 import { useAppSelector } from "src/lib/hooks";
 import { selectIsTermsAndConditionsChecked } from "src/store/UiSlice";
+
+import SharedRegisterForm from "./shared-register-form";
 
 import OTPInputWrapper from "../../otp-input-wrapper";
 

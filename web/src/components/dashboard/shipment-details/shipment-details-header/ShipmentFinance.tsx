@@ -1,14 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Contract, ethers, formatEther, formatUnits, parseUnits } from "ethers";
-import DealVaultAbi from "./DealVault.abi";
-import { useWeb3AuthContext } from "src/context/web3-auth-context";
-import { useUserInfo } from "src/lib/hooks/useUserInfo";
-import ERC20Abi from "./ERC20.abi";
-import { DealStatus } from "src/interfaces/shipment";
 import { Card } from "@mui/material";
 import { Info } from "@phosphor-icons/react";
-import Deposit from "./Deposit";
+
+import { useWeb3AuthContext } from "src/context/web3-auth-context";
+import { useUserInfo } from "src/lib/hooks/useUserInfo";
+import { DealStatus } from "src/interfaces/shipment";
+
+import DealVaultAbi from "./DealVault.abi";
 import DealsManagerAbi from "./DealsManager.abi";
+import Deposit from "./Deposit";
+import ERC20Abi from "./ERC20.abi";
 
 const dealsManagerAddress = process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS as string as "0x";
 const erc20Address = process.env.NEXT_PUBLIC_INVESTMENT_TOKEN_CONTRACT_ADDRESS as string as "0x";

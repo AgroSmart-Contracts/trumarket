@@ -3,13 +3,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { Bell, User, SignOut } from "@phosphor-icons/react";
+import { useQuery } from "@tanstack/react-query";
 
 import NotificationMenu from "src/components/dashboard/notifications/notification-menu";
-import { useUserInfo } from "src/lib/hooks/useUserInfo";
 import { useWeb3AuthContext } from "src/context/web3-auth-context";
-import { useQuery } from "@tanstack/react-query";
 import { NotificationsService } from "src/controller/NotificationsAPI.service";
 import { INotification } from "src/interfaces/notifications";
+import { useUserInfo } from "src/lib/hooks/useUserInfo";
 
 const Header: React.FC = () => {
     const router = useRouter();

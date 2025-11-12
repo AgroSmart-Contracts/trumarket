@@ -69,9 +69,8 @@ const Deposit: React.FC<Props> = ({ walletBalance, walletBalanceEth, poolCapacit
             placeholder="0.0"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className={`bg-white  w-full  flex-1 rounded-md px-3 py-2 focus:outline-none ${
-              error ? "border-red-500 focus:ring-red-500" : ""
-            }`}
+            className={`bg-white  w-full  flex-1 rounded-md px-3 py-2 focus:outline-none ${error ? "border-red-500 focus:ring-red-500" : ""
+              }`}
           />
           <button
             className="text-blue-600 hover:text-blue-700 ml-2 px-4 py-1 text-sm font-medium"
@@ -85,9 +84,8 @@ const Deposit: React.FC<Props> = ({ walletBalance, walletBalanceEth, poolCapacit
           <div className="text-xs">Min. Deposit: {minDeposit} USDC</div>
         </div>
         <button
-          className={`mb-4 w-full rounded bg-tm-green py-2 text-tm-white ${
-            !isValid || loading ? "cursor-not-allowed opacity-50" : ""
-          }`}
+          className={`mb-4 w-full rounded bg-tm-green py-2 text-tm-white ${!isValid || loading ? "cursor-not-allowed opacity-50" : ""
+            }`}
           disabled={!isValid || loading}
           onClick={handleDeposit}
         >

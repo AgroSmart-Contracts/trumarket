@@ -3,9 +3,9 @@ import { useRouter } from "next/router";
 import { useAuth0 } from "@auth0/auth0-react";
 import Link from "next/link";
 
-import AuthLayout from "../auth-layout";
 import StepCounter from "src/components/common/step-counter";
 
+import AuthLayout from "../auth-layout";
 import RegisterTabs from "./register-tabs";
 
 interface RegisterFlowProps { }
