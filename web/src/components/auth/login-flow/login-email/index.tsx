@@ -74,23 +74,19 @@ const LoginEmail: React.FC<LoginEmailProps> = () => {
 
       const { email } = parseToken(auth0Jwt);
 
-      // const subVerifierInfoArray = [
-      //   {
-      //     verifier: "auth0-passwordless",
-      //     idToken: auth0Jwt!,
-      //   },
-      // ];
-
-      if (!process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID) {
-        throw new Error("Web3Auth connection ID is not set");
-      }
+      const subVerifierInfoArray = [
+        {
+          verifier: "auth0-passwordless",
+          idToken: auth0Jwt!,
+        },
+      ];
 
       await web3authSfa.connect({
-        verifier: process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID,
+        verifier: "trumarket-w3a-auth0-2",
         verifierId: email,
         idToken: auth0Jwt,
-        // subVerifierInfoArray,
-      } as any);
+        subVerifierInfoArray,
+      });
 
       const jwt = await web3authSfa.authenticateUser();
 
