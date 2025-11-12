@@ -36,7 +36,7 @@ export default function SocialGoogle() {
       }
 
       await web3authSfa.connect({
-        verifier: process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID,
+        verifier: "trumarket-w3a-auth0-2",
         verifierId: email,
         idToken: auth0JwtToken,
         subVerifierInfoArray,
