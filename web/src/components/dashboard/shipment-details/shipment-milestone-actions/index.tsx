@@ -43,14 +43,14 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
         toolTipText="Submit the approval request to ask the buyer to close the milestone."
         withOverlay={false}
       >
-        <MilestoneActionButton
-          action={() =>
-            handleMilestoneAction({ submitToReview: true }, "Milestone submitted successfully!", setLoading)
-          }
-          loading={loading}
-        >
+          <MilestoneActionButton
+            action={() =>
+              handleMilestoneAction({ submitToReview: true }, "Milestone submitted successfully!", setLoading)
+            }
+            loading={loading}
+          >
           <span className="text-xs sm:text-[12px]">Submit Request</span>
-        </MilestoneActionButton>
+          </MilestoneActionButton>
       </MilestoneApprovalBox>
     );
   }
@@ -137,14 +137,14 @@ const MilestoneActionRenderer: React.FC<MilestoneActionRendererProps> = ({
             <span>Denied</span>
             <CancelIcon className="!h-4 !w-4 sm:!h-[15px] sm:!w-[15px] flex-shrink-0" />
           </div>
-          <MilestoneActionButton
-            action={() =>
-              handleMilestoneAction({ submitToReview: true }, "Milestone resubmitted successfully!", setLoading)
-            }
-            loading={loading}
-          >
+            <MilestoneActionButton
+              action={() =>
+                handleMilestoneAction({ submitToReview: true }, "Milestone resubmitted successfully!", setLoading)
+              }
+              loading={loading}
+            >
             <span className="text-xs sm:text-[12px]">Resubmit Request</span>
-          </MilestoneActionButton>
+            </MilestoneActionButton>
         </div>
       </MilestoneApprovalBox>
     );

@@ -15,9 +15,9 @@ const config = {
     },
     colors: {
       // New TruMarket Brand Colors
-      "tm-primary": "#3CA638", // Green - Primary brand color
-      "tm-primary-dark": "#2D8828",
-      "tm-primary-light": "#4FD746",
+      "tm-primary": "#4E8C37", // Green - Primary brand color
+      "tm-primary-dark": "#3A6B2A",
+      "tm-primary-light": "#5FA84A",
       "tm-accent": "#F2A007", // Yellow/Orange - Accent color
       "tm-accent-dark": "#D48806",
       "tm-accent-light": "#FFB619",
@@ -39,7 +39,7 @@ const config = {
       "tm-text-muted": "#9CA3AF",
 
       // Transparent variants
-      "tm-primary-transparent": "#3CA63820",
+      "tm-primary-transparent": "#4E8C3720",
       "tm-accent-transparent": "#F2A00720",
       "tm-danger-transparent": "#F25E6B20",
       "tm-neutral-transparent": "#F2F2F220",
@@ -51,7 +51,7 @@ const config = {
       "tm-purple": "#C663FF",
       "tm-black-20": "#2d3e5733",
       "tm-theme-text": "#1F2D42",
-      "tm-green": "#3CA638",
+      "tm-green": "#4E8C37",
       "tm-blue": "#4EA4D9",
       "tm-dark-secondary": "#222222",
       "tm-blue-secondary": "#5898C7",
@@ -60,17 +60,17 @@ const config = {
       "tm-red": "#F25E6B",
       "tm-black-transparent-05": "#0000000d",
       "tm-yellow-transparent": "#F2A00720",
-      "tm-green-transparent": "#3CA63820",
-      "tm-green-light": "#3CA63833",
+      "tm-green-transparent": "#4E8C3720",
+      "tm-green-light": "#4E8C3733",
     },
     extend: {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-        "gradient-primary": "linear-gradient(135deg, #3CA638 0%, #2D8828 100%)",
+        "gradient-primary": "linear-gradient(135deg, #4E8C37 0%, #3A6B2A 100%)",
         "gradient-accent": "linear-gradient(135deg, #F2A007 0%, #F28705 100%)",
-        "gradient-hero": "linear-gradient(135deg, #3CA638 0%, #4EA4D9 100%)",
-        "gradient-success": "linear-gradient(90deg, #3CA638 0%, #4FD746 100%)",
+        "gradient-hero": "linear-gradient(135deg, #4E8C37 0%, #4EA4D9 100%)",
+        "gradient-success": "linear-gradient(90deg, #4E8C37 0%, #5FA84A 100%)",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "system-ui", "-apple-system", "sans-serif"],
@@ -81,8 +81,8 @@ const config = {
         "tm-md": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
         "tm-lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
         "tm-xl": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-        "tm-primary": "0 4px 14px 0 rgba(60, 166, 56, 0.25)",
-        "tm-primary-lg": "0 8px 25px 0 rgba(60, 166, 56, 0.35)",
+        "tm-primary": "0 4px 14px 0 rgba(78, 140, 55, 0.25)",
+        "tm-primary-lg": "0 8px 25px 0 rgba(78, 140, 55, 0.35)",
       },
       borderRadius: {
         "tm-sm": "0.375rem",
