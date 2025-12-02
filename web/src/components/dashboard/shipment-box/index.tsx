@@ -101,27 +101,27 @@ const ShipmentBox: React.FC<ShipmentBoxProps> = ({
                 <div className="w-full">
                   <div className="overflow-x-auto -mx-2 sm:mx-0">
                     <div className="min-w-0 px-2 sm:px-0">
-                      <HorizontalMilestones
-                        status={generateMilestoneStatus()}
-                        milestones={shipment.milestones}
-                        isBuyer={isBuyer}
-                        hasNewDocuments={shipment.newDocuments!}
-                        transport={shipment.transport!}
-                        setActive={setActive}
-                      />
-                    </div>
+                  <HorizontalMilestones
+                    status={generateMilestoneStatus()}
+                    milestones={shipment.milestones}
+                    isBuyer={isBuyer}
+                    hasNewDocuments={shipment.newDocuments!}
+                    transport={shipment.transport!}
+                    setActive={setActive}
+                  />
+                </div>
                   </div>
                 </div>
                 <div className="w-full lg:w-auto flex justify-start lg:justify-end text-left lg:text-right">
-                  <ShipmentInfo
-                    title={`${shipment.portOfDestination}, ${shipment.destination}`}
-                    value={`${moment(shipment.expectedShippingEndDate).format("DD.MM.YYYY")}`}
-                    countryCode={getCountryCode(shipment.destination)}
+                <ShipmentInfo
+                  title={`${shipment.portOfDestination}, ${shipment.destination}`}
+                  value={`${moment(shipment.expectedShippingEndDate).format("DD.MM.YYYY")}`}
+                  countryCode={getCountryCode(shipment.destination)}
                     valueClassOverrides="flex-row lg:flex-row-reverse"
                     titleClassOverrides="text-left lg:text-right"
-                    subValue="ETA"
-                    showFlag
-                  />
+                  subValue="ETA"
+                  showFlag
+                />
                 </div>
               </div>
             </div>

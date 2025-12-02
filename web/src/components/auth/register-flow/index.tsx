@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth0 } from "@auth0/auth0-react";
 import Link from "next/link";
@@ -13,6 +13,7 @@ interface RegisterFlowProps { }
 const RegisterFlow: React.FC<RegisterFlowProps> = () => {
   const { push, query } = useRouter();
   const { getIdTokenClaims } = useAuth0();
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
   const checkSocial = async () => {
     const resp = await getIdTokenClaims();
@@ -38,14 +39,14 @@ const RegisterFlow: React.FC<RegisterFlowProps> = () => {
         {/* Step Counter */}
         <div className="flex items-center justify-center">
           <div className="flex items-center gap-4">
-            <StepCounter classOverrides="!bg-tm-white border-2 border-tm-primary !h-[40px] !w-[50px]" invert />
-            <span className="text-lg font-semibold text-tm-text">1/2</span>
+            <StepCounter currentStep={selectedTabIndex + 1} totalSteps={2} classOverrides="!bg-tm-white border-2 border-tm-primary !h-[40px] !w-[50px]" invert />
+            <span className="text-lg font-semibold text-tm-text">{selectedTabIndex + 1}/2</span>
           </div>
         </div>
 
         {/* Register Tabs */}
         <div className="bg-tm-white rounded-tm-lg pt-8 px-8 pb-4 shadow-tm-md">
-          <RegisterTabs />
+          <RegisterTabs selectedIndex={selectedTabIndex} onTabChange={setSelectedTabIndex} />
         </div>
 
         {/* Login Link */}
