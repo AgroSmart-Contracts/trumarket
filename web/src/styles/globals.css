@@ -4,9 +4,9 @@
 
 :root {
   /* TruMarket Brand Colors */
-  --tm-primary: #3ca638;
-  --tm-primary-dark: #2d8828;
-  --tm-primary-light: #4fd746;
+  --tm-primary: #4e8c37;
+  --tm-primary-dark: #3a6b2a;
+  --tm-primary-light: #5fa84a;
   --tm-accent: #f2a007;
   --tm-accent-dark: #d48806;
   --tm-secondary: #f28705;
@@ -250,7 +250,7 @@ input[type="number"] {
 
 .tm-card-highlight {
   border: 2px solid var(--tm-primary);
-  box-shadow: 0 4px 12px rgba(60, 166, 56, 0.15);
+  box-shadow: 0 4px 12px rgba(78, 140, 55, 0.15);
 }
 
 .tm-card-accent {
@@ -283,13 +283,13 @@ input[type="number"] {
   background: var(--tm-primary);
   color: var(--tm-white);
   border: 2px solid var(--tm-primary);
-  box-shadow: 0 4px 14px 0 rgba(60, 166, 56, 0.25);
+  box-shadow: 0 4px 14px 0 rgba(78, 140, 55, 0.25);
 }
 
 .tm-btn-primary:not(:disabled):hover {
   background: var(--tm-primary-dark);
   border-color: var(--tm-primary-dark);
-  box-shadow: 0 8px 25px 0 rgba(60, 166, 56, 0.35);
+  box-shadow: 0 8px 25px 0 rgba(78, 140, 55, 0.35);
   transform: translateY(-2px);
 }
 
@@ -401,7 +401,7 @@ input[type="number"] {
 
 .tm-metric-card:hover {
   border-color: var(--tm-primary);
-  box-shadow: 0 4px 12px rgba(60, 166, 56, 0.15);
+  box-shadow: 0 4px 12px rgba(78, 140, 55, 0.15);
 }
 
 .tm-metric-value {
@@ -505,7 +505,7 @@ input[type="number"] {
 
 .tm-input:focus {
   border-color: var(--tm-primary);
-  box-shadow: 0 0 0 3px rgba(60, 166, 56, 0.1);
+  box-shadow: 0 0 0 3px rgba(78, 140, 55, 0.1);
 }
 
 .tm-input:disabled {
@@ -621,7 +621,7 @@ input[type="number"] {
 }
 
 .tm-shadow-primary {
-  box-shadow: 0 4px 14px 0 rgba(60, 166, 56, 0.25);
+  box-shadow: 0 4px 14px 0 rgba(78, 140, 55, 0.25);
 }
 
 /* === Status Colors === */

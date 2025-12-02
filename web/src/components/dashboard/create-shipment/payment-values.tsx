@@ -168,8 +168,8 @@ const PaymentValues: React.FC<PaymentValueProps> = ({ setSelectedIndex, selected
               <span className="notranslate font-bold text-tm-black-80">
                 {CurrencyFormatter(
                   Number(watch("quantity") || 0) *
-                  Number(watch("offerUnitPrice") || 0) *
-                  (Number(watch("investmentAmountPercentage") || 0) / 100),
+                    Number(watch("offerUnitPrice") || 0) *
+                    (Number(watch("investmentAmountPercentage") || 0) / 100),
                 ) || "-"}
               </span>{" "}
             </p>

@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import { Tab } from "@headlessui/react";
 import classNames from "classnames";
-
-import Input from "src/components/common/input";
 
 interface TabViewProps {
   tabHeaders: string[];
   tabContent: any[];
+  selectedIndex?: number;
+  onTabChange?: (index: number) => void;
 }
 
-const TabView: React.FC<TabViewProps> = ({ tabHeaders, tabContent }) => {
+const TabView: React.FC<TabViewProps> = ({ tabHeaders, tabContent, selectedIndex, onTabChange }) => {
   return (
-    <Tab.Group>
+    <Tab.Group selectedIndex={selectedIndex} onChange={onTabChange}>
       <Tab.List className="flex gap-2">
         {tabHeaders.map((category, i) => (
           <Tab

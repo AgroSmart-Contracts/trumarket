@@ -57,7 +57,7 @@ const DesignSystemShowcase: React.FC = () => {
                                             <div className="w-16 h-16 rounded-tm-md bg-tm-primary shadow-tm-md"></div>
                                             <div>
                                                 <p className="font-semibold text-tm-text">Primary</p>
-                                                <p className="text-sm text-tm-text-light">#3CA638</p>
+                                                <p className="text-sm text-tm-text-light">#4E8C37</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
