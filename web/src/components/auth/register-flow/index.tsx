@@ -40,7 +40,7 @@ const RegisterFlow: React.FC<RegisterFlowProps> = () => {
         <div className="flex items-center justify-center">
           <div className="flex items-center gap-4">
             <StepCounter currentStep={selectedTabIndex + 1} totalSteps={2} classOverrides="!bg-tm-white border-2 border-tm-primary !h-[40px] !w-[50px]" invert />
-            <span className="text-lg font-semibold text-tm-text">{selectedTabIndex + 1}/2</span>
+            <span className="text-lg font-semibold text-tm-text">{selectedTabIndex + 2}/2</span>
           </div>
         </div>
 
