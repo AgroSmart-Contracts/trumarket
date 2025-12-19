@@ -24,9 +24,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.540.0",
     "@aws-sdk/lib-storage": "^3.540.0",
-    "@dfinity/agent": "^1.4.0",
-    "@dfinity/candid": "^1.4.0",
-    "@dfinity/principal": "^1.4.0",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",

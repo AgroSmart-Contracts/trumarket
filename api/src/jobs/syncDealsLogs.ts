@@ -7,7 +7,6 @@ import {
 } from 'viem';
 
 import { config } from '@/config';
-import financeAppClient from '@/infra/finance-app/financeAppClient';
 
 import DealsLogs from '../deals-logs/deals-logs.model';
 import SyncDealsLogsJob, {
@@ -198,30 +197,6 @@ export const syncDealsLogs = async () => {
         }
 
         if (dealsLogs.length) {
-          await Promise.all(
-            dealsLogs.map(async (dealLog) => {
-              try {
-                logger.debug(
-                  dealLog.dealId.toString(),
-                  dealLog.event,
-                  dealLog.message,
-                  dealLog.txHash,
-                );
-                await financeAppClient.createActivity(
-                  dealLog.dealId.toString(),
-                  dealLog.event,
-                  dealLog.message,
-                  dealLog.txHash,
-                  dealLog.blockTimestamp,
-                );
-              } catch (err) {
-                console.warn(
-                  `Error creating activity for deal ${dealLog.dealId}: ${err.message}`,
-                );
-              }
-            }),
-          );
-
           await DealsLogs.create(dealsLogs);
         }
 

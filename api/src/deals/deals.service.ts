@@ -9,7 +9,6 @@ import SyncDealsLogsJob, {
   DealsLogsJobType,
 } from '@/deals-logs/sync-deals-logs-job.model';
 import { BadRequestError, ForbiddenError, UnauthorizedError } from '@/errors';
-import financeAppClient from '@/infra/finance-app/financeAppClient';
 import { logger } from '@/logger';
 import { NotificationsService } from '@/notifications/notifications.service';
 import { Page } from '@/types';
@@ -373,34 +372,6 @@ export class DealsService {
     }
 
     try {
-      await financeAppClient.publishShipment(await this.findById(dealId));
-
-      const dealsLogs = await this.findDealsLogs(dealId);
-
-      await Promise.all(
-        dealsLogs.map(async (dealLog) => {
-          try {
-            console.log(
-              dealLog.dealId.toString(),
-              dealLog.event,
-              dealLog.message,
-              dealLog.txHash,
-            );
-            await financeAppClient.createActivity(
-              dealLog.dealId.toString(),
-              dealLog.event,
-              dealLog.message,
-              dealLog.txHash,
-              dealLog.blockTimestamp,
-            );
-          } catch (err) {
-            console.warn(
-              `Error creating activity for deal ${dealLog.dealId}: ${err.message}`,
-            );
-          }
-        }),
-      );
-
       return this.dealsRepository.updateById(dealId, { isPublished: true });
     } catch (error) {
       logger.error(error);
@@ -914,13 +885,6 @@ export class DealsService {
       deal.nftID as number,
       milestoneIndex + 1,
     );
-
-    if (deal.isPublished) {
-      await financeAppClient.updateMilestone(
-        deal.id,
-        deal.milestones[milestoneIndex],
-      );
-    }
 
     const milestone = this.dealsRepository.upadteMilestoneStatus(
       dealId,
