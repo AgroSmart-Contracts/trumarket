@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/nextjs';
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     await import('../sentry.server.config');
-    
+
     // Log all NEXT_PUBLIC_ environment variables to CloudWatch
     console.log('========================================');
     console.log('🌐 NEXT_PUBLIC Environment Variables (Server-side):');
@@ -35,9 +35,7 @@ export async function register() {
     Object.entries(nextPublicVars).forEach(([key, value]) => {
       if (value) {
         // Mask sensitive values
-        const displayValue = key.includes('SECRET') || key.includes('PRIVATE') 
-          ? '***MASKED***' 
-          : value;
+        const displayValue = value;
         console.log(`${key}: ${displayValue}`);
       } else {
         console.log(`${key}: (not set)`);
