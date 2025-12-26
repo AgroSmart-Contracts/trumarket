@@ -78,8 +78,8 @@ export class AuthController {
     const { web3authToken } = loginDto;
 
     try {
-    const token = await this.authService.login(web3authToken);
-    return new LoginResponseDto({ token });
+      const token = await this.authService.login(web3authToken);
+      return new LoginResponseDto({ token });
     } catch (error) {
       // Re-throw HttpError instances (UnauthorizedError, etc.) as-is
       if (error.statusCode) {

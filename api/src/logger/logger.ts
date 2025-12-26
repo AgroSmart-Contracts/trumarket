@@ -26,12 +26,12 @@ if (config.env === 'development' || config.prettyLogs) {
     }
     // Add file destination
     targets.unshift({
-        target: 'pino-pretty',
-        level: 'trace',
-        options: {
-          destination: config.logsDestination,
-          colorize: true,
-        },
+      target: 'pino-pretty',
+      level: 'trace',
+      options: {
+        destination: config.logsDestination,
+        colorize: true,
+      },
     });
   } catch (err) {
     // If file logging fails, just use stdout (already added above)
