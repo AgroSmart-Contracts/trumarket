@@ -79,18 +79,18 @@ const WithEmail: React.FC<WithEmailProps> = () => {
 
       const { email } = parseToken(auth0Jwt);
 
-      // const subVerifierInfoArray = [
-      //   {
-      //     verifier: "auth0-passwordless",
-      //     idToken: auth0Jwt!,
-      //   },
-      // ];
+      const subVerifierInfoArray = [
+        {
+          verifier: "auth0-passwordless",
+          idToken: auth0Jwt!,
+        },
+      ];
 
       await web3authSfa.connect({
         verifier: process.env.NEXT_PUBLIC_WEB3AUTH_CONNECTION_ID,
         verifierId: email,
         idToken: auth0Jwt,
-        // subVerifierInfoArray,
+        subVerifierInfoArray,
       } as any);
 
       const jwt = await web3authSfa.authenticateUser();
