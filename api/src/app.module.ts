@@ -17,7 +17,15 @@ import { KYCModule } from './kyc/kyc.module';
 import { loggerOptions } from './logger';
 import { UsersModule } from './users/users.module';
 
+import { ConfigModule } from '@nestjs/config';
+
+// ConfigModule must be loaded FIRST to ensure .env files are loaded before config.ts is evaluated
 const modules = [
+  ConfigModule.forRoot({
+    isGlobal: true,
+    envFilePath: ['.env', '.env.local', '.env.development'],
+    expandVariables: true,
+  }),
   SentryModule.forRoot(),
   JwtModule.register({
     secret: config.jwtSecret,
@@ -38,31 +46,46 @@ if (!process.env.E2E_TEST) {
       pinoHttp:
         config.env === 'development' || config.prettyLogs
           ? {
-              serializers: {
-                req: ({ id, method, url, params, query }) => {
-                  return {
-                    id,
-                    method,
-                    url,
-                    params,
-                    query,
-                  };
-                },
-                res: ({ statusCode }) => {
-                  return { statusCode };
-                },
+            serializers: {
+              req: ({ id, method, url, params, query }) => {
+                return {
+                  id,
+                  method,
+                  url,
+                  params,
+                  query,
+                };
               },
-              transport: { target: 'pino-pretty' },
-              stream: pino.destination({
-                dest: config.logsDestination,
-                colorize: true,
-                sync: false,
-              }),
-              redact: {
-                paths: ['req.headers.authorization', 'req.headers.cookie'],
-                censor: '**REDACTED**',
+              res: ({ statusCode }) => {
+                return { statusCode };
               },
-            }
+            },
+            transport: { target: 'pino-pretty' },
+            stream: (() => {
+              try {
+                const fs = require('fs');
+                const path = require('path');
+                const logDir = path.dirname(config.logsDestination);
+                // Create directory if it doesn't exist
+                if (!fs.existsSync(logDir)) {
+                  fs.mkdirSync(logDir, { recursive: true });
+                }
+                return pino.destination({
+                  dest: config.logsDestination,
+                  colorize: true,
+                  sync: false,
+                });
+              } catch (err) {
+                // Fallback to stdout if file logging fails
+                console.warn(`Could not set up file logging: ${err.message}. Logging to stdout only.`);
+                return pino.destination({ dest: 1, sync: false });
+              }
+            })(),
+            redact: {
+              paths: ['req.headers.authorization', 'req.headers.cookie'],
+              censor: '**REDACTED**',
+            },
+          }
           : loggerOptions,
       forRoutes: ['*'],
     }),
@@ -81,7 +104,7 @@ if (!process.env.E2E_TEST) {
   ],
 })
 export class AppModule {
-  constructor(@Inject(providers.DatabaseConnection) private dbClient) {}
+  constructor(@Inject(providers.DatabaseConnection) private dbClient) { }
 
   async onModuleDestroy() {
     await this.dbClient.close();

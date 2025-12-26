@@ -1,5 +1,47 @@
 import './instrument';
 
+// Load .env file BEFORE any other imports that use process.env
+// This ensures config.ts and other modules can read environment variables
+import * as fs from 'fs';
+import * as path from 'path';
+
+const loadEnvFile = () => {
+  const envPaths = [
+    path.join(__dirname, '..', '.env'), // api/.env (when compiled)
+    path.join(process.cwd(), '.env'),    // api/.env (when running from api/)
+    '.env',                              // current directory
+  ];
+
+  for (const envPath of envPaths) {
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf-8');
+      envContent.split('\n').forEach((line) => {
+        const trimmedLine = line.trim();
+        // Skip empty lines and comments
+        if (trimmedLine && !trimmedLine.startsWith('#')) {
+          const equalIndex = trimmedLine.indexOf('=');
+          if (equalIndex > 0) {
+            const key = trimmedLine.substring(0, equalIndex).trim();
+            let value = trimmedLine.substring(equalIndex + 1).trim();
+            // Remove quotes if present
+            if ((value.startsWith('"') && value.endsWith('"')) ||
+              (value.startsWith("'") && value.endsWith("'"))) {
+              value = value.slice(1, -1);
+            }
+            // Only set if not already set (don't override existing env vars)
+            if (key && !process.env[key]) {
+              process.env[key] = value;
+            }
+          }
+        }
+      });
+      break;
+    }
+  }
+};
+
+loadEnvFile();
+
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -13,11 +55,20 @@ import { ErrorsFilter } from './errors.filter';
 import { syncDealsLogs } from './jobs/syncDealsLogs';
 import { logger } from './logger';
 
-webpush.setVapidDetails(
-  'mailto:' + config.mailTo,
-  config.vapidPublicKey,
-  config.vapidPrivateKey,
-);
+// Set VAPID details only if keys are provided, otherwise just log a warning
+try {
+  if (config.vapidPublicKey && config.vapidPrivateKey && config.mailTo) {
+    webpush.setVapidDetails(
+      'mailto:' + config.mailTo,
+      config.vapidPublicKey,
+      config.vapidPrivateKey,
+    );
+  } else {
+    logger.warn('VAPID keys not configured. Push notifications will not work.');
+  }
+} catch (err) {
+  logger.warn({ err }, 'Failed to set VAPID details. Push notifications will not work.');
+}
 
 async function bootstrap() {
   logger.info('Starting server...');

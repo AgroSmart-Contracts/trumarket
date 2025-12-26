@@ -17,7 +17,16 @@ import { KYCService } from './kyc.service';
         const onfidoApiToken = process.env.ONFIDO_API_TOKEN;
 
         if (!onfidoApiToken) {
-          throw new Error('ONFIDO_API_TOKEN is not defined');
+          console.warn('ONFIDO_API_TOKEN is not defined. KYC features will not work.');
+          // Return a default instance to prevent app crash
+          // API calls will fail, but the app will start
+          return new DefaultApi(
+            new Configuration({
+              apiToken: 'dummy-token',
+              region: Region.EU,
+              baseOptions: { timeout: 60_000 },
+            }),
+          );
         }
 
         return new DefaultApi(
@@ -33,4 +42,4 @@ import { KYCService } from './kyc.service';
   imports: [UsersModule, DatabaseModule],
   exports: [KYCService],
 })
-export class KYCModule {}
+export class KYCModule { }

@@ -70,12 +70,25 @@ export class AuthController {
     type: LoginResponseDto,
     description: 'Login Token',
   })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid token or user not found',
+  })
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     const { web3authToken } = loginDto;
 
+    try {
     const token = await this.authService.login(web3authToken);
-
     return new LoginResponseDto({ token });
+    } catch (error) {
+      // Re-throw HttpError instances (UnauthorizedError, etc.) as-is
+      if (error.statusCode) {
+        throw error;
+      }
+      // Log unexpected errors
+      logger.error({ error, web3authToken: web3authToken?.substring(0, 20) + '...' }, 'Unexpected login error');
+      throw error;
+    }
   }
 
   @Post('check-user-exists')

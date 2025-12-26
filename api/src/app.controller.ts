@@ -67,7 +67,7 @@ export class AppController {
   })
   getConfig(): Record<string, any> {
     return {
-      evmChainId: '0x' + (+config.blockchainChainId).toString(16),
+      evmChainId: config.blockchainChainId,
       blockchainExplorer: config.blockchainExplorer,
       investmentTokenAddress: config.investmentTokenContractAddress,
       investmentTokenSymbol: config.investmentTokenSymbol,

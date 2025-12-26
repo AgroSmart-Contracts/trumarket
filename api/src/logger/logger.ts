@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import pino, { type Logger, type LoggerOptions } from 'pino';
 
 import { config } from '../config';
@@ -7,22 +9,37 @@ let pinoTransport: any;
 let pinoLogger: Logger;
 
 if (config.env === 'development' || config.prettyLogs) {
-  pinoTransport = pino.transport({
-    targets: [
-      {
+  const targets: any[] = [
+    {
+      target: 'pino-pretty',
+      level: 'trace',
+      options: { destination: 1, colorize: true }, // Always log to stdout
+    },
+  ];
+
+  // Try to add file destination, but fallback to stdout if it fails
+  try {
+    const logDir = path.dirname(config.logsDestination);
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+    // Add file destination
+    targets.unshift({
         target: 'pino-pretty',
         level: 'trace',
         options: {
           destination: config.logsDestination,
           colorize: true,
         },
-      },
-      {
-        target: 'pino-pretty',
-        level: 'trace',
-        options: { destination: 1, colorize: true },
-      },
-    ],
+    });
+  } catch (err) {
+    // If file logging fails, just use stdout (already added above)
+    console.warn(`Could not set up file logging: ${err.message}. Logging to stdout only.`);
+  }
+
+  pinoTransport = pino.transport({
+    targets,
   });
 }
 

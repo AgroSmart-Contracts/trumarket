@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as jose from 'jose';
 
 import { logger } from '@/logger';
+import { UnauthorizedError } from '@/errors';
 import { User } from '@/users/users.entities';
 import { UsersService } from '@/users/users.service';
 
@@ -47,7 +48,7 @@ export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly users: UsersService,
-  ) {}
+  ) { }
 
   async login(web3authToken: string): Promise<string> {
     if (process.env.E2E_TEST) {
@@ -56,14 +57,16 @@ export class AuthService {
 
     const userWallet = await this.verifyWeb3AuthJwtToken(web3authToken);
     if (!userWallet) {
-      throw new Error('Invalid web3authToken');
+      logger.warn({ wallet: userWallet }, 'Invalid web3authToken provided');
+      throw new UnauthorizedError('Invalid authentication token');
     }
 
     const user = await this.users.findByWalletAddress(
       userWallet.address.toLowerCase(),
     );
     if (!user) {
-      throw new Error('User not found');
+      logger.warn({ walletAddress: userWallet.address }, 'User not found for wallet address');
+      throw new UnauthorizedError('User not found. Please sign up first.');
     }
 
     const token = await this.generateJwtToken(user);

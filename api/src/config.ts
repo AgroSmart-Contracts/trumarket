@@ -11,7 +11,7 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'yourjsonwebtokensecret',
   auth0Domain: process.env.AUTH0_DOMAIN || 'trumarket-dev.eu.auth0.com',
   blockchainRpcUrl:
-    process.env.BLOCKCHAIN_RPC_URL || 'http://host.docker.internal:8545/',
+    process.env.BLOCKCHAIN_RPC_URL || '',
   blockchainPrivateKey: process.env.BLOCKCHAIN_PRIVATE_KEY || '',
   blockchainChainId: process.env.BLOCKCHAIN_CHAIN_ID || '',
   blockchainExplorer: process.env.BLOCKCHAIN_EXPLORER || '',

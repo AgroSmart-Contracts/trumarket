@@ -21,13 +21,32 @@ const saveSubscription = async (subscription: any) => {
 };
 
 const generateSubscription = async (swRegistration: any) => {
-  await window.Notification.requestPermission();
-  const subscription = await swRegistration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(publicVapidKey),
-  });
-  const saved = await saveSubscription(subscription);
-  if (saved) return saved;
+  // Request notification permission
+  const permission = await window.Notification.requestPermission();
+
+  // Check if permission was granted
+  if (permission !== 'granted') {
+    console.warn('Push notification permission not granted:', permission);
+    return null;
+  }
+
+  try {
+    const subscription = await swRegistration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicVapidKey),
+    });
+    const saved = await saveSubscription(subscription);
+    if (saved) return saved;
+  } catch (error: any) {
+    // Handle permission denied or other subscription errors
+    if (error.name === 'NotAllowedError' || error.name === 'NotSupportedError') {
+      console.warn('Push subscription not allowed or not supported:', error.message);
+      return null;
+    }
+    throw error; // Re-throw unexpected errors
+  }
+
+  return null;
 };
 
 const registerServiceWorker = async () => {
@@ -35,8 +54,24 @@ const registerServiceWorker = async () => {
 };
 
 export const register = async () => {
-  if ("serviceWorker" in navigator) {
+  if (!("serviceWorker" in navigator)) {
+    console.warn("ServiceWorkers are not supported by your browser!");
+    return;
+  }
+
+  if (!("Notification" in window)) {
+    console.warn("Notifications are not supported by your browser!");
+    return;
+  }
+
+  try {
     const swRegistration = await registerServiceWorker();
     const sub = await generateSubscription(swRegistration);
-  } else throw new Error("ServiceWorkers are not supported by your browser!");
+    if (!sub) {
+      console.warn("Push notification subscription failed or was denied");
+    }
+  } catch (error: any) {
+    // Log error but don't throw - push notifications are optional
+    console.warn("Failed to register push notifications:", error.message);
+  }
 };
